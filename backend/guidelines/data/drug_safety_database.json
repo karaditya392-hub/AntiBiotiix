@@ -1,0 +1,487 @@
+{
+  "version": "2023.1-clinical",
+  "last_updated": "2023-11-15",
+  "curator": "Antimicrobial Stewardship & Clinical Pharmacology Expert Panel",
+  "drugs": {
+    "amoxicillin": {
+      "name": "Amoxicillin",
+      "class": "Aminopenicillin",
+      "super_class": "Penicillins",
+      "aware_category": "ACCESS",
+      "renal_dosing": {
+        "egfr_threshold_ml_min": 30,
+        "recommendation": "For eGFR 10-30 mL/min: Reduce dose to 250-500 mg Q12H (or decrease frequency from TID to BID). For eGFR <10 mL/min: 250-500 mg Q24H. Clinician review of dose/interval recommended.",
+        "evidence_source": "ICMR National Guidelines 2022 / Renal Drug Handbook 5th Ed.",
+        "evidence_passage": "ICMR Guidelines Section 4.2: Amoxicillin undergoes primary renal elimination (60-80%). In moderate renal impairment (eGFR 10-30 mL/min), dosing frequency should be extended to every 12 hours to prevent accumulation and neurotoxicity."
+      },
+      "hepatic_dosing": {
+        "requires_adjustment": false,
+        "recommendation": "No formal dose adjustment required for mild-to-moderate hepatic impairment; monitor liver enzymes in severe cirrhosis.",
+        "evidence_source": "Sanford Guide 2023"
+      },
+      "pregnancy_category": "Category B (Generally considered safe in pregnancy under clinician supervision)",
+      "lactation_safety": "Compatible with breastfeeding (low concentrations in breast milk, monitor infant for diarrhea)",
+      "pediatric_dosing": {
+        "weight_based": true,
+        "standard_dose": "40-90 mg/kg/day divided BID or TID depending on indication severity",
+        "evidence_source": "IAP / ICMR Pediatric Guidelines 2022"
+      },
+      "cross_reactivity": {
+        "Penicillins": 1.0,
+        "Cephalosporins_1st_Gen": 0.05,
+        "Cephalosporins_3rd_Gen": 0.01,
+        "Carbapenems": 0.005
+      }
+    },
+    "amoxicillin_clavulanate": {
+      "name": "Amoxicillin-Clavulanate",
+      "class": "Aminopenicillin/Beta-lactamase inhibitor",
+      "super_class": "Penicillins",
+      "aware_category": "ACCESS",
+      "renal_dosing": {
+        "egfr_threshold_ml_min": 30,
+        "recommendation": "For eGFR 10-30 mL/min: Dose with 500/125 mg Q12H maximum; avoid 875/125 mg or 1000 mg extended release tablets. For eGFR <10 mL/min: 500/125 mg Q24H.",
+        "evidence_source": "ICMR Guidelines 2022 / British National Formulary 2023",
+        "evidence_passage": "ICMR Guidelines 2022 Appendix B: Amoxicillin-Clavulanate excretion is predominantly renal. High-dose clavulanate tablets (875/125 mg BID) should be avoided when eGFR <30 mL/min."
+      },
+      "hepatic_dosing": {
+        "requires_adjustment": true,
+        "recommendation": "Use with caution in hepatic dysfunction; clavulanate carries established risk of cholestatic jaundice. Monitor LFTs.",
+        "evidence_source": "ICMR Guidelines 2022 Section 5.1"
+      },
+      "pregnancy_category": "Category B (Use with caution; avoid near term if preterm rupture of membranes)",
+      "lactation_safety": "Compatible with breastfeeding",
+      "pediatric_dosing": {
+        "weight_based": true,
+        "standard_dose": "45-90 mg/kg/day amoxicillin component divided BID or TID",
+        "evidence_source": "IAP Guidelines 2022"
+      },
+      "cross_reactivity": {
+        "Penicillins": 1.0,
+        "Cephalosporins_1st_Gen": 0.05,
+        "Cephalosporins_3rd_Gen": 0.01,
+        "Carbapenems": 0.005
+      }
+    },
+    "ciprofloxacin": {
+      "name": "Ciprofloxacin",
+      "class": "Fluoroquinolones",
+      "super_class": "Fluoroquinolones",
+      "aware_category": "WATCH",
+      "renal_dosing": {
+        "egfr_threshold_ml_min": 50,
+        "recommendation": "For eGFR 30-50 mL/min: 250-500 mg Q12H. For eGFR <30 mL/min: 250-500 mg Q18H-Q24H. Clinician review recommended.",
+        "evidence_source": "ICMR Guidelines 2022 / FDA Package Insert 2023",
+        "evidence_passage": "ICMR Antimicrobial Guidelines 2022 Section 6: Ciprofloxacin is 50-70% excreted unchanged by the kidney. Accumulation increases risk of CNS toxicities and QT prolongation in renal insufficiency."
+      },
+      "hepatic_dosing": {
+        "requires_adjustment": false,
+        "recommendation": "No dose adjustment required in mild-to-moderate hepatic impairment. Monitor in severe hepatic failure.",
+        "evidence_source": "Sanford Guide 2023"
+      },
+      "pregnancy_category": "Category C / AVOID (Potential cartilage toxicity and arthropathy in fetus; avoid unless no safe alternatives)",
+      "lactation_safety": "Avoid or pump and discard during therapy (excreted in breast milk)",
+      "pediatric_dosing": {
+        "restricted": true,
+        "recommendation": "Generally contraindicated in pediatric patients due to risk of arthropathy/cartilage erosion, except in specific indications (complicated UTI, inhalational anthrax, cystic fibrosis exacerbation).",
+        "evidence_source": "ICMR Pediatric Stewardship 2022 / AAP Guidance 2023"
+      },
+      "interactions": [
+        {
+          "interacting_drug_or_class": "Warfarin",
+          "severity": "HIGH",
+          "mechanism": "Inhibition of CYP1A2 and alteration of gut flora elevates INR and increases major bleeding risk.",
+          "recommendation": "Close monitoring of PT/INR recommended upon initiation or discontinuation; consider alternative antibiotic if high bleeding risk.",
+          "evidence_source": "ICMR Drug Interaction Compendium 2022"
+        },
+        {
+          "interacting_drug_or_class": "Ondansetron",
+          "severity": "HIGH",
+          "mechanism": "Additive cardiac QT-interval prolongation increasing risk of Torsades de Pointes / polymorphic ventricular arrhythmias.",
+          "recommendation": "Review concurrent QT-prolonging agents; obtain baseline ECG or consider non-QT prolonging antiemetic/antimicrobial.",
+          "evidence_source": "CredibleMeds QT Database / ICMR 2022"
+        },
+        {
+          "interacting_drug_or_class": "Amiodarone",
+          "severity": "CRITICAL",
+          "mechanism": "Synergistic severe QT prolongation and ventricular arrhythmia risk.",
+          "recommendation": "Combination generally avoided; urgent cardiology/pharmacology review recommended.",
+          "evidence_source": "AHA/ACC Drug Safety Advisory 2022"
+        },
+        {
+          "interacting_drug_or_class": "Haloperidol",
+          "severity": "HIGH",
+          "mechanism": "Additive QT-interval prolongation.",
+          "recommendation": "Review cardiac risk profile and monitor QTc interval.",
+          "evidence_source": "CredibleMeds 2023"
+        }
+      ]
+    },
+    "levofloxacin": {
+      "name": "Levofloxacin",
+      "class": "Fluoroquinolones",
+      "super_class": "Fluoroquinolones",
+      "aware_category": "WATCH",
+      "renal_dosing": {
+        "egfr_threshold_ml_min": 50,
+        "recommendation": "For eGFR 20-49 mL/min: Initial 500 mg, then 250 mg Q24H (or 750 mg Q48H). For eGFR <20 mL/min: Initial 500 mg, then 250 mg Q48H.",
+        "evidence_source": "ICMR Guidelines 2022 / Renal Drug Handbook 2023",
+        "evidence_passage": "ICMR Guidelines 2022: Levofloxacin is >80% excreted unchanged by kidneys. Dosage adjustment is mandatory when eGFR < 50 mL/min to prevent severe neurotoxicity, hypoglycemia, and tendon rupture."
+      },
+      "hepatic_dosing": {
+        "requires_adjustment": false,
+        "recommendation": "No adjustment required (negligible hepatic metabolism).",
+        "evidence_source": "Sanford Guide 2023"
+      },
+      "pregnancy_category": "Category C / AVOID (Cartilage and musculoskeletal toxicity risk in developing fetus)",
+      "lactation_safety": "Avoid in breastfeeding",
+      "pediatric_dosing": {
+        "restricted": true,
+        "recommendation": "Avoid in children due to cartilage damage risk except for anthrax or MDR-TB under specialist guidance.",
+        "evidence_source": "ICMR 2022"
+      },
+      "interactions": [
+        {
+          "interacting_drug_or_class": "Warfarin",
+          "severity": "HIGH",
+          "mechanism": "Potentiation of hypoprothrombinemic effect and INR elevation.",
+          "recommendation": "Frequent INR monitoring recommended.",
+          "evidence_source": "ICMR 2022"
+        },
+        {
+          "interacting_drug_or_class": "Ondansetron",
+          "severity": "HIGH",
+          "mechanism": "Additive QT-interval prolongation.",
+          "recommendation": "Monitor ECG QTc or substitute antiemetic.",
+          "evidence_source": "CredibleMeds 2023"
+        },
+        {
+          "interacting_drug_or_class": "Amiodarone",
+          "severity": "CRITICAL",
+          "mechanism": "Marked additive QT prolongation and risk of Torsades de Pointes.",
+          "recommendation": "Avoid combination; clinician review required.",
+          "evidence_source": "AHA 2022"
+        }
+      ]
+    },
+    "azithromycin": {
+      "name": "Azithromycin",
+      "class": "Macrolides",
+      "super_class": "Macrolides",
+      "aware_category": "WATCH",
+      "renal_dosing": {
+        "egfr_threshold_ml_min": 10,
+        "recommendation": "Use caution in severe renal impairment (eGFR <10 mL/min); no routine dose adjustment needed for eGFR > 10 mL/min (predominantly biliary excretion).",
+        "evidence_source": "ICMR Guidelines 2022 / Sanford 2023",
+        "evidence_passage": "ICMR Guidelines 2022: Azithromycin undergoes biliary elimination; renal dose adjustment is only advised if eGFR < 10 mL/min."
+      },
+      "hepatic_dosing": {
+        "requires_adjustment": true,
+        "recommendation": "Use with caution in severe hepatic impairment (Child-Pugh Class C) because biliary excretion is the primary route.",
+        "evidence_source": "FDA Safety Advisory / ICMR 2022"
+      },
+      "pregnancy_category": "Category B (Generally acceptable for respiratory and chlamydial infections when indicated)",
+      "lactation_safety": "Compatible with breastfeeding",
+      "pediatric_dosing": {
+        "weight_based": true,
+        "standard_dose": "10 mg/kg on Day 1, followed by 5 mg/kg/day Days 2-5",
+        "evidence_source": "ICMR Pediatric Guidelines 2022"
+      },
+      "interactions": [
+        {
+          "interacting_drug_or_class": "Ondansetron",
+          "severity": "HIGH",
+          "mechanism": "Additive prolongation of cardiac QTc interval.",
+          "recommendation": "Review concurrent QT-prolonging medications and electrolyte status (K+, Mg2+).",
+          "evidence_source": "CredibleMeds 2023"
+        },
+        {
+          "interacting_drug_or_class": "Amiodarone",
+          "severity": "CRITICAL",
+          "mechanism": "Synergistic QTc prolongation with elevated risk of fatal arrhythmia.",
+          "recommendation": "Co-administration contraindicated or strictly monitored with continuous ECG.",
+          "evidence_source": "AHA Advisory 2022"
+        },
+        {
+          "interacting_drug_or_class": "Atorvastatin",
+          "severity": "MODERATE",
+          "mechanism": "Macrolide inhibition of hepatic CYP3A4/transporters can elevate statin serum levels, increasing risk of myopathy or rhabdomyolysis.",
+          "recommendation": "Monitor for muscle pain or temporarily hold statin during short macrolide course.",
+          "evidence_source": "Lexicomp Drug Interactions 2023"
+        }
+      ]
+    },
+    "clarithromycin": {
+      "name": "Clarithromycin",
+      "class": "Macrolides",
+      "super_class": "Macrolides",
+      "aware_category": "WATCH",
+      "renal_dosing": {
+        "egfr_threshold_ml_min": 30,
+        "recommendation": "For eGFR <30 mL/min: Reduce dose by 50% (e.g. 250 mg Q12H or 500 mg Q24H); do not use extended-release formulation.",
+        "evidence_source": "ICMR Guidelines 2022 / BNF 2023",
+        "evidence_passage": "ICMR Guidelines 2022: In severe renal impairment (eGFR <30 mL/min), clarithromycin clearance is significantly reduced; halve the daily dose."
+      },
+      "hepatic_dosing": {
+        "requires_adjustment": true,
+        "recommendation": "Do not administer in patients with severe hepatic impairment accompanied by renal impairment.",
+        "evidence_source": "Sanford Guide 2023"
+      },
+      "pregnancy_category": "Category C (Avoid in pregnancy unless no alternative; azithromycin preferred)",
+      "lactation_safety": "Use with caution",
+      "interactions": [
+        {
+          "interacting_drug_or_class": "Atorvastatin",
+          "severity": "HIGH",
+          "mechanism": "Potent CYP3A4 inhibition causes dramatic increase in statin plasma concentrations, markedly elevating rhabdomyolysis risk.",
+          "recommendation": "Hold statin therapy during clarithromycin treatment or choose alternative antibiotic (e.g. azithromycin/amoxicillin).",
+          "evidence_source": "FDA Drug Safety Communication / ICMR 2022"
+        },
+        {
+          "interacting_drug_or_class": "Warfarin",
+          "severity": "HIGH",
+          "mechanism": "CYP3A4/CYP1A2 inhibition and gut flora suppression elevates INR.",
+          "recommendation": "Monitor INR closely.",
+          "evidence_source": "ICMR 2022"
+        }
+      ]
+    },
+    "metronidazole": {
+      "name": "Metronidazole",
+      "class": "Nitroimidazoles",
+      "super_class": "Nitroimidazoles",
+      "aware_category": "ACCESS",
+      "renal_dosing": {
+        "egfr_threshold_ml_min": 15,
+        "recommendation": "For eGFR <15 mL/min: Dose reduction of 50% recommended if prolonged therapy due to toxic metabolite accumulation.",
+        "evidence_source": "ICMR Guidelines 2022"
+      },
+      "hepatic_dosing": {
+        "requires_adjustment": true,
+        "recommendation": "In severe hepatic impairment (Child-Pugh Class C), reduce daily dose by 50% and monitor for neurotoxicity (ataxia, peripheral neuropathy, encephalopathy).",
+        "evidence_source": "ICMR Guidelines 2022 / Sanford 2023",
+        "evidence_passage": "ICMR Antimicrobial Guidelines 2022 Section 7: Metronidazole is extensively metabolized by the liver (60-80%). In severe hepatic dysfunction (Child-Pugh C), clearance is decreased up to 65%, warranting a 50% dose reduction to avoid central nervous system toxicity."
+      },
+      "pregnancy_category": "Category B (Caution in first trimester; acceptable for trichomoniasis/bacterial vaginosis when indicated)",
+      "lactation_safety": "Excreted in breast milk; pump and discard during single-dose therapy or use caution",
+      "interactions": [
+        {
+          "interacting_drug_or_class": "Warfarin",
+          "severity": "HIGH",
+          "mechanism": "Potent inhibition of S-warfarin metabolism via CYP2C9 leading to dramatic INR elevation and severe hemorrhage risk.",
+          "recommendation": "Reduce warfarin maintenance dose by 30-50% and check INR within 48-72 hours of starting metronidazole.",
+          "evidence_source": "ICMR Drug Safety Advisory 2022"
+        },
+        {
+          "interacting_drug_or_class": "Alcohol / Ethanol",
+          "severity": "HIGH",
+          "mechanism": "Disulfiram-like reaction (nausea, vomiting, flushing, tachycardia).",
+          "recommendation": "Counsel patient to strictly avoid alcohol during and for 48 hours post-treatment.",
+          "evidence_source": "ICMR 2022"
+        }
+      ]
+    },
+    "ceftriaxone": {
+      "name": "Ceftriaxone",
+      "class": "Cephalosporins_3rd_Gen",
+      "super_class": "Cephalosporins",
+      "aware_category": "WATCH",
+      "renal_dosing": {
+        "egfr_threshold_ml_min": 10,
+        "recommendation": "No dose adjustment necessary in standalone renal impairment (dual biliary/renal clearance). If severe renal AND hepatic impairment co-exist, maximum dose is 2 g/day.",
+        "evidence_source": "ICMR Guidelines 2022 / Sanford 2023",
+        "evidence_passage": "ICMR Guidelines 2022 Section 4: Ceftriaxone has balanced excretion (40% biliary, 60% renal). Isolated renal failure does not require dose reduction unless combined with severe hepatic failure."
+      },
+      "hepatic_dosing": {
+        "requires_adjustment": false,
+        "recommendation": "No adjustment in isolated hepatic impairment. Cap at 2 g/24h if combined renal and hepatic failure.",
+        "evidence_source": "Sanford 2023"
+      },
+      "pregnancy_category": "Category B (Established clinical safety in pregnancy)",
+      "lactation_safety": "Compatible with breastfeeding",
+      "pediatric_dosing": {
+        "weight_based": true,
+        "standard_dose": "50-100 mg/kg/day IV/IM in 1-2 divided doses",
+        "contraindication_neonates": "Contraindicated in neonates with hyperbilirubinemia (displaces bilirubin from albumin) and in neonates receiving IV calcium (fatal lung/kidney precipitate risk).",
+        "evidence_source": "WHO / ICMR Pediatric Safety Advisory 2022"
+      },
+      "cross_reactivity": {
+        "Penicillins": 0.01,
+        "Cephalosporins_1st_Gen": 0.10,
+        "Carbapenems": 0.005
+      }
+    },
+    "piperacillin_tazobactam": {
+      "name": "Piperacillin-Tazobactam",
+      "class": "Antipseudomonal Penicillin/Inhibitor",
+      "super_class": "Penicillins",
+      "aware_category": "WATCH",
+      "renal_dosing": {
+        "egfr_threshold_ml_min": 50,
+        "recommendation": "For eGFR 20-50 mL/min: 3.375 g Q6H (or 4.5 g Q8H). For eGFR <20 mL/min: 2.25 g Q6H (or 3.375 g Q8H).",
+        "evidence_source": "ICMR Guidelines 2022 / Renal Drug Handbook 2023",
+        "evidence_passage": "ICMR Guidelines 2022: Both piperacillin and tazobactam are cleared by glomerular filtration. In renal impairment, accumulation occurs rapidly; adjust dosing interval per eGFR."
+      },
+      "hepatic_dosing": {
+        "requires_adjustment": false,
+        "recommendation": "No specific dose reduction required; monitor in severe cirrhosis.",
+        "evidence_source": "Sanford 2023"
+      },
+      "pregnancy_category": "Category B",
+      "lactation_safety": "Compatible with breastfeeding",
+      "cross_reactivity": {
+        "Penicillins": 1.0,
+        "Cephalosporins_1st_Gen": 0.05,
+        "Cephalosporins_3rd_Gen": 0.01,
+        "Carbapenems": 0.005
+      }
+    },
+    "meropenem": {
+      "name": "Meropenem",
+      "class": "Carbapenems",
+      "super_class": "Carbapenems",
+      "aware_category": "WATCH",
+      "renal_dosing": {
+        "egfr_threshold_ml_min": 50,
+        "recommendation": "For eGFR 26-50 mL/min: 1 g Q12H. For eGFR 10-25 mL/min: 500 mg Q12H. For eGFR <10 mL/min: 500 mg Q24H.",
+        "evidence_source": "ICMR Guidelines 2022 / BNF 2023",
+        "evidence_passage": "ICMR Guidelines 2022: Meropenem is ~70% excreted unchanged in urine. In renal insufficiency, reduced clearance leads to high serum concentrations and seizure risk."
+      },
+      "hepatic_dosing": {
+        "requires_adjustment": false,
+        "recommendation": "No adjustment required in hepatic impairment.",
+        "evidence_source": "Sanford 2023"
+      },
+      "pregnancy_category": "Category B",
+      "lactation_safety": "Compatible with breastfeeding",
+      "cross_reactivity": {
+        "Penicillins": 0.005,
+        "Cephalosporins": 0.005
+      }
+    },
+    "vancomycin": {
+      "name": "Vancomycin",
+      "class": "Glycopeptides",
+      "super_class": "Glycopeptides",
+      "aware_category": "WATCH",
+      "renal_dosing": {
+        "egfr_threshold_ml_min": 50,
+        "recommendation": "Dose and interval MUST be guided by therapeutic drug monitoring (AUC24/MIC target 400-600 or trough 15-20 mcg/mL). For eGFR 30-50 mL/min: 15 mg/kg Q24H. For eGFR <30 mL/min: dose by levels.",
+        "evidence_source": "ICMR Guidelines 2022 / ASHP-IDSA-SIDP Vancomycin Guidelines 2020",
+        "evidence_passage": "ICMR Guidelines 2022: Vancomycin is highly nephrotoxic and 80-90% eliminated by kidneys. Serum level monitoring is mandatory in renal impairment."
+      },
+      "hepatic_dosing": {
+        "requires_adjustment": false,
+        "recommendation": "No adjustment for hepatic impairment.",
+        "evidence_source": "Sanford 2023"
+      },
+      "pregnancy_category": "Category C (Use when benefit justifies potential fetal ototoxicity/nephrotoxicity risk)",
+      "lactation_safety": "Compatible with breastfeeding (poor oral absorption by infant)",
+      "pediatric_dosing": {
+        "weight_based": true,
+        "standard_dose": "15 mg/kg IV Q6-8H with therapeutic monitoring",
+        "evidence_source": "ICMR Pediatric Guidelines 2022"
+      }
+    },
+    "doxycycline": {
+      "name": "Doxycycline",
+      "class": "Tetracyclines",
+      "super_class": "Tetracyclines",
+      "aware_category": "ACCESS",
+      "renal_dosing": {
+        "egfr_threshold_ml_min": 0,
+        "recommendation": "No dose adjustment required in renal failure (primarily non-renal/biliary and intestinal elimination).",
+        "evidence_source": "ICMR Guidelines 2022 / Sanford 2023",
+        "evidence_passage": "ICMR Guidelines 2022: Doxycycline does not accumulate in renal failure and can be safely given at normal doses (100 mg BID) without adjustment."
+      },
+      "hepatic_dosing": {
+        "requires_adjustment": true,
+        "recommendation": "Use caution in severe hepatic impairment.",
+        "evidence_source": "Sanford 2023"
+      },
+      "pregnancy_category": "Category D / CONTRAINDICATED (Causes permanent fetal tooth discoloration, enamel hypoplasia, and inhibition of fetal bone growth in 2nd and 3rd trimesters)",
+      "lactation_safety": "Avoid prolonged use in breastfeeding (>21 days) due to tooth staining risk",
+      "pediatric_dosing": {
+        "restricted": true,
+        "recommendation": "Contraindicated in children < 8 years old for general use due to permanent dental staining, except in life-threatening rickettsial infections (Scrub Typhus/Rocky Mountain Spotted Fever) where benefits outweigh risks.",
+        "evidence_source": "ICMR National Scrub Typhus Guidelines 2022 / AAP Red Book 2023"
+      }
+    },
+    "nitrofurantoin": {
+      "name": "Nitrofurantoin",
+      "class": "Nitrofurans",
+      "super_class": "Nitrofurans",
+      "aware_category": "ACCESS",
+      "renal_dosing": {
+        "egfr_threshold_ml_min": 30,
+        "recommendation": "Contraindicated or ineffective if eGFR < 30 mL/min due to inadequate urinary concentration and increased risk of peripheral neuropathy.",
+        "evidence_source": "ICMR UTI Guidelines 2022 / Beers Criteria 2023",
+        "evidence_passage": "ICMR Guidelines 2022 Section 3: Nitrofurantoin requires renal filtration to achieve therapeutic bladder concentrations. When eGFR < 30 mL/min, drug fails to reach effective urinary levels and systemic accumulation causes neurotoxicity and pulmonary fibrosis."
+      },
+      "hepatic_dosing": {
+        "requires_adjustment": true,
+        "recommendation": "Contraindicated in patients with previous history of nitrofurantoin-induced cholestatic jaundice/hepatic dysfunction.",
+        "evidence_source": "FDA Drug Label 2023"
+      },
+      "pregnancy_category": "Category B (Contraindicated at term, 38-42 weeks gestation, due to risk of neonatal hemolytic anemia)",
+      "lactation_safety": "Compatible with breastfeeding, but avoid if infant has G6PD deficiency",
+      "pediatric_dosing": {
+        "weight_based": true,
+        "standard_dose": "5-7 mg/kg/day in 4 divided doses for cystitis in children > 1 month",
+        "contraindication_neonates": "Contraindicated in neonates < 1 month old.",
+        "evidence_source": "ICMR Pediatric UTI Guidelines 2022"
+      }
+    },
+    "linezolid": {
+      "name": "Linezolid",
+      "class": "Oxazolidinones",
+      "super_class": "Oxazolidinones",
+      "aware_category": "RESERVE",
+      "renal_dosing": {
+        "egfr_threshold_ml_min": 0,
+        "recommendation": "No dose adjustment required for renal impairment (30% excreted unchanged, non-renal metabolites). Monitor CBC weekly for myelosuppression.",
+        "evidence_source": "ICMR Reserve Guidelines 2022 / Sanford 2023"
+      },
+      "hepatic_dosing": {
+        "requires_adjustment": false,
+        "recommendation": "No dose adjustment in mild-to-moderate impairment. Monitor in severe hepatic failure.",
+        "evidence_source": "Sanford 2023"
+      },
+      "pregnancy_category": "Category C (Reserve for resistant Gram-positive infections where no safer alternatives exist)",
+      "lactation_safety": "Excreted in breast milk; caution advised",
+      "interactions": [
+        {
+          "interacting_drug_or_class": "SSRIs / SNRIs (e.g. Fluoxetine, Sertraline, Escitalopram, Venlafaxine)",
+          "severity": "CRITICAL",
+          "mechanism": "Linezolid is a reversible, non-selective monoamine oxidase inhibitor (MAOI). Co-administration with serotonergic agents causes severe Serotonin Syndrome (hyperthermia, clonus, autonomic instability, death).",
+          "recommendation": "Avoid concurrent use. If linezolid is urgent, withhold serotonergic antidepressant and monitor for serotonin toxicity.",
+          "evidence_source": "FDA Drug Safety Warning / ICMR Reserve Guidance 2022"
+        }
+      ]
+    },
+    "gentamicin": {
+      "name": "Gentamicin",
+      "class": "Aminoglycosides",
+      "super_class": "Aminoglycosides",
+      "aware_category": "ACCESS",
+      "renal_dosing": {
+        "egfr_threshold_ml_min": 60,
+        "recommendation": "Mandatory dose/interval adjustment and therapeutic drug monitoring (peak and trough). For eGFR 40-60: Q12H or extend interval. For eGFR 20-40: Q24H. For eGFR <20: single dose then monitor levels.",
+        "evidence_source": "ICMR Guidelines 2022 / Sanford 2023",
+        "evidence_passage": "ICMR Guidelines 2022: Aminoglycosides are 100% excreted unchanged by kidneys and cause direct proximal tubule nephrotoxicity and irreversible ototoxicity. Dosing must be strictly monitored."
+      },
+      "hepatic_dosing": {
+        "requires_adjustment": false,
+        "recommendation": "No hepatic adjustment required.",
+        "evidence_source": "Sanford 2023"
+      },
+      "pregnancy_category": "Category D / HIGH RISK (Risk of irreversible congenital bilateral sensorineural deafness and fetal nephrotoxicity)",
+      "lactation_safety": "Compatible with breastfeeding (poorly absorbed orally by infant)",
+      "pediatric_dosing": {
+        "weight_based": true,
+        "standard_dose": "5-7.5 mg/kg/day once daily IV/IM with level monitoring",
+        "evidence_source": "ICMR Pediatric Guidelines 2022"
+      }
+    }
+  }
+}

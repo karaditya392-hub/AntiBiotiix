@@ -1,0 +1,6 @@
+# Optional — for the PostgreSQL / pgvector migration (Phase 1, NOT yet implemented).
+# The application runs on SQLite without these. Install only when doing that work.
+-r requirements.txt
+alembic==1.19.1
+pgvector==0.5.0
+psycopg[binary]==3.3.4

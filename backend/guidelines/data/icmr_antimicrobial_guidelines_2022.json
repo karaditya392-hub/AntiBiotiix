@@ -1,0 +1,80 @@
+{
+  "document_id": "ICMR-AMR-GUIDELINES-2022",
+  "title": "Treatment Guidelines for Antimicrobial Use in Common Syndromes",
+  "issuing_org": "Indian Council of Medical Research (ICMR), New Delhi, India",
+  "geographic_scope": "National (India)",
+  "version": "Edition 3 (2022-2023)",
+  "publication_date": "2022-10-01",
+  "source_url": "https://amrtg.icmr.org.in/dashboard.html",
+  "precedence_rank": 2,
+  "syndromes": {
+    "community_acquired_pneumonia": {
+      "syndrome_name": "Community-Acquired Pneumonia (CAP) - Outpatient / Inpatient Non-ICU",
+      "first_line_preferred": [
+        "Amoxicillin",
+        "Amoxicillin-Clavulanate"
+      ],
+      "alternative_atypical": [
+        "Azithromycin",
+        "Doxycycline"
+      ],
+      "inpatient_severe": [
+        "Ceftriaxone",
+        "Piperacillin-Tazobactam"
+      ],
+      "recommended_duration_days": "5 to 7 days",
+      "clinical_notes": "ICMR Guidelines Section 1.1: For outpatient mild CAP, oral Amoxicillin (500mg TID or 1g TID) is first-line. In patients with comorbidities or recent antibiotic exposure, Amoxicillin-Clavulanate plus Azithromycin or Doxycycline is advised. Reserve Fluoroquinolones (Levofloxacin) only for patients with documented beta-lactam anaphylaxis due to high background resistance in India and risk of masking tuberculosis."
+    },
+    "uncomplicated_urinary_tract_infection": {
+      "syndrome_name": "Uncomplicated Acute Cystitis (UTI)",
+      "first_line_preferred": [
+        "Nitrofurantoin",
+        "Fosfomycin"
+      ],
+      "second_line": [
+        "Amoxicillin-Clavulanate",
+        "Cefixime"
+      ],
+      "avoid_empirical": [
+        "Ciprofloxacin",
+        "Levofloxacin",
+        "Co-trimoxazole"
+      ],
+      "recommended_duration_days": "5 days for Nitrofurantoin, single dose for Fosfomycin",
+      "clinical_notes": "ICMR Guidelines Section 2.1: Nitrofurantoin (100mg BID x 5 days) and Fosfomycin (3g single dose) remain the preferred empirical oral agents in India due to high (>70%) fluoroquinolone and co-trimoxazole resistance among uropathogenic E. coli. Nitrofurantoin is contraindicated if eGFR < 30 mL/min."
+    },
+    "skin_and_soft_tissue_infection": {
+      "syndrome_name": "Skin and Soft Tissue Infection (Cellulitis / Erysipelas)",
+      "first_line_preferred": [
+        "Amoxicillin-Clavulanate",
+        "Cephalexin"
+      ],
+      "mrsa_suspected": [
+        "Doxycycline",
+        "Co-trimoxazole",
+        "Linezolid"
+      ],
+      "recommended_duration_days": "5 to 7 days",
+      "clinical_notes": "ICMR Guidelines Section 3.2: For mild non-purulent cellulitis, beta-lactam active against Streptococcus pyogenes and MSSA is recommended. If CA-MRSA is suspected in purulent infections, Doxycycline or Co-trimoxazole is preferred. Linezolid is restricted as Reserve therapy for confirmed resistant MRSA."
+    },
+    "acute_gastroenteritis": {
+      "syndrome_name": "Acute Infectious Diarrhea / Gastroenteritis",
+      "first_line_preferred": [
+        "Oral Rehydration Salts (ORS) + Zinc"
+      ],
+      "antimicrobial_restricted": "Antimicrobial therapy is NOT recommended for routine acute watery diarrhea. Reserve for culture-proven Shigellosis, severe cholera, or severe dysentery.",
+      "clinical_notes": "ICMR Guidelines Section 4.3: Routine use of antimicrobials (especially Norfloxacin/Metronidazole combinations) for acute gastroenteritis is strongly discouraged due to high resistance and self-limiting nature."
+    },
+    "acute_bacterial_sinusitis": {
+      "syndrome_name": "Acute Bacterial Rhinosinusitis",
+      "first_line_preferred": [
+        "Amoxicillin-Clavulanate"
+      ],
+      "alternative_penicillin_allergic": [
+        "Doxycycline"
+      ],
+      "recommended_duration_days": "5 to 7 days",
+      "clinical_notes": "ICMR Guidelines Section 1.4: Most acute sinusitis cases are viral. Antimicrobial therapy is indicated only if symptoms persist >= 10 days or 'double sickening'. Amoxicillin-Clavulanate is first-line."
+    }
+  }
+}

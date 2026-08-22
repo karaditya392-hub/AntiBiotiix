@@ -1,0 +1,61 @@
+{
+  "document_id": "WHO-AWARE-2023",
+  "title": "WHO AWaRe Classification of Antibiotics for Evaluation and Monitoring of Use",
+  "issuing_org": "World Health Organization (WHO), Geneva",
+  "geographic_scope": "Global",
+  "version": "2023 Release",
+  "publication_date": "2023-06-15",
+  "source_url": "https://www.who.int/publications/i/item/WHO-MHP-HPS-EML-2023.04",
+  "precedence_rank": 3,
+  "categories": {
+    "ACCESS": {
+      "description": "Antibiotics that have activity against a wide range of commonly encountered susceptible pathogens while showing lower resistance potential than antibiotics in other groups. Selected Access antibiotics should be available at all times as first- or second-line empirical treatments.",
+      "target_proportion": ">= 60% of total hospital/country antibiotic consumption",
+      "members": [
+        "Amoxicillin",
+        "Amoxicillin-Clavulanate",
+        "Ampicillin",
+        "Benzathine Benzylpenicillin",
+        "Cephalexin",
+        "Cefazolin",
+        "Doxycycline",
+        "Gentamicin",
+        "Metronidazole",
+        "Nitrofurantoin",
+        "Co-trimoxazole",
+        "Cloxacillin"
+      ]
+    },
+    "WATCH": {
+      "description": "Antibiotics that have higher resistance potential and include most of the highest priority agents among Critically Important Antimicrobials for Human Medicine. These should be prioritized as key targets of stewardship programs and monitored closely.",
+      "members": [
+        "Azithromycin",
+        "Ceftriaxone",
+        "Cefotaxime",
+        "Ceftazidime",
+        "Cefepime",
+        "Ciprofloxacin",
+        "Levofloxacin",
+        "Moxifloxacin",
+        "Clarithromycin",
+        "Meropenem",
+        "Imipenem-Cilastatin",
+        "Piperacillin-Tazobactam",
+        "Vancomycin"
+      ]
+    },
+    "RESERVE": {
+      "description": "Antibiotics and antibiotic classes that should be reserved for treatment of confirmed or suspected infections due to multi-drug-resistant organisms (e.g. CRKP, MRSA, VRE). These represent last-resort options and must be protected through restricted pre-authorization.",
+      "members": [
+        "Linezolid",
+        "Colistin",
+        "Polymyxin B",
+        "Ceftazidime-Avibactam",
+        "Ceftolozane-Tazobactam",
+        "Plazomicin",
+        "Tigecycline",
+        "Daptomycin"
+      ]
+    }
+  }
+}

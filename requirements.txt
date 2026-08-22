@@ -1,0 +1,27 @@
+# S11 Prescription Safety Assistant — runtime dependencies
+# Pinned to the versions this project is verified against (117 passing tests).
+
+# --- API / web ---
+fastapi==0.139.0
+uvicorn==0.51.0
+sqlalchemy==2.0.52
+pydantic==2.13.4
+
+# --- guideline ingestion + retrieval (Phase 2) ---
+pymupdf==1.28.2                # guideline PDF text extraction (handles ligatures
+                               # correctly; pypdf emits unmapped glyph names here)
+pypdf==6.16.1                  # PDF inspection / verification utilities
+numpy==2.5.1                   # vector store (cosine search)
+sentence-transformers==6.0.0   # all-MiniLM-L6-v2 embeddings; ~90 MB model
+                               # downloaded once on first use, offline thereafter
+torch==2.13.0                  # required by sentence-transformers (CPU build is fine)
+scikit-learn==1.9.0            # TF-IDF fallback when the semantic model is unavailable
+
+# --- tests ---
+pytest==9.1.1
+httpx==0.28.1
+
+# --- PostgreSQL / pgvector: NOT required to run ---
+# Phase 1 (Postgres migration) is not implemented. The app defaults to SQLite and
+# the vector store runs in-process. These are listed for that migration only and
+# are currently unused — see requirements-postgres.txt.

@@ -1,0 +1,30 @@
+# --- database (regenerate with: python -m backend.seed_data) ---
+*.db
+*.sqlite
+*.sqlite3
+
+# --- python ---
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+venv/
+.venv/
+.env
+
+# --- fetched source data (regenerate with: python scripts/ingest_dailymed.py --all) ---
+.cache/
+
+# --- editor / OS ---
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# NOTE: backend/guidelines/data/rag/ IS committed on purpose. It holds the
+# ingested guideline corpus and its vector index, so the app works immediately
+# after clone with no PDFs and no re-embedding step.
+
+# --- scratch / throwaway verification scripts ---
+scratch/

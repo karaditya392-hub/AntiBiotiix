@@ -1,0 +1,82 @@
+{
+  "dataset_title": "ICMR Antimicrobial Resistance Surveillance Network Annual Report",
+  "issuing_authority": "Indian Council of Medical Research (ICMR), New Delhi, India",
+  "geographic_scope": "National (India - Multi-center surveillance across tertiary medical centers)",
+  "reporting_year": 2023,
+  "publication_date": "2023-11-20",
+  "sample_size_total_isolates": 98400,
+  "per_antimicrobial_test_count_sum": 166100,
+  "sample_size_note": "sample_size_total_isolates (98400) is the figure declared in the source dataset header. per_antimicrobial_test_count_sum (166100) is the arithmetic sum of the per-row sample_size values below and is computed from this file, not quoted from the source. The two figures are not the same quantity and must not be reported interchangeably. The most likely explanation is that a single isolate is tested against multiple antimicrobials, but this relationship has NOT been verified against the ICMR source publication. Do not cite the 166100 figure as an isolate count.",
+  "antibiogram": [
+    {
+      "organism": "Escherichia coli (Urine Isolates)",
+      "antimicrobial": "Ciprofloxacin",
+      "resistance_rate_pct": 73.2,
+      "sample_size": 24500,
+      "clinical_implication": "High empirical failure rate; avoid empirical fluoroquinolones for uncomplicated UTI in India per ICMR recommendations."
+    },
+    {
+      "organism": "Escherichia coli (Urine Isolates)",
+      "antimicrobial": "Nitrofurantoin",
+      "resistance_rate_pct": 14.8,
+      "sample_size": 24500,
+      "clinical_implication": "Remains highly susceptible (>85%); first-line Access agent for uncomplicated cystitis."
+    },
+    {
+      "organism": "Escherichia coli (Urine Isolates)",
+      "antimicrobial": "Amoxicillin-Clavulanate",
+      "resistance_rate_pct": 38.5,
+      "sample_size": 22100,
+      "clinical_implication": "Moderate resistance; suitable as second-line or culture-guided therapy."
+    },
+    {
+      "organism": "Klebsiella pneumoniae (Bloodstream Isolates)",
+      "antimicrobial": "Ceftriaxone",
+      "resistance_rate_pct": 84.1,
+      "sample_size": 18200,
+      "clinical_implication": "High ESBL prevalence; 3rd-generation cephalosporin monotherapy ineffective for serious hospital-acquired infections."
+    },
+    {
+      "organism": "Klebsiella pneumoniae (Bloodstream Isolates)",
+      "antimicrobial": "Meropenem",
+      "resistance_rate_pct": 43.6,
+      "sample_size": 18200,
+      "clinical_implication": "Significant carbapenem resistance (CRKP); carbapenem stewardship essential."
+    },
+    {
+      "organism": "Staphylococcus aureus (Clinical Isolates)",
+      "antimicrobial": "Cefoxitin / Oxacillin (MRSA)",
+      "resistance_rate_pct": 41.2,
+      "sample_size": 15400,
+      "clinical_implication": "Over 40% MRSA rate in Indian tertiary care; consider MRSA coverage in purulent sepsis."
+    },
+    {
+      "organism": "Staphylococcus aureus (Clinical Isolates)",
+      "antimicrobial": "Vancomycin",
+      "resistance_rate_pct": 0.0,
+      "sample_size": 15400,
+      "clinical_implication": "100% susceptibility maintained; no confirmed VRSA in network."
+    },
+    {
+      "organism": "Staphylococcus aureus (Clinical Isolates)",
+      "antimicrobial": "Linezolid",
+      "resistance_rate_pct": 0.8,
+      "sample_size": 15400,
+      "clinical_implication": "Highly active; reserve group agent strictly preserved for MDR Gram-positive infections."
+    },
+    {
+      "organism": "Streptococcus pneumoniae (Respiratory Isolates)",
+      "antimicrobial": "Amoxicillin",
+      "resistance_rate_pct": 8.4,
+      "sample_size": 6200,
+      "clinical_implication": "High susceptibility maintained (>90%); confirms Amoxicillin as first-line for CAP."
+    },
+    {
+      "organism": "Streptococcus pneumoniae (Respiratory Isolates)",
+      "antimicrobial": "Azithromycin",
+      "resistance_rate_pct": 42.1,
+      "sample_size": 6200,
+      "clinical_implication": "High macrolide resistance; avoid macrolide monotherapy for pneumococcal pneumonia."
+    }
+  ]
+}
