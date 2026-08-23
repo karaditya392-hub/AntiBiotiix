@@ -48,7 +48,7 @@ An explainable, evidence-grounded Clinical Decision-Support System (CDSS) for an
 python -m backend.seed_data
 ```
 
-### 3. Run Automated Clinical Safety & Extraction Test Suite (50 Tests)
+### 3. Run Automated Clinical Safety & Extraction Test Suite (237 Tests)
 ```bash
 python -m pytest tests/ -v
 ```
@@ -61,7 +61,7 @@ Open your browser at `http://127.0.0.1:8000/` to access the clinical decision-su
 
 ---
 
-## 🧪 Comprehensive Test Suite (50 Tests Across 6 Modules)
+## Comprehensive Test Suite (237 Tests Across 16 Modules)
 
 - `tests/test_clinical_safety.py`: 27 clinical safety scenarios and edge cases.
 - `tests/test_coverage_failsafe.py`: Unknown drug, real uncovered drug (Amikacin), and covered drug tests.

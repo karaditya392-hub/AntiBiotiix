@@ -199,11 +199,34 @@ def seed_database():
         }
     ]
 
+    # Seeded patients are FIXTURES, so seeding converges them to the intended
+    # state rather than skipping any that already exist.
+    #
+    # Skipping looks idempotent but is not: anything that touches the API before
+    # the seeder runs -- the test suite, or a click in the UI -- can create a row
+    # for PATIENT-001 with no allergies. The old code then saw the id present and
+    # left it that way, so the penicillin allergy every allergy test depends on
+    # silently never arrived, and re-running the seeder could not repair it. The
+    # failure surfaced as "assert 'Penicillin' in []", which points nowhere near
+    # the cause.
+    #
+    # Only the seeded ids are touched. Patients created by a clinician through the
+    # UI are never overwritten, because their ids are not in this list.
+    repaired = []
     for p_data in patients_data:
         existing = db.query(PatientDB).filter(PatientDB.patient_id == p_data["patient_id"]).first()
         if not existing:
-            patient = PatientDB(**p_data)
-            db.add(patient)
+            db.add(PatientDB(**p_data))
+            continue
+
+        drifted = [
+            field for field, value in p_data.items()
+            if field != "patient_id" and getattr(existing, field, None) != value
+        ]
+        if drifted:
+            for field, value in p_data.items():
+                setattr(existing, field, value)
+            repaired.append(f"{p_data['patient_id']} ({', '.join(drifted)})")
 
     # 2. Seed Clinical Rules
     for r in knowledge_base.rules_catalog:
@@ -262,6 +285,12 @@ def seed_database():
     db.commit()
     db.close()
     print("Database successfully seeded with 10 synthetic patients, clinical rules, and AMR data.")
+    if repaired:
+        # Say so out loud: a silent repair hides that something had already
+        # written over a fixture, which is worth knowing about.
+        print(f"Repaired {len(repaired)} seeded patient record(s) that had drifted:")
+        for entry in repaired:
+            print(f"  - {entry}")
 
 
 if __name__ == "__main__":
