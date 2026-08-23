@@ -33,6 +33,8 @@ from backend.models.schemas import (
     PatientRegistration, MedicationUpdate, AllergyReportRequest,
 )
 from backend.guidelines.knowledge_base import knowledge_base
+from backend.guidelines import governance as rule_governance
+from backend.guidelines.cross_source import compare_sources
 from backend.rules.engine import rule_engine
 from backend.rules.priority import compute_stewardship_priority
 from backend.extraction.parser import clinical_parser
@@ -983,6 +985,116 @@ def get_amr_surveillance_data(drug: Optional[str] = None):
         "sample_size_note": knowledge_base.amr_data.get("sample_size_note"),
         "records_count": len(records),
         "records": records
+    }
+
+
+@app.get("/api/guidelines/cross-source")
+def compare_guideline_sources(topic: str = Query("", max_length=200)):
+    """
+    Lay every ingested document's guidance on a topic side by side (Spec 8A).
+
+    Reports what each source says and which antimicrobials each names, ordered by
+    the precedence hierarchy. It does NOT assert that sources clinically conflict:
+    differences in named agents are computed from the retrieved wording, and the
+    clinical reading is left to the clinician. Curated, already-reviewed conflicts
+    are returned separately and labelled as such.
+    """
+    from backend.rag.store import vector_store
+
+    return compare_sources(topic, knowledge_base, vector_store)
+
+
+@app.get("/api/rules/governance")
+def get_rule_governance(db: Session = Depends(get_db)):
+    """Catalog rules with their review state derived from the append-only log."""
+    return rule_governance.governance_report(db, knowledge_base.rules_catalog)
+
+
+@app.get("/api/rules/{rule_id}/history")
+def get_rule_review_history(rule_id: str, db: Session = Depends(get_db)):
+    if not knowledge_base.get_rule_by_id(rule_id):
+        raise HTTPException(status_code=404, detail=f"Unknown rule '{rule_id}'.")
+    return {"rule_id": rule_id, "history": rule_governance.review_history(db, rule_id)}
+
+
+@app.post("/api/rules/{rule_id}/review")
+def review_clinical_rule(
+    rule_id: str,
+    payload: Dict[str, Any],
+    current_clinician: Dict[str, str] = Depends(get_current_clinician),
+    db: Session = Depends(get_db),
+):
+    """
+    Record a clinician's review decision on a catalog rule.
+
+    Authorization reuses the rule-authoring roles, so the same people who may
+    author a rule may sign one off. The decision is appended to the authorship log
+    AND written into the immutable audit chain, because "who approved this rule,
+    when, and on what grounds" is exactly the kind of question the chain exists to
+    answer defensibly.
+
+    The catalog file is never edited, and approving a rule does not change how it
+    evaluates: every rule fires identically before and after review.
+    """
+    authorizer.verify_rule_authoring_authorization(
+        author_role=current_clinician["clinician_role"],
+        author_id=current_clinician["clinician_id"],
+    )
+
+    rule = knowledge_base.get_rule_by_id(rule_id)
+    if not rule:
+        raise HTTPException(status_code=404, detail=f"Unknown rule '{rule_id}'.")
+
+    action = str((payload or {}).get("action", "")).strip().upper()
+    if action not in rule_governance.REVIEW_ACTIONS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"action must be one of: {', '.join(rule_governance.REVIEW_ACTIONS)}",
+        )
+
+    rationale = str((payload or {}).get("rationale", "")).strip()
+    if len(rationale) < 10:
+        # A signature without a reason is not governance.
+        raise HTTPException(
+            status_code=400,
+            detail="A clinical rationale of at least 10 characters is required to record a review.",
+        )
+
+    entry = rule_governance.record_review(
+        db=db,
+        rule_id=rule_id,
+        action=action,
+        rationale=rationale,
+        reviewer_id=current_clinician["clinician_id"],
+        reviewer_role=current_clinician["clinician_role"],
+    )
+
+    audit_logger.log_event(
+        db=db,
+        event_type="RULE_REVIEWED",
+        prescription_id="N/A",
+        patient_id="N/A",
+        clinician_id=current_clinician["clinician_id"],
+        clinician_role=current_clinician["clinician_role"],
+        action_summary=f"Rule {rule_id} reviewed: {action}.",
+        payload={
+            "rule_id": rule_id,
+            "action": action,
+            "rationale": rationale,
+            "rule_severity": rule.get("severity"),
+            "rule_category": rule.get("category"),
+            "catalog_status_at_review": rule.get("approval_status"),
+        },
+    )
+
+    return {
+        "status": "RULE_REVIEW_RECORDED",
+        "rule_id": rule_id,
+        "action": action,
+        "reviewed_by": current_clinician["clinician_id"],
+        "reviewer_role": current_clinician["clinician_role"],
+        "reviewed_at": entry.timestamp.isoformat() if entry.timestamp else None,
+        "note": "Recorded against the catalog, which is unchanged. Rule evaluation is unaffected.",
     }
 
 

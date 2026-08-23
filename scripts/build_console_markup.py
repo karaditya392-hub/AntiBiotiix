@@ -318,3 +318,105 @@ _still_missing = [i for i in sorted(set(re.findall(r'getElementById\(["\']([^"\'
 print("  ids app.js queries but markup lacks:", _still_missing or "NONE")
 
 io.open(OUT, "w", encoding="utf-8").write(body + "\n")
+
+
+# ---------------------------------------------------------------------------
+# Guidelines tab: cross-source comparison + rule governance
+# ---------------------------------------------------------------------------
+# Both are driven by src/legacy/guidelinesGovernance.ts, not app.js, so app.js
+# keeps its four-line diff against the original. The existing rules catalog table
+# is left exactly as it was.
+
+_GUIDELINES_ADDITIONS = """
+        <!-- Cross-source comparison -->
+        <div class="card" id="crossSourceCard">
+          <div class="panel-header">
+            <div>
+              <h3><span class="icon" aria-hidden="true">\u2261</span> Cross-Source Comparison</h3>
+              <p class="sub-text">
+                What every ingested guideline says about one topic, side by side and ordered by
+                precedence. Sources that do not cover the topic are shown as silent rather than
+                given a weak answer.
+              </p>
+            </div>
+            <span id="crossSourceBadge" class="badge badge-subtle">11 documents held</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="crossSourceInput">Syndrome or therapy topic</label>
+            <input type="text" id="crossSourceInput" class="form-input"
+                   placeholder="e.g. uncomplicated urinary tract infection empiric treatment">
+          </div>
+          <div class="quick-presets">
+            <span class="preset-label">Try:</span>
+            <button class="btn btn-chip" data-cross-topic="uncomplicated urinary tract infection empiric treatment">UTI</button>
+            <button class="btn btn-chip" data-cross-topic="community acquired pneumonia treatment">CAP</button>
+            <button class="btn btn-chip" data-cross-topic="skin and soft tissue infection cellulitis treatment">Cellulitis</button>
+            <button class="btn btn-chip" data-cross-topic="tubercular meningitis regimen">TB meningitis</button>
+          </div>
+          <button id="crossSourceBtn" class="btn btn-primary btn-sm">Compare across sources</button>
+
+          <div id="crossSourceResults" class="cross-source-results"></div>
+        </div>
+
+        <!-- Rule governance -->
+        <div class="card" id="ruleGovernanceCard">
+          <div class="panel-header">
+            <div>
+              <h3><span class="icon" aria-hidden="true">\u229c</span> Rule Governance &amp; Clinical Sign-Off</h3>
+              <p class="sub-text">
+                Rules ship as <code>PENDING_CLINICAL_REVIEW</code>. Review decisions are appended
+                against the catalog rather than edited into it, so the shipped catalog stays
+                reproducible and an approval cannot rewrite the rule it approved.
+              </p>
+            </div>
+            <span id="governanceSummaryBadge" class="badge badge-subtle">Loading&hellip;</span>
+          </div>
+
+          <div id="governanceNotice" class="catalog-unavailable" style="margin-bottom:0.85rem;">
+            <strong>Approval does not change how a rule behaves</strong>
+            <p>
+              Every rule fires identically before and after sign-off. Recording a review captures
+              that a clinician accepted it, and writes that decision into the immutable audit trail.
+              Only rule-authoring roles may sign off; the decision requires a written rationale.
+            </p>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table" id="governanceTable">
+              <thead>
+                <tr>
+                  <th>Rule ID</th>
+                  <th>Severity</th>
+                  <th>Catalog status</th>
+                  <th>Effective status</th>
+                  <th>Reviewed by</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="governanceTableBody">
+                <tr><td colspan="6" class="text-center">Loading rule governance state&hellip;</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+"""
+
+_RULES_CARD_ANCHOR = '        <!-- Rules Catalog Table -->'
+if _RULES_CARD_ANCHOR not in body:
+    raise SystemExit("rules catalog anchor not found")
+body = body.replace(_RULES_CARD_ANCHOR, _GUIDELINES_ADDITIONS + "\n" + _RULES_CARD_ANCHOR, 1)
+
+print()
+print("Guidelines tab additions:")
+print("  cross-source card   :", 'id="crossSourceCard"' in body)
+print("  governance card     :", 'id="ruleGovernanceCard"' in body)
+print("  inside guidelines   :", body.find('id="crossSourceCard"') > body.find('id="tab-guidelines"')
+                                 and body.find('id="crossSourceCard"') < body.find('id="tab-audit"'))
+print("  existing rules table intact:", 'id="rulesTableBody"' in body)
+
+_gap = [i for i in sorted(set(re.findall(r'getElementById\(["\']([^"\']+)["\']\)', appjs)))
+        if 'id="%s"' % i not in body]
+print("  ids app.js queries but markup lacks:", _gap or "NONE")
+
+io.open(OUT, "w", encoding="utf-8").write(body + "\n")

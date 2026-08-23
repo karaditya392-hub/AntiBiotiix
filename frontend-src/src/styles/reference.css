@@ -327,3 +327,93 @@
 @media (max-width: 900px) {
   .compare-grid { grid-template-columns: 1fr; }
 }
+
+/* ---------------------------------------------------------------------------
+ * Guidelines tab: cross-source comparison + rule governance
+ * ------------------------------------------------------------------------- */
+
+.cross-source-results { margin-top: 1rem; }
+
+.cross-summary { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.9rem; }
+
+.cross-curated {
+  padding: 0.85rem 1rem;
+  margin-bottom: 1rem;
+  background: var(--moderate-bg);
+  border: 1px solid var(--moderate-border);
+  border-radius: var(--radius-md);
+}
+.cross-curated strong { display: block; color: var(--moderate-text); margin-bottom: 0.45rem; font-size: 0.85rem; }
+.cross-curated p { margin: 0 0 0.35rem; font-size: 0.8rem; line-height: 1.5; }
+.cross-curated .label {
+  display: block; color: var(--text-subtle); font-size: 0.66rem;
+  font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+}
+.cross-curated em { color: var(--text-subtle); font-size: 0.72rem; }
+
+.cross-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 0.9rem;
+}
+
+.cross-doc {
+  padding: 0.85rem 0.95rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-secondary);
+}
+.cross-doc header { padding-bottom: 0.6rem; margin-bottom: 0.6rem; border-bottom: 1px solid var(--border-color); }
+.cross-rank {
+  display: inline-block; color: var(--accent-primary);
+  font-family: var(--font-mono); font-size: 0.62rem; margin-bottom: 0.25rem;
+}
+.cross-doc header strong { display: block; font-size: 0.86rem; line-height: 1.35; }
+.cross-version { display: block; color: var(--text-subtle); font-size: 0.7rem; margin-top: 0.15rem; }
+.cross-prov {
+  display: inline-block; margin-top: 0.35rem; padding: 0.1rem 0.4rem;
+  border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 0.6rem;
+}
+.cross-prov.verified { background: var(--success-bg); border: 1px solid var(--success-border); color: var(--success-text); }
+.cross-prov.attested { background: var(--moderate-bg); border: 1px solid var(--moderate-border); color: var(--moderate-text); }
+
+.cross-drugs { display: flex; flex-wrap: wrap; gap: 0.25rem; margin-bottom: 0.6rem; }
+
+.cross-passage {
+  margin: 0 0 0.5rem; padding: 0.55rem 0.7rem;
+  background: var(--bg-tertiary); border-left: 2px solid var(--accent-primary);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted); font-size: 0.76rem; line-height: 1.55;
+}
+.cross-passage cite {
+  display: block; margin-top: 0.35rem;
+  color: var(--text-subtle); font-family: var(--font-mono); font-size: 0.62rem; font-style: normal;
+}
+
+.cross-differ { margin-top: 1rem; }
+.cross-differ h5 {
+  color: var(--text-subtle); font-size: 0.7rem; font-weight: 700;
+  letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 0.4rem;
+}
+.cross-differ ul, .cross-silent ul { margin: 0 0 0 1.05rem; padding: 0; }
+.cross-differ li, .cross-silent li { font-size: 0.79rem; line-height: 1.55; }
+.cross-differ em, .cross-silent em { color: var(--text-subtle); font-size: 0.72rem; }
+
+.cross-silent { margin-top: 0.9rem; }
+.cross-silent summary { color: var(--text-muted); font-size: 0.78rem; cursor: pointer; }
+
+.cross-note {
+  margin-top: 1rem; padding-top: 0.7rem;
+  border-top: 1px solid var(--border-color);
+  color: var(--text-subtle); font-size: 0.75rem; line-height: 1.55;
+}
+
+.gov-status {
+  display: inline-block; padding: 0.15rem 0.45rem;
+  border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 0.64rem;
+}
+.gov-approved { background: var(--success-bg); border: 1px solid var(--success-border); color: var(--success-text); }
+.gov-rejected { background: var(--critical-bg); border: 1px solid var(--critical-border); color: var(--critical-text); }
+.gov-changes  { background: var(--moderate-bg); border: 1px solid var(--moderate-border); color: var(--moderate-text); }
+.gov-retired  { background: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-subtle); }
+.gov-pending  { background: var(--low-bg); border: 1px solid var(--low-border); color: var(--low-text); }

@@ -7,6 +7,7 @@ import consoleMarkup from "@/legacy/console.html?raw";
 import { installPregnancyDisplayRule } from "@/legacy/pregnancyDisplay";
 import { installClinicalReference } from "@/legacy/clinicalReference";
 import { installAlternativeComparison } from "@/legacy/alternativeComparison";
+import { installGuidelinesGovernance } from "@/legacy/guidelinesGovernance";
 import "@/styles/legacy.css";
 import "@/styles/reference.css";
 
@@ -48,6 +49,8 @@ export default function Console() {
       // Comparative what-if against an alternative agent. Reuses the original
       // create+analyze endpoints; recommends nothing.
       installAlternativeComparison();
+      // Cross-source comparison and rule sign-off in the guidelines tab.
+      installGuidelinesGovernance();
     });
 
     return () => {
