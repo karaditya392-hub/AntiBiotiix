@@ -5,7 +5,9 @@ import { useEffect, useRef } from "react";
 // silently detach a handler and break the safety-analysis flow.
 import consoleMarkup from "@/legacy/console.html?raw";
 import { installPregnancyDisplayRule } from "@/legacy/pregnancyDisplay";
+import { installClinicalReference } from "@/legacy/clinicalReference";
 import "@/styles/legacy.css";
+import "@/styles/reference.css";
 
 /**
  * The original vanilla console, rendered inside React.
@@ -39,6 +41,9 @@ export default function Console() {
       document.dispatchEvent(new Event("DOMContentLoaded", { bubbles: false }));
       // Presentational rule layered on top of app.js's own rendering (section 16).
       installPregnancyDisplayRule();
+      // Read-only browser over the ingested guideline corpus. Separate from
+      // app.js so that file keeps its four-line diff against the original.
+      installClinicalReference();
     });
 
     return () => {

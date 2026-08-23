@@ -47,8 +47,8 @@
     <button class="nav-tab" data-tab="tab-ask">
       <span class="tab-icon" aria-hidden="true">⌕</span> Ask the Evidence
     </button>
-    <button class="nav-tab" data-tab="tab-test-lab">
-      <span class="tab-icon" aria-hidden="true">◇</span> Clinical Safety Test Suite
+    <button class="nav-tab" data-tab="tab-reference">
+      <span class="tab-icon" aria-hidden="true">▤</span> Clinical Reference
     </button>
   </nav>
 
@@ -421,34 +421,45 @@
     </section>
 
     <!-- TAB 4: Clinical Safety Test Suite -->
-    <section id="tab-test-lab" class="tab-pane">
-      <div class="test-lab-layout card">
+    <section id="tab-reference" class="tab-pane">
+      <div class="card">
         <div class="panel-header">
           <div>
-            <h3><span class="icon" aria-hidden="true">◇</span> Automated Clinical Safety & Adversarial Test Suite</h3>
-            <p class="sub-text">Executes the full automated suite live &mdash; the 27 required clinical safety scenarios plus adversarial prompt-injection, extraction-accuracy, coverage fail-safe, authorization, and stewardship-priority tests. Counts below are read from the actual test run.</p>
+            <h3><span class="icon" aria-hidden="true">▤</span> Clinical Reference &mdash; Ingested Guideline Corpus</h3>
+            <p class="sub-text">
+              Conditions and antimicrobial regimens read directly from the guideline
+              documents held by this system. Every entry carries its source document and,
+              where the source is an official PDF, a real page number. Nothing here is
+              generated: it is the ingested text.
+            </p>
           </div>
-          <button id="runAllTestsBtn" class="btn btn-primary">
-            ▶ Run Complete Test Suite
-          </button>
+          <span id="referenceCountBadge" class="badge badge-subtle">Loading&hellip;</span>
         </div>
 
-        <!-- Test Results Table -->
-        <div class="table-responsive">
-          <table class="data-table" id="testSuiteTable">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Scenario Name</th>
-                <th>Category</th>
-                <th>Expected Clinical Behavior</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody id="testSuiteTableBody">
-              <!-- Populated by JS -->
-            </tbody>
-          </table>
+        <div class="form-group">
+          <label class="form-label" for="referenceSearchInput">Search conditions and medications</label>
+          <input type="text" id="referenceSearchInput" class="form-input"
+                 placeholder="e.g. cellulitis, pyelonephritis, meropenem, tuberculosis">
+        </div>
+        <div class="quick-presets">
+          <span class="preset-label">Filter by source:</span>
+          <button class="btn btn-chip" data-reference-filter="all">All</button>
+          <button class="btn btn-chip" data-reference-filter="stg">ICMR Treatment Guidelines 2022-23</button>
+          <button class="btn btn-chip" data-reference-filter="stw">ICMR Standard Treatment Workflows 2022</button>
+        </div>
+
+        <div id="referenceProvenanceNote" class="catalog-unavailable" style="display:none;"></div>
+
+        <div class="reference-layout">
+          <div class="reference-list" id="referenceList">
+            <div class="empty-state"><p>Loading the ingested guideline corpus&hellip;</p></div>
+          </div>
+          <div class="reference-detail" id="referenceDetail">
+            <div class="empty-state">
+              <span class="empty-icon" aria-hidden="true">□</span>
+              <p>Select a condition to read its presentation, regimens, and source.</p>
+            </div>
+          </div>
         </div>
       </div>
     </section>

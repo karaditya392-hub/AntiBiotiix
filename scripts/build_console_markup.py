@@ -145,3 +145,93 @@ def emoji_codepoints(text):
 left = emoji_codepoints(body)
 print()
 print("section 18 -- emoji remaining in markup:", left or "NONE")
+
+
+# ---------------------------------------------------------------------------
+# Clinical Reference tab
+# ---------------------------------------------------------------------------
+# Replaces the Clinical Safety Test Suite tab. The suite is unchanged and still
+# runs from the command line; POST /api/system/run-test-suite also still exists.
+# What changes is that the slot now surfaces the ingested guideline corpus --
+# 82 ICMR 2022-23 conditions and 29 ICMR STW 2022 workflows -- which the backend
+# already served but nothing in the UI ever showed.
+#
+# Rendering is handled by src/legacy/clinicalReference.ts, NOT by app.js, so
+# app.js keeps its four-line diff against the original.
+
+# NOTE: matched AFTER the emoji substitutions above run, so the icon is already
+# the typographic glyph rather than the original emoji.
+_OLD_TAB_BUTTON = """<button class="nav-tab" data-tab="tab-test-lab">
+      <span class="tab-icon" aria-hidden="true">◇</span> Clinical Safety Test Suite
+    </button>"""
+
+_NEW_TAB_BUTTON = """<button class="nav-tab" data-tab="tab-reference">
+      <span class="tab-icon" aria-hidden="true">\u25a4</span> Clinical Reference
+    </button>"""
+
+_NEW_SECTION = """<section id="tab-reference" class="tab-pane">
+      <div class="card">
+        <div class="panel-header">
+          <div>
+            <h3><span class="icon" aria-hidden="true">\u25a4</span> Clinical Reference &mdash; Ingested Guideline Corpus</h3>
+            <p class="sub-text">
+              Conditions and antimicrobial regimens read directly from the guideline
+              documents held by this system. Every entry carries its source document and,
+              where the source is an official PDF, a real page number. Nothing here is
+              generated: it is the ingested text.
+            </p>
+          </div>
+          <span id="referenceCountBadge" class="badge badge-subtle">Loading&hellip;</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="referenceSearchInput">Search conditions and medications</label>
+          <input type="text" id="referenceSearchInput" class="form-input"
+                 placeholder="e.g. cellulitis, pyelonephritis, meropenem, tuberculosis">
+        </div>
+        <div class="quick-presets">
+          <span class="preset-label">Filter by source:</span>
+          <button class="btn btn-chip" data-reference-filter="all">All</button>
+          <button class="btn btn-chip" data-reference-filter="stg">ICMR Treatment Guidelines 2022-23</button>
+          <button class="btn btn-chip" data-reference-filter="stw">ICMR Standard Treatment Workflows 2022</button>
+        </div>
+
+        <div id="referenceProvenanceNote" class="catalog-unavailable" style="display:none;"></div>
+
+        <div class="reference-layout">
+          <div class="reference-list" id="referenceList">
+            <div class="empty-state"><p>Loading the ingested guideline corpus&hellip;</p></div>
+          </div>
+          <div class="reference-detail" id="referenceDetail">
+            <div class="empty-state">
+              <span class="empty-icon" aria-hidden="true">\u25a1</span>
+              <p>Select a condition to read its presentation, regimens, and source.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>"""
+
+start = body.find('<section id="tab-test-lab"')
+end = body.find("</section>", start) + len("</section>")
+if start == -1:
+    raise SystemExit("test-lab section not found")
+
+body = body[:start] + _NEW_SECTION + body[end:]
+
+if _OLD_TAB_BUTTON not in body:
+    raise SystemExit("test-lab nav button not found")
+body = body.replace(_OLD_TAB_BUTTON, _NEW_TAB_BUTTON)
+
+print()
+print("Clinical Reference tab: swapped in")
+print("  test-lab section removed:", '<section id="tab-test-lab"' not in body)
+print("  reference section added :", 'id="tab-reference"' in body)
+print("  testSuiteTableBody gone :", "testSuiteTableBody" not in body)
+
+# app.js must not be left querying ids that no longer exist.
+_gone = [i for i in ("runAllTestsBtn", "testSuiteTableBody")
+         if i in appjs and 'id="%s"' % i not in body]
+print("  ids app.js still queries but markup no longer has:", _gone or "NONE")
+
+io.open(OUT, "w", encoding="utf-8").write(body + "\n")
