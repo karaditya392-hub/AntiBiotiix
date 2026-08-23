@@ -1,6 +1,6 @@
 {
-  "version": "2023.1-clinical",
-  "last_updated": "2023-11-15",
+  "version": "2026.08-stg2022-23",
+  "last_updated": "2026-08-23",
   "curator": "Antimicrobial Stewardship & Clinical Pharmacology Expert Panel",
   "drugs": {
     "amoxicillin": {
@@ -307,7 +307,7 @@
       },
       "cross_reactivity": {
         "Penicillins": 0.01,
-        "Cephalosporins_1st_Gen": 0.10,
+        "Cephalosporins_1st_Gen": 0.1,
         "Carbapenems": 0.005
       }
     },
@@ -482,6 +482,1998 @@
         "standard_dose": "5-7.5 mg/kg/day once daily IV/IM with level monitoring",
         "evidence_source": "ICMR Pediatric Guidelines 2022"
       }
+    },
+    "cloxacillin": {
+      "name": "Cloxacillin",
+      "class": "Isoxazolyl penicillin (anti-staphylococcal penicillin)",
+      "super_class": "Penicillins",
+      "route": "Oral",
+      "aware_category": "ACCESS",
+      "aware_category_source": "who_aware_classification_2023.json (ACCESS members list held in this repository)",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "hepatic_dosing",
+        "pregnancy_category",
+        "lactation_safety",
+        "pediatric_dosing_safety_review",
+        "interactions"
+      ],
+      "coverage_note": "Added from a held ICMR Standard Treatment Workflow (2022). That source states the indication and dose only. The fields listed in coverage_gaps are not stated in any document held by this repository and have NOT been supplied from memory or from an uningested reference. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "Skin and soft tissue infections - preferred beta-lactam option",
+        "Staphylococcal scalded skin syndrome (mild cases, oral anti-staphylococcal antibiotic)"
+      ],
+      "dosing_from_held_sources": {
+        "adult": "500 mg QID",
+        "paediatric": "50 mg/kg/day",
+        "source_document_id": "ICMR-STW-VOL3-2022",
+        "source_page": 11,
+        "verbatim_passage": "PREFER B-LACTAMS: Cloxacillin 500mg QID (50mg/kg/day)"
+      },
+      "unverified_sources": []
+    },
+    "cephalexin": {
+      "name": "Cephalexin",
+      "class": "1st Generation Cephalosporin",
+      "super_class": "Cephalosporins",
+      "route": "Oral",
+      "aware_category": "ACCESS",
+      "aware_category_source": "who_aware_classification_2023.json (ACCESS members list held in this repository)",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "hepatic_dosing",
+        "pregnancy_category",
+        "lactation_safety",
+        "pediatric_dosing_safety_review",
+        "interactions"
+      ],
+      "coverage_note": "Added from a held ICMR Standard Treatment Workflow (2022). That source states the indication and dose only. The fields listed in coverage_gaps are not stated in any document held by this repository and have NOT been supplied from memory or from an uningested reference. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "Skin and soft tissue infections - preferred beta-lactam option"
+      ],
+      "dosing_from_held_sources": {
+        "adult": "250-500 mg QID",
+        "paediatric": "25-50 mg/kg/day",
+        "source_document_id": "ICMR-STW-VOL3-2022",
+        "source_page": 11,
+        "verbatim_passage": "PREFER B-LACTAMS: Cephalexin 250-500mg QID (25-50 mg/kg/day)"
+      },
+      "unverified_sources": [],
+      "clinical_notes_from_held_sources": "Beta-lactam. Cross-reactivity with documented penicillin allergy is evaluated by ALLERGY-003 via super_class."
+    },
+    "clindamycin": {
+      "name": "Clindamycin",
+      "class": "Lincosamide",
+      "super_class": "Lincosamides",
+      "route": "Oral / IV / Topical",
+      "aware_category": "NOT_APPLICABLE",
+      "aware_category_source": "Not classified in any AWaRe source held by this repository. The ingested WHO AWaRe antibiotic book (WHO-AWARE-BOOK-2022) does not assign this agent to a group, and it is absent from who_aware_classification_2023.json. Treated as NOT_APPLICABLE so that no stewardship rule fires on an unverified group assignment.",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "hepatic_dosing",
+        "pregnancy_category",
+        "lactation_safety",
+        "pediatric_dosing_safety_review",
+        "interactions"
+      ],
+      "coverage_note": "Added from a held ICMR Standard Treatment Workflow (2022). That source states the indication and dose only. The fields listed in coverage_gaps are not stated in any document held by this repository and have NOT been supplied from memory or from an uningested reference. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "Skin and soft tissue infections in patients allergic to penicillins",
+        "Cutaneous abscess and moderate cellulitis - IV alternative in penicillin allergy",
+        "MRSA - IV option",
+        "Topical component of rational acne combinations"
+      ],
+      "dosing_from_held_sources": {
+        "adult_oral": "300-600 mg BD/TID",
+        "paediatric": "20 mg/kg/day",
+        "adult_iv": "600-900 mg TDS",
+        "source_document_id": "ICMR-STW-VOL3-2022",
+        "source_page": 11,
+        "verbatim_passage": "IF ALLERGIC TO PENICILLINS: Clindamycin: 300-600mg BD/TID (20mg/kg/day). Alternatively - Inj Clindamycin 600-900mg TDS. IV ANTIBIOTICS FOR MRSA: Clindamycin: 600-900 mg TDS."
+      },
+      "unverified_sources": [],
+      "aware_classification_status": "NOT_ESTABLISHED_IN_HELD_SOURCES",
+      "clinical_notes_from_held_sources": "Named by the source as the penicillin-allergy alternative for SSTI. Topical clindamycin is not recommended as acne monotherapy because of the risk of bacterial resistance (STW Vol. 3, p.18)."
+    },
+    "erythromycin": {
+      "name": "Erythromycin",
+      "class": "Macrolide",
+      "super_class": "Macrolides",
+      "route": "Oral",
+      "aware_category": "NOT_APPLICABLE",
+      "aware_category_source": "Not classified in any AWaRe source held by this repository. The ingested WHO AWaRe antibiotic book (WHO-AWARE-BOOK-2022) does not assign this agent to a group, and it is absent from who_aware_classification_2023.json. Treated as NOT_APPLICABLE so that no stewardship rule fires on an unverified group assignment.",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "hepatic_dosing",
+        "pregnancy_category",
+        "lactation_safety",
+        "pediatric_dosing_safety_review",
+        "interactions"
+      ],
+      "coverage_note": "Added from a held ICMR Standard Treatment Workflow (2022). That source states the indication and dose only. The fields listed in coverage_gaps are not stated in any document held by this repository and have NOT been supplied from memory or from an uningested reference. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "Skin and soft tissue infections in patients allergic to penicillins"
+      ],
+      "dosing_from_held_sources": {
+        "adult": "500 mg QID",
+        "paediatric": "40 mg/kg/day",
+        "source_document_id": "ICMR-STW-VOL3-2022",
+        "source_page": 11,
+        "verbatim_passage": "IF ALLERGIC TO PENICILLINS: Erythromycin 500mg QID (40 mg/kg/day)"
+      },
+      "unverified_sources": [],
+      "aware_classification_status": "NOT_ESTABLISHED_IN_HELD_SOURCES"
+    },
+    "cotrimoxazole": {
+      "name": "Cotrimoxazole (Sulfamethoxazole-Trimethoprim)",
+      "class": "Sulfonamide / Diaminopyrimidine combination",
+      "super_class": "Sulfonamides",
+      "route": "Oral",
+      "aware_category": "ACCESS",
+      "aware_category_source": "who_aware_classification_2023.json (ACCESS members list held in this repository)",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "hepatic_dosing",
+        "pregnancy_category",
+        "lactation_safety",
+        "pediatric_dosing_safety_review",
+        "interactions"
+      ],
+      "coverage_note": "Added from a held ICMR Standard Treatment Workflow (2022). That source states the indication and dose only. The fields listed in coverage_gaps are not stated in any document held by this repository and have NOT been supplied from memory or from an uningested reference. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "Suspected or confirmed MRSA skin and soft tissue infection - oral option"
+      ],
+      "dosing_from_held_sources": {
+        "adult": "2 DS tablets BD",
+        "source_document_id": "ICMR-STW-VOL3-2022",
+        "source_page": 11,
+        "verbatim_passage": "ORAL ANTIBIOTICS FOR SUSPECTED OR CONFIRMED MRSA INFECTION: Cotrimoxazole 2 DS tablets BD"
+      },
+      "unverified_sources": []
+    },
+    "minocycline": {
+      "name": "Minocycline",
+      "class": "Tetracycline",
+      "super_class": "Tetracyclines",
+      "route": "Oral",
+      "aware_category": "NOT_APPLICABLE",
+      "aware_category_source": "Not classified in any AWaRe source held by this repository. The ingested WHO AWaRe antibiotic book (WHO-AWARE-BOOK-2022) does not assign this agent to a group, and it is absent from who_aware_classification_2023.json. Treated as NOT_APPLICABLE so that no stewardship rule fires on an unverified group assignment.",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "hepatic_dosing",
+        "pregnancy_category",
+        "lactation_safety",
+        "pediatric_dosing_safety_review",
+        "interactions"
+      ],
+      "coverage_note": "Added from a held ICMR Standard Treatment Workflow (2022). That source states the indication and dose only. The fields listed in coverage_gaps are not stated in any document held by this repository and have NOT been supplied from memory or from an uningested reference. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "Suspected or confirmed MRSA skin and soft tissue infection - oral option"
+      ],
+      "dosing_from_held_sources": {
+        "adult": "200 mg BD",
+        "source_document_id": "ICMR-STW-VOL3-2022",
+        "source_page": 11,
+        "verbatim_passage": "ORAL ANTIBIOTICS FOR SUSPECTED OR CONFIRMED MRSA INFECTION: Minocycine 200 mg BD",
+        "source_spelling_note": "The source PDF prints 'Minocycine'; the entry is stored under the correct spelling 'Minocycline'."
+      },
+      "unverified_sources": [],
+      "aware_classification_status": "NOT_ESTABLISHED_IN_HELD_SOURCES"
+    },
+    "mupirocin": {
+      "name": "Mupirocin",
+      "class": "Topical antibacterial (monoxycarbolic acid)",
+      "super_class": "Topical Antibacterials",
+      "route": "Topical",
+      "aware_category": "NOT_APPLICABLE",
+      "aware_category_source": "Not classified in any AWaRe source held by this repository. The ingested WHO AWaRe antibiotic book (WHO-AWARE-BOOK-2022) does not assign this agent to a group, and it is absent from who_aware_classification_2023.json. Treated as NOT_APPLICABLE so that no stewardship rule fires on an unverified group assignment.",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "pregnancy_category",
+        "lactation_safety",
+        "interactions"
+      ],
+      "coverage_note": "Added from a held ICMR Standard Treatment Workflow (2022). That source states the indication and dose only. The fields listed in coverage_gaps are not stated in any document held by this repository and have NOT been supplied from memory or from an uningested reference. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "Topical antibiotic for impetigo, ecthyma and folliculitis",
+        "Nasal Staphylococcus aureus carriage decolonization"
+      ],
+      "dosing_from_held_sources": {
+        "topical": "cream 2%",
+        "nasal_carriage": "2% ointment for 5 days a month",
+        "source_document_id": "ICMR-STW-VOL3-2022",
+        "source_page": 11,
+        "verbatim_passage": "TOPICAL ANTIBIOTICS: Mupirocin cream 2%. FOR NASAL CARRIERS: 2% Mupirocin ointment for 5 days a month."
+      },
+      "unverified_sources": [],
+      "aware_classification_status": "NOT_ESTABLISHED_IN_HELD_SOURCES"
+    },
+    "fusidic_acid": {
+      "name": "Fusidic acid",
+      "class": "Topical antibacterial (fusidane)",
+      "super_class": "Topical Antibacterials",
+      "route": "Topical",
+      "aware_category": "NOT_APPLICABLE",
+      "aware_category_source": "Not classified in any AWaRe source held by this repository. The ingested WHO AWaRe antibiotic book (WHO-AWARE-BOOK-2022) does not assign this agent to a group, and it is absent from who_aware_classification_2023.json. Treated as NOT_APPLICABLE so that no stewardship rule fires on an unverified group assignment.",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "pregnancy_category",
+        "lactation_safety",
+        "interactions"
+      ],
+      "coverage_note": "Added from a held ICMR Standard Treatment Workflow (2022). That source states the indication and dose only. The fields listed in coverage_gaps are not stated in any document held by this repository and have NOT been supplied from memory or from an uningested reference. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "Topical antibiotic for superficial bacterial skin infection",
+        "Component of TCS + Fusidic acid 2% cream/ointment for impetiginized eczematous lesions"
+      ],
+      "dosing_from_held_sources": {
+        "topical": "cream 2%",
+        "source_document_id": "ICMR-STW-VOL3-2022",
+        "source_page": [
+          11,
+          18
+        ],
+        "verbatim_passage": "TOPICAL ANTIBIOTICS: Fusidic acid cream 2%. FEW ACCEPTABLE COMBINATIONS WITH TCS: TCS + Fusidic acid 2% cream/ointment (for impetiginized eczematous lesions)."
+      },
+      "unverified_sources": [],
+      "aware_classification_status": "NOT_ESTABLISHED_IN_HELD_SOURCES"
+    },
+    "framycetin": {
+      "name": "Framycetin",
+      "class": "Topical aminoglycoside",
+      "super_class": "Aminoglycosides",
+      "route": "Topical",
+      "aware_category": "NOT_APPLICABLE",
+      "aware_category_source": "Not classified in any AWaRe source held by this repository. The ingested WHO AWaRe antibiotic book (WHO-AWARE-BOOK-2022) does not assign this agent to a group, and it is absent from who_aware_classification_2023.json. Treated as NOT_APPLICABLE so that no stewardship rule fires on an unverified group assignment.",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "pregnancy_category",
+        "lactation_safety",
+        "interactions"
+      ],
+      "coverage_note": "Added from a held ICMR Standard Treatment Workflow (2022). That source states the indication and dose only. The fields listed in coverage_gaps are not stated in any document held by this repository and have NOT been supplied from memory or from an uningested reference. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "Topical antibiotic for superficial bacterial skin infection"
+      ],
+      "dosing_from_held_sources": {
+        "topical": "cream 1%",
+        "source_document_id": "ICMR-STW-VOL3-2022",
+        "source_page": 11,
+        "verbatim_passage": "TOPICAL ANTIBIOTICS: Framycetin cream 1%"
+      },
+      "unverified_sources": [],
+      "aware_classification_status": "NOT_ESTABLISHED_IN_HELD_SOURCES"
+    },
+    "isoniazid": {
+      "name": "Isoniazid",
+      "class": "Antitubercular (isonicotinic acid hydrazide)",
+      "super_class": "Antituberculars",
+      "route": "Oral",
+      "aware_category": "NOT_APPLICABLE",
+      "aware_category_source": "Antitubercular agents are not assigned an AWaRe group by any source held by this repository. The ingested WHO AWaRe antibiotic book contains no entry for this drug.",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "hepatic_dosing",
+        "pregnancy_category",
+        "lactation_safety",
+        "pediatric_dosing_safety_review",
+        "interactions"
+      ],
+      "coverage_note": "Added from a held ICMR Standard Treatment Workflow (2022). That source states the indication and dose only. The fields listed in coverage_gaps are not stated in any document held by this repository and have NOT been supplied from memory or from an uningested reference. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "Drug-sensitive tuberculosis - intensive and continuation phase (NTEP 2HRZE/4HRE)"
+      ],
+      "dosing_from_held_sources": {
+        "adult": "5 mg/kg daily (4 to 6 mg/kg)",
+        "fdc_strength": "H: 75 mg",
+        "source_document_id": "ICMR-STW-PTB-EPTB-2022",
+        "source_page": 26,
+        "verbatim_passage": "Isoniazid (H) 5 mg/kg daily (4 to 6 mg/kg)"
+      },
+      "unverified_sources": [],
+      "aware_classification_status": "NOT_IN_HELD_AWARE_SOURCES",
+      "clinical_notes_from_held_sources": "Pyridoxine may be given at a dosage of 10 mg per day (STW PTB/EPTB p.26)."
+    },
+    "rifampicin": {
+      "name": "Rifampicin",
+      "class": "Rifamycin",
+      "super_class": "Antituberculars",
+      "route": "Oral",
+      "aware_category": "NOT_APPLICABLE",
+      "aware_category_source": "Antitubercular agents are not assigned an AWaRe group by any source held by this repository. The ingested WHO AWaRe antibiotic book contains no entry for this drug.",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "hepatic_dosing",
+        "pregnancy_category",
+        "lactation_safety",
+        "pediatric_dosing_safety_review",
+        "interactions"
+      ],
+      "coverage_note": "Added from a held ICMR Standard Treatment Workflow (2022). That source states the indication and dose only. The fields listed in coverage_gaps are not stated in any document held by this repository and have NOT been supplied from memory or from an uningested reference. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "Drug-sensitive tuberculosis - intensive and continuation phase (NTEP 2HRZE/4HRE)"
+      ],
+      "dosing_from_held_sources": {
+        "adult": "10 mg/kg daily (8 to 12 mg/kg)",
+        "fdc_strength": "R: 150 mg",
+        "source_document_id": "ICMR-STW-PTB-EPTB-2022",
+        "source_page": 26,
+        "verbatim_passage": "Rifampicin (R) 10 mg/kg daily (8 to 12 mg/kg)"
+      },
+      "unverified_sources": [],
+      "aware_classification_status": "NOT_IN_HELD_AWARE_SOURCES",
+      "clinical_notes_from_held_sources": "Rifampicin is a potent enzyme inducer with extensive drug-drug interactions. NO interaction data is held in this repository for it; the interactions field is an explicit coverage gap and must not be assumed empty."
+    },
+    "pyrazinamide": {
+      "name": "Pyrazinamide",
+      "class": "Antitubercular (pyrazine analogue)",
+      "super_class": "Antituberculars",
+      "route": "Oral",
+      "aware_category": "NOT_APPLICABLE",
+      "aware_category_source": "Antitubercular agents are not assigned an AWaRe group by any source held by this repository. The ingested WHO AWaRe antibiotic book contains no entry for this drug.",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "hepatic_dosing",
+        "pregnancy_category",
+        "lactation_safety",
+        "pediatric_dosing_safety_review",
+        "interactions"
+      ],
+      "coverage_note": "Added from a held ICMR Standard Treatment Workflow (2022). That source states the indication and dose only. The fields listed in coverage_gaps are not stated in any document held by this repository and have NOT been supplied from memory or from an uningested reference. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "Drug-sensitive tuberculosis - intensive phase only (stopped in continuation phase)"
+      ],
+      "dosing_from_held_sources": {
+        "adult": "25 mg/kg daily (20 to 30 mg/kg)",
+        "fdc_strength": "Z: 400 mg",
+        "source_document_id": "ICMR-STW-PTB-EPTB-2022",
+        "source_page": 26,
+        "verbatim_passage": "Pyrazinamide (Z) 25 mg/kg daily (20 to 30 mg/kg). Only pyrazinamide will be stopped in the continuation phase."
+      },
+      "unverified_sources": [],
+      "aware_classification_status": "NOT_IN_HELD_AWARE_SOURCES"
+    },
+    "ethambutol": {
+      "name": "Ethambutol",
+      "class": "Antitubercular (ethylenediamine)",
+      "super_class": "Antituberculars",
+      "route": "Oral",
+      "aware_category": "NOT_APPLICABLE",
+      "aware_category_source": "Antitubercular agents are not assigned an AWaRe group by any source held by this repository. The ingested WHO AWaRe antibiotic book contains no entry for this drug.",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "hepatic_dosing",
+        "pregnancy_category",
+        "lactation_safety",
+        "pediatric_dosing_safety_review",
+        "interactions"
+      ],
+      "coverage_note": "Added from a held ICMR Standard Treatment Workflow (2022). That source states the indication and dose only. The fields listed in coverage_gaps are not stated in any document held by this repository and have NOT been supplied from memory or from an uningested reference. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "Drug-sensitive tuberculosis - intensive and continuation phase (NTEP 2HRZE/4HRE)"
+      ],
+      "dosing_from_held_sources": {
+        "adult": "15 mg/kg daily (12 to 18 mg/kg)",
+        "fdc_strength": "E: 275 mg",
+        "source_document_id": "ICMR-STW-PTB-EPTB-2022",
+        "source_page": 26,
+        "verbatim_passage": "Ethambutol (E) 15 mg/kg daily (12 to 18 mg/kg)"
+      },
+      "unverified_sources": [],
+      "aware_classification_status": "NOT_IN_HELD_AWARE_SOURCES",
+      "clinical_notes_from_held_sources": "The source records expert concern over Ethambutol toxicity in TB meningitis (STW PTB/EPTB p.19 region); Streptomycin-containing RHZS is offered as an intensive-phase alternative in TBM."
+    },
+    "streptomycin": {
+      "name": "Streptomycin",
+      "class": "Aminoglycoside",
+      "super_class": "Aminoglycosides",
+      "route": "IM / IV",
+      "aware_category": "NOT_APPLICABLE",
+      "aware_category_source": "Antitubercular agents are not assigned an AWaRe group by any source held by this repository. The ingested WHO AWaRe antibiotic book contains no entry for this drug.",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "hepatic_dosing",
+        "pregnancy_category",
+        "lactation_safety",
+        "pediatric_dosing_safety_review",
+        "interactions"
+      ],
+      "coverage_note": "Added from a held ICMR Standard Treatment Workflow (2022). That source states the indication and dose only. The fields listed in coverage_gaps are not stated in any document held by this repository and have NOT been supplied from memory or from an uningested reference. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "Drug-sensitive tuberculosis - restricted use",
+        "Adult tubercular meningitis - intensive phase alternative (RHZS)"
+      ],
+      "dosing_from_held_sources": {
+        "adult": "15 mg/kg daily (15 to 20 mg/kg)",
+        "source_document_id": "ICMR-STW-PTB-EPTB-2022",
+        "source_page": 26,
+        "verbatim_passage": "Streptomycin (S) 15 mg/kg daily (15 to 20 mg/kg). Streptomycin is administered only in certain situations, like TB meningitis or if any first line drug need to be replaced due to ADR as per weight of the patient."
+      },
+      "unverified_sources": [],
+      "aware_classification_status": "NOT_IN_HELD_AWARE_SOURCES",
+      "clinical_notes_from_held_sources": "Restricted indication: administered only in certain situations, like TB meningitis or if a first line drug needs replacing due to an adverse drug reaction."
+    },
+    "cefazolin": {
+      "name": "Cefazolin",
+      "class": "1st Generation Cephalosporin",
+      "super_class": "Cephalosporins",
+      "route": "IV",
+      "aware_category": "ACCESS",
+      "aware_category_source": "who_aware_classification_2023.json (member list held in this repository)",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "hepatic_dosing",
+        "pregnancy_category",
+        "lactation_safety",
+        "pediatric_dosing_safety_review",
+        "interactions"
+      ],
+      "coverage_note": "Added from the ICMR Treatment Guidelines 2022-23 edition (operator-attested), which states the indication and dose only. The fields listed in coverage_gaps are not stated in any document held by this repository and have NOT been supplied from memory. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "Cellulitis - first choice",
+        "Surgical antimicrobial prophylaxis"
+      ],
+      "dosing_from_held_sources": {
+        "stated_dose": "Dose not stated in the held chapter",
+        "source_document_id": "ICMR-STG-2022-23",
+        "verbatim_passage": "Cellulitis | S.pyogenes S.aureus | Cefazolin",
+        "source_page": null,
+        "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+        "attribution_basis": "OPERATOR_ATTESTATION",
+        "prior_edition_cross_reference": {
+          "document_id": "ICMR-STG-2019-ED2",
+          "page": 61,
+          "section": "6.1 Introduction",
+          "text_continuity_score": 1.0,
+          "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+        }
+      },
+      "unverified_sources": []
+    },
+    "cefotaxime": {
+      "name": "Cefotaxime",
+      "class": "3rd Generation Cephalosporin",
+      "super_class": "Cephalosporins",
+      "route": "IV",
+      "aware_category": "WATCH",
+      "aware_category_source": "who_aware_classification_2023.json (member list held in this repository)",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "hepatic_dosing",
+        "pregnancy_category",
+        "lactation_safety",
+        "pediatric_dosing_safety_review",
+        "interactions"
+      ],
+      "coverage_note": "Added from the ICMR Treatment Guidelines 2022-23 edition (operator-attested), which states the indication and dose only. The fields listed in coverage_gaps are not stated in any document held by this repository and have NOT been supplied from memory. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "Acute bacterial meningitis in solid organ transplant",
+        "Healthcare associated meningitis - non ESBL gram negative",
+        "Brain abscess or subdural empyema"
+      ],
+      "dosing_from_held_sources": {
+        "stated_dose": "2 gm 6 hourly (adult); 50 mg/kg 6 hourly (paediatric) in CNS infection",
+        "source_document_id": "ICMR-STG-2022-23",
+        "verbatim_passage": "Cefotaxime 2 gm 6 hourly 50 mg/kg 6 hourly",
+        "source_page": null,
+        "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+        "attribution_basis": "OPERATOR_ATTESTATION",
+        "prior_edition_cross_reference": {
+          "document_id": "ICMR-STG-2019-ED2",
+          "page": 88,
+          "section": "7.2.6 Management",
+          "text_continuity_score": 1.0,
+          "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+        }
+      },
+      "unverified_sources": []
+    },
+    "ceftazidime": {
+      "name": "Ceftazidime",
+      "class": "3rd Generation Cephalosporin (antipseudomonal)",
+      "super_class": "Cephalosporins",
+      "route": "IV",
+      "aware_category": "WATCH",
+      "aware_category_source": "who_aware_classification_2023.json (member list held in this repository)",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "hepatic_dosing",
+        "pregnancy_category",
+        "lactation_safety",
+        "pediatric_dosing_safety_review",
+        "interactions"
+      ],
+      "coverage_note": "Added from the ICMR Treatment Guidelines 2022-23 edition (operator-attested), which states the indication and dose only. The fields listed in coverage_gaps are not stated in any document held by this repository and have NOT been supplied from memory. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "CLABSI due to carbapenem sensitive Pseudomonas",
+        "Burkholderia cepacia complex",
+        "Healthcare associated meningitis - non ESBL gram negative"
+      ],
+      "dosing_from_held_sources": {
+        "stated_dose": "2 g IV q8h; 2 gm q 6-8 hourly (adult) and 50 mg/kg 8 hourly (paediatric) in CNS infection",
+        "source_document_id": "ICMR-STG-2022-23",
+        "verbatim_passage": "Ceftazidime 2 g IV q8h",
+        "source_page": null,
+        "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+        "attribution_basis": "OPERATOR_ATTESTATION",
+        "prior_edition_cross_reference": {
+          "document_id": "ICMR-STG-2019-ED2",
+          "page": 114,
+          "section": "10.4.2 When to suspect",
+          "text_continuity_score": 1.0,
+          "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+        }
+      },
+      "unverified_sources": []
+    },
+    "cefepime": {
+      "name": "Cefepime",
+      "class": "4th Generation Cephalosporin",
+      "super_class": "Cephalosporins",
+      "route": "IV",
+      "aware_category": "WATCH",
+      "aware_category_source": "who_aware_classification_2023.json (member list held in this repository)",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "hepatic_dosing",
+        "pregnancy_category",
+        "lactation_safety",
+        "pediatric_dosing_safety_review",
+        "interactions"
+      ],
+      "coverage_note": "Added from the ICMR Treatment Guidelines 2022-23 edition (operator-attested), which states the indication and dose only. The fields listed in coverage_gaps are not stated in any document held by this repository and have NOT been supplied from memory. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "CLABSI due to carbapenem sensitive Pseudomonas"
+      ],
+      "dosing_from_held_sources": {
+        "stated_dose": "2 g IV q8h; 2 gm 8-12 hourly (adult) and 50 mg/kg 12 hourly (paediatric) in CNS infection",
+        "source_document_id": "ICMR-STG-2022-23",
+        "verbatim_passage": "Cefepime 2 g IV q8h",
+        "source_page": null,
+        "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+        "attribution_basis": "OPERATOR_ATTESTATION",
+        "prior_edition_cross_reference": {
+          "document_id": "ICMR-STG-2019-ED2",
+          "page": 114,
+          "section": "10.4.2 When to suspect",
+          "text_continuity_score": 1.0,
+          "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+        }
+      },
+      "unverified_sources": []
+    },
+    "cefoperazone_sulbactam": {
+      "name": "Cefoperazone-sulbactam",
+      "class": "3rd Generation Cephalosporin with beta-lactamase inhibitor",
+      "super_class": "Cephalosporins",
+      "route": "IV",
+      "aware_category": "NOT_APPLICABLE",
+      "aware_category_source": "Not classified in any AWaRe source held by this repository. Treated as NOT_APPLICABLE so that no stewardship rule fires on an unverified group assignment.",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "hepatic_dosing",
+        "pregnancy_category",
+        "lactation_safety",
+        "pediatric_dosing_safety_review",
+        "interactions"
+      ],
+      "coverage_note": "Added from the ICMR Treatment Guidelines 2022-23 edition (operator-attested), which states the indication and dose only. The fields listed in coverage_gaps are not stated in any document held by this repository and have NOT been supplied from memory. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "Community acquired intra-abdominal infection of mild to moderate severity - first choice",
+        "Spontaneous bacterial peritonitis - first choice",
+        "Liver abscess",
+        "Empiric HAP/VAP - early onset",
+        "CLABSI due to carbapenem sensitive E. coli or Klebsiella",
+        "CA-UTI post solid organ transplant"
+      ],
+      "dosing_from_held_sources": {
+        "stated_dose": "(2:1) IV 3 g q12h; 3 g IV q12h in CA-UTI post transplant",
+        "source_document_id": "ICMR-STG-2022-23",
+        "verbatim_passage": "Cefoperazone Sulbactam(2:l) IV 3 g q12 h",
+        "source_page": null,
+        "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+        "attribution_basis": "OPERATOR_ATTESTATION",
+        "prior_edition_cross_reference": {
+          "document_id": "ICMR-STG-2019-ED2",
+          "page": 113,
+          "section": "10.4.2 When to suspect",
+          "text_continuity_score": 1.0,
+          "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+        }
+      },
+      "unverified_sources": [],
+      "aware_classification_status": "NOT_ESTABLISHED_IN_HELD_SOURCES"
+    },
+    "ampicillin": {
+      "name": "Ampicillin",
+      "class": "Aminopenicillin",
+      "super_class": "Penicillins",
+      "route": "IV",
+      "aware_category": "ACCESS",
+      "aware_category_source": "who_aware_classification_2023.json (member list held in this repository)",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "hepatic_dosing",
+        "pregnancy_category",
+        "lactation_safety",
+        "pediatric_dosing_safety_review",
+        "interactions"
+      ],
+      "coverage_note": "Added from the ICMR Treatment Guidelines 2022-23 edition (operator-attested), which states the indication and dose only. The fields listed in coverage_gaps are not stated in any document held by this repository and have NOT been supplied from memory. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "Acute bacterial meningitis in solid organ transplant - added for Listeria cover"
+      ],
+      "dosing_from_held_sources": {
+        "stated_dose": "Dose not stated in the held chapter",
+        "source_document_id": "ICMR-STG-2022-23",
+        "verbatim_passage": "Ceftriaxone or cefotaxime plus ampicillin (for listeria) Plus vancomycin",
+        "source_page": null,
+        "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+        "attribution_basis": "OPERATOR_ATTESTATION",
+        "prior_edition_cross_reference": {
+          "document_id": "ICMR-STG-2019-ED2",
+          "page": 139,
+          "section": "11.2 Solid organ transplant",
+          "text_continuity_score": 1.0,
+          "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+        }
+      },
+      "unverified_sources": [],
+      "clinical_notes_from_held_sources": "Added specifically for Listeria monocytogenes cover in meningitis. The guideline states that if the patient is penicillin allergic, cotrimoxazole (TMP component) or meropenem should be used to cover Listeria instead."
+    },
+    "ampicillin_sulbactam": {
+      "name": "Ampicillin-sulbactam",
+      "class": "Aminopenicillin with beta-lactamase inhibitor",
+      "super_class": "Penicillins",
+      "route": "IV",
+      "aware_category": "NOT_APPLICABLE",
+      "aware_category_source": "Not classified in any AWaRe source held by this repository. Treated as NOT_APPLICABLE so that no stewardship rule fires on an unverified group assignment.",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "hepatic_dosing",
+        "pregnancy_category",
+        "lactation_safety",
+        "pediatric_dosing_safety_review",
+        "interactions"
+      ],
+      "coverage_note": "Added from the ICMR Treatment Guidelines 2022-23 edition (operator-attested), which states the indication and dose only. The fields listed in coverage_gaps are not stated in any document held by this repository and have NOT been supplied from memory. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "Skin abscess",
+        "Peri-tonsillar abscess (Quinsy)",
+        "Suppurative parotitis",
+        "Ludwig's angina",
+        "Odontogenic deep neck space infection"
+      ],
+      "dosing_from_held_sources": {
+        "stated_dose": "Dose not stated in the held chapter",
+        "source_document_id": "ICMR-STG-2022-23",
+        "verbatim_passage": "Clindamycin OR Ampicillin-sulbactum OR Amoxicillin-clavulanate",
+        "source_page": null,
+        "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+        "attribution_basis": "OPERATOR_ATTESTATION",
+        "prior_edition_cross_reference": {
+          "document_id": "ICMR-STG-2019-ED2",
+          "page": 63,
+          "section": "6.3 Deep neck space infections",
+          "text_continuity_score": 1.0,
+          "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+        }
+      },
+      "unverified_sources": [],
+      "aware_classification_status": "NOT_ESTABLISHED_IN_HELD_SOURCES"
+    },
+    "benzathine_penicillin": {
+      "name": "Benzathine penicillin",
+      "class": "Natural penicillin (long-acting)",
+      "super_class": "Penicillins",
+      "route": "IM",
+      "aware_category": "ACCESS",
+      "aware_category_source": "who_aware_classification_2023.json (member list held in this repository)",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "hepatic_dosing",
+        "pregnancy_category",
+        "lactation_safety",
+        "pediatric_dosing_safety_review",
+        "interactions"
+      ],
+      "coverage_note": "Added from the ICMR Treatment Guidelines 2022-23 edition (operator-attested), which states the indication and dose only. The fields listed in coverage_gaps are not stated in any document held by this repository and have NOT been supplied from memory. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "Acute bacterial pharyngitis"
+      ],
+      "dosing_from_held_sources": {
+        "stated_dose": "Dose not stated in the held chapter",
+        "source_document_id": "ICMR-STG-2022-23",
+        "verbatim_passage": "Acute bacterial pharyngitis Streptococcus pyogenes Benzathine penicillin or amoxycillin",
+        "source_page": null,
+        "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+        "attribution_basis": "OPERATOR_ATTESTATION",
+        "prior_edition_cross_reference": {
+          "document_id": "ICMR-STG-2019-ED2",
+          "page": 140,
+          "section": "11.2 Solid organ transplant",
+          "text_continuity_score": 1.0,
+          "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+        }
+      },
+      "unverified_sources": [],
+      "clinical_notes_from_held_sources": "The guideline notes most pharyngitis is viral and bacterial etiology should be confirmed before antibiotic treatment."
+    },
+    "imipenem": {
+      "name": "Imipenem-cilastatin",
+      "class": "Carbapenem",
+      "super_class": "Carbapenems",
+      "route": "IV",
+      "aware_category": "WATCH",
+      "aware_category_source": "who_aware_classification_2023.json (member list held in this repository)",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "hepatic_dosing",
+        "pregnancy_category",
+        "lactation_safety",
+        "pediatric_dosing_safety_review",
+        "interactions"
+      ],
+      "coverage_note": "Added from the ICMR Treatment Guidelines 2022-23 edition (operator-attested), which states the indication and dose only. The fields listed in coverage_gaps are not stated in any document held by this repository and have NOT been supplied from memory. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "Community acquired intra-abdominal infection with high severity",
+        "Healthcare associated intra-abdominal infection",
+        "Infected pancreatic necrosis",
+        "Acute pyelonephritis - alternative",
+        "Acute prostatitis - alternative",
+        "Empiric HAP/VAP - late onset",
+        "Pneumonia in solid organ transplant - alternative"
+      ],
+      "dosing_from_held_sources": {
+        "stated_dose": "1 g IV q8h (500 mg q6h stated in the transcription only)",
+        "source_document_id": "ICMR-STG-2022-23",
+        "verbatim_passage": "Imipenem- cilastatin 1g IV q8h or Ertapenam 1 g IV q24hr /Meropenem 1g IV q8h",
+        "source_page": null,
+        "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+        "attribution_basis": "OPERATOR_ATTESTATION",
+        "prior_edition_cross_reference": {
+          "document_id": "ICMR-STG-2019-ED2",
+          "page": 127,
+          "section": "10.7.8 Antimicrobial Therapy",
+          "text_continuity_score": 1.0,
+          "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+        }
+      },
+      "unverified_sources": [],
+      "clinical_notes_from_held_sources": "High dose imipenem may be combined with colistin when imipenem MICs are favourable."
+    },
+    "ertapenem": {
+      "name": "Ertapenem",
+      "class": "Carbapenem (group 1)",
+      "super_class": "Carbapenems",
+      "route": "IV",
+      "aware_category": "NOT_APPLICABLE",
+      "aware_category_source": "Not classified in any AWaRe source held by this repository. Treated as NOT_APPLICABLE so that no stewardship rule fires on an unverified group assignment.",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "hepatic_dosing",
+        "pregnancy_category",
+        "lactation_safety",
+        "pediatric_dosing_safety_review",
+        "interactions"
+      ],
+      "coverage_note": "Added from the ICMR Treatment Guidelines 2022-23 edition (operator-attested), which states the indication and dose only. The fields listed in coverage_gaps are not stated in any document held by this repository and have NOT been supplied from memory. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "Acute cystitis - alternative",
+        "Acute pyelonephritis - alternative",
+        "Acute prostatitis - drug of choice",
+        "CA-UTI in severely ill patients"
+      ],
+      "dosing_from_held_sources": {
+        "stated_dose": "1 g IV once daily (q24hr)",
+        "source_document_id": "ICMR-STG-2022-23",
+        "verbatim_passage": "Ertapenem 1 g IV once daily",
+        "source_page": null,
+        "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+        "attribution_basis": "OPERATOR_ATTESTATION",
+        "prior_edition_cross_reference": {
+          "document_id": "ICMR-STG-2019-ED2",
+          "page": 94,
+          "section": "9.1.4 Common organisms causing UTI (As per ICMR - AMRSN data 2017)",
+          "text_continuity_score": 1.0,
+          "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+        }
+      },
+      "unverified_sources": [],
+      "aware_classification_status": "NOT_ESTABLISHED_IN_HELD_SOURCES"
+    },
+    "aztreonam": {
+      "name": "Aztreonam",
+      "class": "Monobactam",
+      "super_class": "Monobactams",
+      "route": "IV",
+      "aware_category": "NOT_APPLICABLE",
+      "aware_category_source": "Not classified in any AWaRe source held by this repository. Treated as NOT_APPLICABLE so that no stewardship rule fires on an unverified group assignment.",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "hepatic_dosing",
+        "pregnancy_category",
+        "lactation_safety",
+        "pediatric_dosing_safety_review",
+        "interactions"
+      ],
+      "coverage_note": "Added from the ICMR Treatment Guidelines 2022-23 edition (operator-attested), which states the indication and dose only. The fields listed in coverage_gaps are not stated in any document held by this repository and have NOT been supplied from memory. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "Surgical antimicrobial prophylaxis - may be combined with clindamycin or vancomycin as an additional agent",
+        "HAP/VAP with ceftazidime-avibactam is stated ONLY in the operator-supplied transcription and is NOT present in the held ICMR 2019 document"
+      ],
+      "dosing_from_held_sources": {
+        "stated_dose": "Dose not stated in the held document",
+        "source_document_id": "ICMR-STG-2022-23",
+        "verbatim_passage": "practitioners may consider combining clindamycin or vancomycin with another agent like cefazolin, aztreonam",
+        "source_page": null,
+        "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+        "attribution_basis": "OPERATOR_ATTESTATION",
+        "prior_edition_cross_reference": {
+          "document_id": "ICMR-STG-2019-ED2",
+          "page": 103,
+          "section": "10.3.2 Criteria for defining a Surgical Site Infection (SSI)",
+          "text_continuity_score": 1.0,
+          "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+        }
+      },
+      "unverified_sources": [],
+      "aware_classification_status": "NOT_ESTABLISHED_IN_HELD_SOURCES",
+      "clinical_notes_from_held_sources": "A monobactam: it does not share the bicyclic beta-lactam structure of penicillins and cephalosporins. The held chapter makes no statement about its use in beta-lactam allergy, so none is recorded here."
+    },
+    "ceftazidime_avibactam": {
+      "name": "Ceftazidime-avibactam",
+      "class": "Cephalosporin with beta-lactamase inhibitor",
+      "super_class": "Cephalosporins",
+      "route": "IV",
+      "aware_category": "RESERVE",
+      "aware_category_source": "who_aware_classification_2023.json (member list held in this repository)",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "hepatic_dosing",
+        "pregnancy_category",
+        "lactation_safety",
+        "pediatric_dosing_safety_review",
+        "interactions"
+      ],
+      "coverage_note": "Added from the ICMR Treatment Guidelines 2022-23 edition (operator-attested), which states the indication and dose only. The fields listed in coverage_gaps are not stated in any document held by this repository and have NOT been supplied from memory. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "Empiric HAP/VAP - late onset or prior antibiotic exposure, combined with aztreonam"
+      ],
+      "dosing_from_held_sources": {
+        "stated_dose": "Dose not stated in the held chapter",
+        "source_document_id": "ICMR-STG-2022-23",
+        "verbatim_passage": "Ceftazidime-Avibactam + Aztreonam",
+        "source_page": null,
+        "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+        "attribution_basis": "OPERATOR_ATTESTATION",
+        "prior_edition_cross_reference": null,
+        "edition_note": "This passage could not be located in the 2019 edition. It is most likely new or revised content introduced in the 2022-23 edition. No prior-edition cross-reference exists for it."
+      },
+      "unverified_sources": [],
+      "clinical_notes_from_held_sources": "RESERVE group agent: requires pre-authorization and microbiology confirmation."
+    },
+    "faropenem": {
+      "name": "Faropenem",
+      "class": "Oral penem",
+      "super_class": "Penems",
+      "route": "Oral",
+      "aware_category": "NOT_APPLICABLE",
+      "aware_category_source": "Not classified in any AWaRe source held by this repository. Treated as NOT_APPLICABLE so that no stewardship rule fires on an unverified group assignment.",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "hepatic_dosing",
+        "pregnancy_category",
+        "lactation_safety",
+        "pediatric_dosing_safety_review",
+        "interactions"
+      ],
+      "coverage_note": "Added from the ICMR Treatment Guidelines 2022-23 edition (operator-attested), which states the indication and dose only. The fields listed in coverage_gaps are not stated in any document held by this repository and have NOT been supplied from memory. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "Named only to be RESTRICTED: the guideline states faropenem should NOT be used as step-down therapy in VAP/HAP susceptible to carbapenems"
+      ],
+      "dosing_from_held_sources": {
+        "stated_dose": "Not recommended as step-down therapy",
+        "source_document_id": "ICMR-STG-2022-23",
+        "verbatim_passage": "Faropenem should not be used as a step-down therapy in VAP/HAP susceptible to Carbapenems",
+        "source_page": null,
+        "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+        "attribution_basis": "OPERATOR_ATTESTATION",
+        "prior_edition_cross_reference": {
+          "document_id": "ICMR-STG-2019-ED2",
+          "page": 119,
+          "section": "10.5 Pneumonia",
+          "text_continuity_score": 1.0,
+          "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+        }
+      },
+      "unverified_sources": [],
+      "aware_classification_status": "NOT_ESTABLISHED_IN_HELD_SOURCES",
+      "clinical_notes_from_held_sources": "This drug appears in the guideline as a NEGATIVE recommendation only. It is recorded so that a prescription of faropenem for step-down therapy in carbapenem-susceptible VAP/HAP can be recognised as contrary to the held guidance."
+    },
+    "amikacin": {
+      "name": "Amikacin",
+      "class": "Aminoglycoside",
+      "super_class": "Aminoglycosides",
+      "route": "IV / IM",
+      "aware_category": "NOT_APPLICABLE",
+      "aware_category_source": "Not classified in any AWaRe source held by this repository. Treated as NOT_APPLICABLE so that no stewardship rule fires on an unverified group assignment.",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "hepatic_dosing",
+        "pregnancy_category",
+        "lactation_safety",
+        "pediatric_dosing_safety_review",
+        "interactions"
+      ],
+      "coverage_note": "Added from the ICMR Treatment Guidelines 2022-23 edition (operator-attested), which states the indication and dose only. The fields listed in coverage_gaps are not stated in any document held by this repository and have NOT been supplied from memory. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "Acute cystitis - alternative (can be used in children as well)",
+        "Acute pyelonephritis - alternative (recommended for children as well)",
+        "CA-UTI not severely ill",
+        "Febrile neutropenia - first line with piperacillin-tazobactam",
+        "Empiric HAP/VAP as a second agent"
+      ],
+      "dosing_from_held_sources": {
+        "stated_dose": "15 mg/kg single dose in CA-UTI; 5-50 mg by intrathecal/intraventricular route in CSF shunt infection",
+        "source_document_id": "ICMR-STG-2022-23",
+        "verbatim_passage": "Amikacin 15 mg/kg single dose",
+        "source_page": null,
+        "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+        "attribution_basis": "OPERATOR_ATTESTATION",
+        "prior_edition_cross_reference": {
+          "document_id": "ICMR-STG-2019-ED2",
+          "page": 127,
+          "section": "10.7.8 Antimicrobial Therapy",
+          "text_continuity_score": 1.0,
+          "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+        }
+      },
+      "unverified_sources": [],
+      "aware_classification_status": "NOT_ESTABLISHED_IN_HELD_SOURCES",
+      "clinical_notes_from_held_sources": "Amikacin retains activity against ESBL-producing strains and can be considered as a carbapenem-sparing option. Levofloxacin 750 mg IV q24h may be used as an alternative to amikacin as a second anti-pseudomonal agent."
+    },
+    "teicoplanin": {
+      "name": "Teicoplanin",
+      "class": "Glycopeptide",
+      "super_class": "Glycopeptides",
+      "route": "IV",
+      "aware_category": "NOT_APPLICABLE",
+      "aware_category_source": "Not classified in any AWaRe source held by this repository. Treated as NOT_APPLICABLE so that no stewardship rule fires on an unverified group assignment.",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "hepatic_dosing",
+        "pregnancy_category",
+        "lactation_safety",
+        "pediatric_dosing_safety_review",
+        "interactions"
+      ],
+      "coverage_note": "Added from the ICMR Treatment Guidelines 2022-23 edition (operator-attested), which states the indication and dose only. The fields listed in coverage_gaps are not stated in any document held by this repository and have NOT been supplied from memory. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "MRSA HAP/VAP - alternative",
+        "Febrile neutropenia - second and third line",
+        "Blood stream, catheter, skin, intra-abdominal and urinary infection in the transplant setting"
+      ],
+      "dosing_from_held_sources": {
+        "stated_dose": "Dose not stated in the held document; named as an alternative to vancomycin",
+        "source_document_id": "ICMR-STG-2022-23",
+        "verbatim_passage": "Meropenem or Cefoperazone -Sulbactam +/- Amikacin +/- Vancomycin or Teicoplanin",
+        "source_page": null,
+        "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+        "attribution_basis": "OPERATOR_ATTESTATION",
+        "prior_edition_cross_reference": {
+          "document_id": "ICMR-STG-2019-ED2",
+          "page": 37,
+          "section": "3.4 Diagnosis",
+          "text_continuity_score": 1.0,
+          "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+        }
+      },
+      "unverified_sources": [],
+      "aware_classification_status": "NOT_ESTABLISHED_IN_HELD_SOURCES",
+      "clinical_notes_from_held_sources": "If blood cultures are negative at 3 days following initiation of antibiotic, teicoplanin or vancomycin may be discontinued in febrile neutropenia."
+    },
+    "moxifloxacin": {
+      "name": "Moxifloxacin",
+      "class": "Fluoroquinolone",
+      "super_class": "Fluoroquinolones",
+      "route": "IV / Oral",
+      "aware_category": "WATCH",
+      "aware_category_source": "who_aware_classification_2023.json (member list held in this repository)",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "hepatic_dosing",
+        "pregnancy_category",
+        "lactation_safety",
+        "pediatric_dosing_safety_review",
+        "interactions"
+      ],
+      "coverage_note": "Added from the ICMR Treatment Guidelines 2022-23 edition (operator-attested), which states the indication and dose only. The fields listed in coverage_gaps are not stated in any document held by this repository and have NOT been supplied from memory. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "Healthcare associated meningitis - ESBL gram negative alternative",
+        "Acute bacterial meningitis in solid organ transplant - alternative"
+      ],
+      "dosing_from_held_sources": {
+        "stated_dose": "Dose not stated in the held chapter",
+        "source_document_id": "ICMR-STG-2022-23",
+        "verbatim_passage": "ESBL gram negative Meropenem Cotrimoxazole/ Moxifloxacin",
+        "source_page": null,
+        "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+        "attribution_basis": "OPERATOR_ATTESTATION",
+        "prior_edition_cross_reference": {
+          "document_id": "ICMR-STG-2019-ED2",
+          "page": 87,
+          "section": "7.2.6 Management",
+          "text_continuity_score": 1.0,
+          "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+        }
+      },
+      "unverified_sources": [],
+      "clinical_notes_from_held_sources": "The guideline advises avoiding fluoroquinolones in transplant pneumonia unless tuberculosis has been excluded."
+    },
+    "ofloxacin": {
+      "name": "Ofloxacin",
+      "class": "Fluoroquinolone",
+      "super_class": "Fluoroquinolones",
+      "route": "Oral",
+      "aware_category": "NOT_APPLICABLE",
+      "aware_category_source": "Not classified in any AWaRe source held by this repository. Treated as NOT_APPLICABLE so that no stewardship rule fires on an unverified group assignment.",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "hepatic_dosing",
+        "pregnancy_category",
+        "lactation_safety",
+        "pediatric_dosing_safety_review",
+        "interactions"
+      ],
+      "coverage_note": "Added from the ICMR Treatment Guidelines 2022-23 edition (operator-attested), which states the indication and dose only. The fields listed in coverage_gaps are not stated in any document held by this repository and have NOT been supplied from memory. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "Epididymo-orchitis, high risk of sexually transmitted - alternative",
+        "Epididymo-orchitis, low risk - drug of choice"
+      ],
+      "dosing_from_held_sources": {
+        "stated_dose": "Dose not stated in the held chapter",
+        "source_document_id": "ICMR-STG-2022-23",
+        "verbatim_passage": "Epididymo-orchitis (Low risk of sexually transmitted; likely due to enteric or urinary organisms) Ofloxacin",
+        "source_page": null,
+        "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+        "attribution_basis": "OPERATOR_ATTESTATION",
+        "prior_edition_cross_reference": {
+          "document_id": "ICMR-STG-2019-ED2",
+          "page": 95,
+          "section": "9.1.4 Common organisms causing UTI (As per ICMR - AMRSN data 2017)",
+          "text_continuity_score": 0.727,
+          "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+        }
+      },
+      "unverified_sources": [],
+      "aware_classification_status": "NOT_ESTABLISHED_IN_HELD_SOURCES"
+    },
+    "norfloxacin": {
+      "name": "Norfloxacin",
+      "class": "Fluoroquinolone",
+      "super_class": "Fluoroquinolones",
+      "route": "Oral",
+      "aware_category": "NOT_APPLICABLE",
+      "aware_category_source": "Not classified in any AWaRe source held by this repository. Treated as NOT_APPLICABLE so that no stewardship rule fires on an unverified group assignment.",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "hepatic_dosing",
+        "pregnancy_category",
+        "lactation_safety",
+        "pediatric_dosing_safety_review",
+        "interactions"
+      ],
+      "coverage_note": "Added from the ICMR Treatment Guidelines 2022-23 edition (operator-attested), which states the indication and dose only. The fields listed in coverage_gaps are not stated in any document held by this repository and have NOT been supplied from memory. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "Aeromonas enteritis - alternative"
+      ],
+      "dosing_from_held_sources": {
+        "stated_dose": "400 mg b.i.d for 3 days",
+        "source_document_id": "ICMR-STG-2022-23",
+        "verbatim_passage": "Norfloxacin  400 mg, b.i.d for 3 days",
+        "source_page": null,
+        "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+        "attribution_basis": "OPERATOR_ATTESTATION",
+        "prior_edition_cross_reference": {
+          "document_id": "ICMR-STG-2019-ED2",
+          "page": 58,
+          "section": "5.3.5 Treatment",
+          "text_continuity_score": 1.0,
+          "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+        }
+      },
+      "unverified_sources": [],
+      "aware_classification_status": "NOT_ESTABLISHED_IN_HELD_SOURCES",
+      "clinical_notes_from_held_sources": "The guideline states norfloxacin prophylaxis for SBP reported in western literature is unlikely to be useful in India, where resistance prevalence exceeds 20% even for community acquired isolates."
+    },
+    "colistin": {
+      "name": "Colistin",
+      "class": "Polymyxin",
+      "super_class": "Polymyxins",
+      "route": "IV / Nebulized / Intrathecal",
+      "aware_category": "RESERVE",
+      "aware_category_source": "who_aware_classification_2023.json (member list held in this repository)",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "hepatic_dosing",
+        "pregnancy_category",
+        "lactation_safety",
+        "pediatric_dosing_safety_review",
+        "interactions"
+      ],
+      "coverage_note": "Added from the ICMR Treatment Guidelines 2022-23 edition (operator-attested), which states the indication and dose only. The fields listed in coverage_gaps are not stated in any document held by this repository and have NOT been supplied from memory. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "Healthcare associated intra-abdominal infection with MDR organisms",
+        "Carbapenem resistant healthcare associated meningitis and ventriculitis",
+        "Empiric HAP/VAP where carbapenem resistance is >20%",
+        "Febrile neutropenia third line or septic shock"
+      ],
+      "dosing_from_held_sources": {
+        "stated_dose": "9 million unit loading then 4.5 million units 12 hourly (adult); 150,000 units/kg loading then 75000 units/kg 12 hourly (paediatric); 10-20 mg intrathecal/intraventricular",
+        "source_document_id": "ICMR-STG-2022-23",
+        "verbatim_passage": "Colistin 9 million unit loading and then 4.5 million units 12 hourly",
+        "source_page": null,
+        "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+        "attribution_basis": "OPERATOR_ATTESTATION",
+        "prior_edition_cross_reference": {
+          "document_id": "ICMR-STG-2019-ED2",
+          "page": 88,
+          "section": "7.2.6 Management",
+          "text_continuity_score": 1.0,
+          "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+        }
+      },
+      "unverified_sources": [],
+      "clinical_notes_from_held_sources": "Colistin and polymyxin B should be used only when there is resistance to all the other tested antibiotics. Consider adding nebulized colistin for carbapenem resistant organisms along with IV colistin. Empiric use in CA-UTI is preferably avoided."
+    },
+    "polymyxin_b": {
+      "name": "Polymyxin B",
+      "class": "Polymyxin",
+      "super_class": "Polymyxins",
+      "route": "IV / Intrathecal",
+      "aware_category": "RESERVE",
+      "aware_category_source": "who_aware_classification_2023.json (member list held in this repository)",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "hepatic_dosing",
+        "pregnancy_category",
+        "lactation_safety",
+        "pediatric_dosing_safety_review",
+        "interactions"
+      ],
+      "coverage_note": "Added from the ICMR Treatment Guidelines 2022-23 edition (operator-attested), which states the indication and dose only. The fields listed in coverage_gaps are not stated in any document held by this repository and have NOT been supplied from memory. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "Carbapenem resistant gram negative infection",
+        "Healthcare associated pneumonia in the transplant setting",
+        "Carbapenem resistant meningitis and ventriculitis"
+      ],
+      "dosing_from_held_sources": {
+        "stated_dose": "20000-25000 units/kg loading then 12500 to 15000 units/kg 12 hourly, single dose not to exceed 20,00,000 units (adult); 15-25,000 units/kg loading then 5000-7500 units/kg 8 hourly (paediatric); 50,000 units intrathecal",
+        "source_document_id": "ICMR-STG-2022-23",
+        "verbatim_passage": "Polymyxin B 20000- 25000 units/kg loading and then 12500 to 15000 units/kg 12 hourly",
+        "source_page": null,
+        "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+        "attribution_basis": "OPERATOR_ATTESTATION",
+        "prior_edition_cross_reference": {
+          "document_id": "ICMR-STG-2019-ED2",
+          "page": 88,
+          "section": "7.2.6 Management",
+          "text_continuity_score": 1.0,
+          "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+        }
+      },
+      "unverified_sources": [],
+      "clinical_notes_from_held_sources": "Should be used only when there is resistance to all the other tested antibiotics."
+    },
+    "tigecycline": {
+      "name": "Tigecycline",
+      "class": "Glycylcycline",
+      "super_class": "Tetracyclines",
+      "route": "IV",
+      "aware_category": "RESERVE",
+      "aware_category_source": "who_aware_classification_2023.json (member list held in this repository)",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "hepatic_dosing",
+        "pregnancy_category",
+        "lactation_safety",
+        "pediatric_dosing_safety_review",
+        "interactions"
+      ],
+      "coverage_note": "Added from the ICMR Treatment Guidelines 2022-23 edition (operator-attested), which states the indication and dose only. The fields listed in coverage_gaps are not stated in any document held by this repository and have NOT been supplied from memory. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "Healthcare associated intra-abdominal infection with MDR organisms",
+        "Carbapenem resistant healthcare associated meningitis (high dose)",
+        "Febrile neutropenia third line"
+      ],
+      "dosing_from_held_sources": {
+        "stated_dose": "Dose not stated in the held chapter",
+        "source_document_id": "ICMR-STG-2022-23",
+        "verbatim_passage": "Colistin, Tigecyline",
+        "source_page": null,
+        "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+        "attribution_basis": "OPERATOR_ATTESTATION",
+        "prior_edition_cross_reference": {
+          "document_id": "ICMR-STG-2019-ED2",
+          "page": 53,
+          "section": "5.1.2 Organisms involved",
+          "text_continuity_score": 1.0,
+          "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+        }
+      },
+      "unverified_sources": [],
+      "clinical_notes_from_held_sources": "The guideline states tigecycline is NOT recommended routinely in the treatment of VAP."
+    },
+    "fosfomycin": {
+      "name": "Fosfomycin",
+      "class": "Phosphonic acid derivative",
+      "super_class": "Fosfomycins",
+      "route": "Oral / IV",
+      "aware_category": "NOT_APPLICABLE",
+      "aware_category_source": "Not classified in any AWaRe source held by this repository. Treated as NOT_APPLICABLE so that no stewardship rule fires on an unverified group assignment.",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "hepatic_dosing",
+        "pregnancy_category",
+        "lactation_safety",
+        "pediatric_dosing_safety_review",
+        "interactions"
+      ],
+      "coverage_note": "Added from the ICMR Treatment Guidelines 2022-23 edition (operator-attested), which states the indication and dose only. The fields listed in coverage_gaps are not stated in any document held by this repository and have NOT been supplied from memory. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "Acute cystitis - drug of choice",
+        "CA-UTI not severely ill",
+        "Carbapenem resistant healthcare associated meningitis",
+        "Febrile neutropenia third line"
+      ],
+      "dosing_from_held_sources": {
+        "stated_dose": "3 g PO once stat in CA-UTI; 4 gm 6 hourly (adult) and 75-100 mg/kg/dose 6 hourly (paediatric) in CNS infection",
+        "source_document_id": "ICMR-STG-2022-23",
+        "verbatim_passage": "Fosfomycin 3 g PO once stat",
+        "source_page": null,
+        "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+        "attribution_basis": "OPERATOR_ATTESTATION",
+        "prior_edition_cross_reference": {
+          "document_id": "ICMR-STG-2019-ED2",
+          "page": 127,
+          "section": "10.7.8 Antimicrobial Therapy",
+          "text_continuity_score": 1.0,
+          "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+        }
+      },
+      "unverified_sources": [],
+      "aware_classification_status": "NOT_ESTABLISHED_IN_HELD_SOURCES",
+      "clinical_notes_from_held_sources": "Fosfomycin susceptibility is to be requested for, and used only for Gram-negative MDR organisms. It should be avoided when there is suspicion of pyelonephritis or prostatitis. For creatinine clearances of 40, 30, 20 and 10 ml/min a reduction to 70%, 60%, 40% and 20% of the daily recommended dose respectively is proposed. Consider only where colistin resistant Klebsiella/E. coli/Enterobacter are suspected in febrile neutropenia."
+    },
+    "chloramphenicol": {
+      "name": "Chloramphenicol",
+      "class": "Amphenicol",
+      "super_class": "Amphenicols",
+      "route": "IV / Oral",
+      "aware_category": "NOT_APPLICABLE",
+      "aware_category_source": "Not classified in any AWaRe source held by this repository. Treated as NOT_APPLICABLE so that no stewardship rule fires on an unverified group assignment.",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "hepatic_dosing",
+        "pregnancy_category",
+        "lactation_safety",
+        "pediatric_dosing_safety_review",
+        "interactions"
+      ],
+      "coverage_note": "Added from the ICMR Treatment Guidelines 2022-23 edition (operator-attested), which states the indication and dose only. The fields listed in coverage_gaps are not stated in any document held by this repository and have NOT been supplied from memory. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "Carbapenem resistant healthcare associated meningitis and ventriculitis - depending on susceptibility"
+      ],
+      "dosing_from_held_sources": {
+        "stated_dose": "1-2 gm 6 hourly (adult); 25 mg/kg 6 hourly (paediatric)",
+        "source_document_id": "ICMR-STG-2022-23",
+        "verbatim_passage": "Chloramphenicol 1-2 gm 6 hourly 25 mg/kg 6 hourly",
+        "source_page": null,
+        "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+        "attribution_basis": "OPERATOR_ATTESTATION",
+        "prior_edition_cross_reference": {
+          "document_id": "ICMR-STG-2019-ED2",
+          "page": 89,
+          "section": "7.2.6 Management",
+          "text_continuity_score": 1.0,
+          "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+        }
+      },
+      "unverified_sources": [],
+      "aware_classification_status": "NOT_ESTABLISHED_IN_HELD_SOURCES"
+    },
+    "rifaximin": {
+      "name": "Rifaximin",
+      "class": "Rifamycin (non-absorbable)",
+      "super_class": "Rifamycins",
+      "route": "Oral",
+      "aware_category": "NOT_APPLICABLE",
+      "aware_category_source": "Not classified in any AWaRe source held by this repository. Treated as NOT_APPLICABLE so that no stewardship rule fires on an unverified group assignment.",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "hepatic_dosing",
+        "pregnancy_category",
+        "lactation_safety",
+        "pediatric_dosing_safety_review",
+        "interactions"
+      ],
+      "coverage_note": "Added from the ICMR Treatment Guidelines 2022-23 edition (operator-attested), which states the indication and dose only. The fields listed in coverage_gaps are not stated in any document held by this repository and have NOT been supplied from memory. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "Clostridium difficile infection - second or subsequent recurrence, following vancomycin"
+      ],
+      "dosing_from_held_sources": {
+        "stated_dose": "400 mg 3 times daily for 20 days",
+        "source_document_id": "ICMR-STG-2022-23",
+        "verbatim_passage": "rifaximin 400 mg 3 times daily for 20 days",
+        "source_page": null,
+        "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+        "attribution_basis": "OPERATOR_ATTESTATION",
+        "prior_edition_cross_reference": {
+          "document_id": "ICMR-STG-2019-ED2",
+          "page": 122,
+          "section": "10.5 Pneumonia",
+          "text_continuity_score": 1.0,
+          "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+        }
+      },
+      "unverified_sources": [],
+      "aware_classification_status": "NOT_ESTABLISHED_IN_HELD_SOURCES"
+    },
+    "fluconazole": {
+      "name": "Fluconazole",
+      "class": "Triazole antifungal",
+      "super_class": "Azole Antifungals",
+      "route": "IV / Oral",
+      "aware_category": "NOT_APPLICABLE",
+      "aware_category_source": "The WHO AWaRe classification covers antibacterials. This agent is not an antibacterial and is not assigned an AWaRe group by any source held here.",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "hepatic_dosing",
+        "pregnancy_category",
+        "lactation_safety",
+        "interactions"
+      ],
+      "coverage_note": "Added from the ICMR Treatment Guidelines 2022-23 edition (operator-attested), which states the indication and dose only. The fields listed in coverage_gaps are not stated in any document held by this repository and have NOT been supplied from memory. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "Candida cover in intra-abdominal infection where risk factors are present",
+        "CLABSI due to Candida - step down",
+        "Candiduria - susceptible strains"
+      ],
+      "dosing_from_held_sources": {
+        "stated_dose": "800 mg loading then 400 mg once daily (adult); 12 mg/kg loading then 6 mg/kg daily (paediatric); 25 mg/kg loading in neonates then 12 mg/kg daily",
+        "source_document_id": "ICMR-STG-2022-23",
+        "verbatim_passage": "Fluconazole 800 mg loading and then 400 mg once daily",
+        "source_page": null,
+        "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+        "attribution_basis": "OPERATOR_ATTESTATION",
+        "prior_edition_cross_reference": {
+          "document_id": "ICMR-STG-2019-ED2",
+          "page": 89,
+          "section": "7.2.6 Management",
+          "text_continuity_score": 1.0,
+          "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+        }
+      },
+      "unverified_sources": [],
+      "aware_classification_status": "NOT_AN_ANTIBACTERIAL",
+      "clinical_notes_from_held_sources": "May be used as a preferred or step down agent after 5-7 days of initial echinocandin therapy if the isolate is susceptible, the patient has no previous azole exposure and is not critically ill."
+    },
+    "voriconazole": {
+      "name": "Voriconazole",
+      "class": "Triazole antifungal",
+      "super_class": "Azole Antifungals",
+      "route": "IV / Oral",
+      "aware_category": "NOT_APPLICABLE",
+      "aware_category_source": "The WHO AWaRe classification covers antibacterials. This agent is not an antibacterial and is not assigned an AWaRe group by any source held here.",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "hepatic_dosing",
+        "pregnancy_category",
+        "lactation_safety",
+        "interactions"
+      ],
+      "coverage_note": "Added from the ICMR Treatment Guidelines 2022-23 edition (operator-attested), which states the indication and dose only. The fields listed in coverage_gaps are not stated in any document held by this repository and have NOT been supplied from memory. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "Invasive pulmonary aspergillosis - first choice",
+        "CLABSI due to C. glabrata, C. auris, C. haemulonii or C. krusei"
+      ],
+      "dosing_from_held_sources": {
+        "stated_dose": "400 mg (6 mg/kg) q12h for 2 doses then 200 mg (3 mg/kg) q12h",
+        "source_document_id": "ICMR-STG-2022-23",
+        "verbatim_passage": "Voriconazole 400 mg (6 mg/kg) q12h for 2 doses then 200 mg (3 mg/kg ) q12h",
+        "source_page": null,
+        "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+        "attribution_basis": "OPERATOR_ATTESTATION",
+        "prior_edition_cross_reference": {
+          "document_id": "ICMR-STG-2019-ED2",
+          "page": 115,
+          "section": "10.4.2 When to suspect",
+          "text_continuity_score": 1.0,
+          "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+        }
+      },
+      "unverified_sources": [],
+      "aware_classification_status": "NOT_AN_ANTIBACTERIAL",
+      "clinical_notes_from_held_sources": "Consider voriconazole therapeutic drug level monitoring (TDM) wherever feasible. Duration in invasive pulmonary aspergillosis is approximately 6 weeks."
+    },
+    "micafungin": {
+      "name": "Micafungin",
+      "class": "Echinocandin",
+      "super_class": "Echinocandins",
+      "route": "IV",
+      "aware_category": "NOT_APPLICABLE",
+      "aware_category_source": "The WHO AWaRe classification covers antibacterials. This agent is not an antibacterial and is not assigned an AWaRe group by any source held here.",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "hepatic_dosing",
+        "pregnancy_category",
+        "lactation_safety",
+        "interactions"
+      ],
+      "coverage_note": "Added from the ICMR Treatment Guidelines 2022-23 edition (operator-attested), which states the indication and dose only. The fields listed in coverage_gaps are not stated in any document held by this repository and have NOT been supplied from memory. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "CLABSI due to Candida species - preferred",
+        "Antifungal prophylaxis in HSCT"
+      ],
+      "dosing_from_held_sources": {
+        "stated_dose": "100 mg IV daily",
+        "source_document_id": "ICMR-STG-2022-23",
+        "verbatim_passage": "Micafungin 100 mg IV daily",
+        "source_page": null,
+        "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+        "attribution_basis": "OPERATOR_ATTESTATION",
+        "prior_edition_cross_reference": {
+          "document_id": "ICMR-STG-2019-ED2",
+          "page": 115,
+          "section": "10.4.2 When to suspect",
+          "text_continuity_score": 1.0,
+          "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+        }
+      },
+      "unverified_sources": [],
+      "aware_classification_status": "NOT_AN_ANTIBACTERIAL"
+    },
+    "anidulafungin": {
+      "name": "Anidulafungin",
+      "class": "Echinocandin",
+      "super_class": "Echinocandins",
+      "route": "IV",
+      "aware_category": "NOT_APPLICABLE",
+      "aware_category_source": "The WHO AWaRe classification covers antibacterials. This agent is not an antibacterial and is not assigned an AWaRe group by any source held here.",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "hepatic_dosing",
+        "pregnancy_category",
+        "lactation_safety",
+        "interactions"
+      ],
+      "coverage_note": "Added from the ICMR Treatment Guidelines 2022-23 edition (operator-attested), which states the indication and dose only. The fields listed in coverage_gaps are not stated in any document held by this repository and have NOT been supplied from memory. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "CLABSI due to Candida species - preferred",
+        "Antifungal prophylaxis in HSCT"
+      ],
+      "dosing_from_held_sources": {
+        "stated_dose": "Loading dose 200 mg, then 100 mg daily",
+        "source_document_id": "ICMR-STG-2022-23",
+        "verbatim_passage": "Anidulafungin loading dose 200 mg, then 100 mg daily",
+        "source_page": null,
+        "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+        "attribution_basis": "OPERATOR_ATTESTATION",
+        "prior_edition_cross_reference": {
+          "document_id": "ICMR-STG-2019-ED2",
+          "page": 115,
+          "section": "10.4.2 When to suspect",
+          "text_continuity_score": 1.0,
+          "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+        }
+      },
+      "unverified_sources": [],
+      "aware_classification_status": "NOT_AN_ANTIBACTERIAL"
+    },
+    "caspofungin": {
+      "name": "Caspofungin",
+      "class": "Echinocandin",
+      "super_class": "Echinocandins",
+      "route": "IV",
+      "aware_category": "NOT_APPLICABLE",
+      "aware_category_source": "The WHO AWaRe classification covers antibacterials. This agent is not an antibacterial and is not assigned an AWaRe group by any source held here.",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "hepatic_dosing",
+        "pregnancy_category",
+        "lactation_safety",
+        "interactions"
+      ],
+      "coverage_note": "Added from the ICMR Treatment Guidelines 2022-23 edition (operator-attested), which states the indication and dose only. The fields listed in coverage_gaps are not stated in any document held by this repository and have NOT been supplied from memory. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "CLABSI due to Candida species",
+        "Febrile neutropenia third line",
+        "Mucormycosis - may be considered along with liposomal amphotericin B"
+      ],
+      "dosing_from_held_sources": {
+        "stated_dose": "Loading dose 70 mg, then 50 mg daily",
+        "source_document_id": "ICMR-STG-2022-23",
+        "verbatim_passage": "Caspofungin loading dose 70 mg, then 50 mg daily",
+        "source_page": null,
+        "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+        "attribution_basis": "OPERATOR_ATTESTATION",
+        "prior_edition_cross_reference": {
+          "document_id": "ICMR-STG-2019-ED2",
+          "page": 115,
+          "section": "10.4.2 When to suspect",
+          "text_continuity_score": 1.0,
+          "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+        }
+      },
+      "unverified_sources": [],
+      "aware_classification_status": "NOT_AN_ANTIBACTERIAL"
+    },
+    "amphotericin_b": {
+      "name": "Amphotericin B",
+      "class": "Polyene antifungal",
+      "super_class": "Polyene Antifungals",
+      "route": "IV",
+      "aware_category": "NOT_APPLICABLE",
+      "aware_category_source": "The WHO AWaRe classification covers antibacterials. This agent is not an antibacterial and is not assigned an AWaRe group by any source held here.",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "hepatic_dosing",
+        "pregnancy_category",
+        "lactation_safety",
+        "interactions"
+      ],
+      "coverage_note": "Added from the ICMR Treatment Guidelines 2022-23 edition (operator-attested), which states the indication and dose only. The fields listed in coverage_gaps are not stated in any document held by this repository and have NOT been supplied from memory. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "Mucormycosis - liposomal amphotericin B with surgical debridement",
+        "Invasive pulmonary aspergillosis - alternative",
+        "CLABSI due to Candida - alternative"
+      ],
+      "dosing_from_held_sources": {
+        "stated_dose": "Deoxycholate 1 mg/kg/day; liposomal 3-5 mg/kg/day; lipid 3-5 mg/kg daily; deoxycholate 0.5-1 mg/kg daily in candidaemia",
+        "source_document_id": "ICMR-STG-2022-23",
+        "verbatim_passage": "Amphotericin B deoxycholate 1 mg/kg/day Liposomal amphotericin B 3-5 mg/kg/day",
+        "source_page": null,
+        "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+        "attribution_basis": "OPERATOR_ATTESTATION",
+        "prior_edition_cross_reference": {
+          "document_id": "ICMR-STG-2019-ED2",
+          "page": 89,
+          "section": "7.2.6 Management",
+          "text_continuity_score": 1.0,
+          "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+        }
+      },
+      "unverified_sources": [],
+      "aware_classification_status": "NOT_AN_ANTIBACTERIAL",
+      "clinical_notes_from_held_sources": "Antifungal therapy for mucormycosis should be continued until resolution of clinical signs and symptoms, resolution or stabilization of residual radiographic signs, and resolution of underlying immunosuppression."
+    },
+    "flucytosine": {
+      "name": "Flucytosine",
+      "class": "Pyrimidine analogue antifungal",
+      "super_class": "Antifungals",
+      "route": "Oral",
+      "aware_category": "NOT_APPLICABLE",
+      "aware_category_source": "The WHO AWaRe classification covers antibacterials. This agent is not an antibacterial and is not assigned an AWaRe group by any source held here.",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "hepatic_dosing",
+        "pregnancy_category",
+        "lactation_safety",
+        "interactions"
+      ],
+      "coverage_note": "Added from the ICMR Treatment Guidelines 2022-23 edition (operator-attested), which states the indication and dose only. The fields listed in coverage_gaps are not stated in any document held by this repository and have NOT been supplied from memory. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "Candiduria due to Candida glabrata and Candida krusei"
+      ],
+      "dosing_from_held_sources": {
+        "stated_dose": "Dose not stated in the held chapter",
+        "source_document_id": "ICMR-STG-2022-23",
+        "verbatim_passage": "Flucytosine - Candida glabrata and Candida krusei",
+        "source_page": null,
+        "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+        "attribution_basis": "OPERATOR_ATTESTATION",
+        "prior_edition_cross_reference": {
+          "document_id": "ICMR-STG-2019-ED2",
+          "page": 127,
+          "section": "10.7.8 Antimicrobial Therapy",
+          "text_continuity_score": 1.0,
+          "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+        }
+      },
+      "unverified_sources": [],
+      "aware_classification_status": "NOT_AN_ANTIBACTERIAL"
+    },
+    "acyclovir": {
+      "name": "Acyclovir",
+      "class": "Nucleoside analogue antiviral",
+      "super_class": "Antivirals",
+      "route": "IV / Oral",
+      "aware_category": "NOT_APPLICABLE",
+      "aware_category_source": "The WHO AWaRe classification covers antibacterials. This agent is not an antibacterial and is not assigned an AWaRe group by any source held here.",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "hepatic_dosing",
+        "pregnancy_category",
+        "lactation_safety",
+        "interactions"
+      ],
+      "coverage_note": "Added from the ICMR Treatment Guidelines 2022-23 edition (operator-attested), which states the indication and dose only. The fields listed in coverage_gaps are not stated in any document held by this repository and have NOT been supplied from memory. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "Empiric therapy in acute febrile encephalopathy",
+        "Herpes simplex",
+        "Varicella and zoster",
+        "Antiviral prophylaxis in HSCT"
+      ],
+      "dosing_from_held_sources": {
+        "stated_dose": "10 mg/kg 8 hourly (adult and paediatric); 20 mg/kg 8 hourly in children below 12",
+        "source_document_id": "ICMR-STG-2022-23",
+        "verbatim_passage": "Acyclovir 10 mg/kg 8 hourly",
+        "source_page": null,
+        "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+        "attribution_basis": "OPERATOR_ATTESTATION",
+        "prior_edition_cross_reference": {
+          "document_id": "ICMR-STG-2019-ED2",
+          "page": 88,
+          "section": "7.2.6 Management",
+          "text_continuity_score": 1.0,
+          "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+        }
+      },
+      "unverified_sources": [],
+      "aware_classification_status": "NOT_AN_ANTIBACTERIAL"
+    },
+    "valacyclovir": {
+      "name": "Valacyclovir",
+      "class": "Nucleoside analogue antiviral (prodrug)",
+      "super_class": "Antivirals",
+      "route": "Oral",
+      "aware_category": "NOT_APPLICABLE",
+      "aware_category_source": "The WHO AWaRe classification covers antibacterials. This agent is not an antibacterial and is not assigned an AWaRe group by any source held here.",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "hepatic_dosing",
+        "pregnancy_category",
+        "lactation_safety",
+        "interactions"
+      ],
+      "coverage_note": "Added from the ICMR Treatment Guidelines 2022-23 edition (operator-attested), which states the indication and dose only. The fields listed in coverage_gaps are not stated in any document held by this repository and have NOT been supplied from memory. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "Herpes simplex",
+        "Varicella or disseminated zoster"
+      ],
+      "dosing_from_held_sources": {
+        "stated_dose": "Dose not stated in the held chapter",
+        "source_document_id": "ICMR-STG-2022-23",
+        "verbatim_passage": "Herpes simplex Herpes Simplex Virus Type 1 and Type 2 (HSV1, HSV2) Acyclovir or Valacyclovir",
+        "source_page": null,
+        "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+        "attribution_basis": "OPERATOR_ATTESTATION",
+        "prior_edition_cross_reference": {
+          "document_id": "ICMR-STG-2019-ED2",
+          "page": 137,
+          "section": "11.1 Prophylaxis and treatment in Hematopoietic Stem Cell Transplantation",
+          "text_continuity_score": 1.0,
+          "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+        }
+      },
+      "unverified_sources": [],
+      "aware_classification_status": "NOT_AN_ANTIBACTERIAL",
+      "clinical_notes_from_held_sources": "Intravenous therapy is recommended in all severe and complicated varicella zoster cases."
+    },
+    "ganciclovir": {
+      "name": "Ganciclovir",
+      "class": "Nucleoside analogue antiviral",
+      "super_class": "Antivirals",
+      "route": "IV",
+      "aware_category": "NOT_APPLICABLE",
+      "aware_category_source": "The WHO AWaRe classification covers antibacterials. This agent is not an antibacterial and is not assigned an AWaRe group by any source held here.",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "hepatic_dosing",
+        "pregnancy_category",
+        "lactation_safety",
+        "interactions"
+      ],
+      "coverage_note": "Added from the ICMR Treatment Guidelines 2022-23 edition (operator-attested), which states the indication and dose only. The fields listed in coverage_gaps are not stated in any document held by this repository and have NOT been supplied from memory. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "CMV reactivation or disease (colitis, pneumonitis, hepatitis, retinitis, encephalitis)"
+      ],
+      "dosing_from_held_sources": {
+        "stated_dose": "Dose not stated in the held chapter",
+        "source_document_id": "ICMR-STG-2022-23",
+        "verbatim_passage": "CMV reactivation or disease (colitis, pneumonitis, hepatitis, retinitis, encephalitis) Cytomegalovirus Ganciclovir",
+        "source_page": null,
+        "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+        "attribution_basis": "OPERATOR_ATTESTATION",
+        "prior_edition_cross_reference": {
+          "document_id": "ICMR-STG-2019-ED2",
+          "page": 137,
+          "section": "11.1 Prophylaxis and treatment in Hematopoietic Stem Cell Transplantation",
+          "text_continuity_score": 1.0,
+          "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+        }
+      },
+      "unverified_sources": [],
+      "aware_classification_status": "NOT_AN_ANTIBACTERIAL",
+      "clinical_notes_from_held_sources": "In case of treatment failure with ganciclovir, foscarnet is the drug of choice."
+    },
+    "valganciclovir": {
+      "name": "Valganciclovir",
+      "class": "Nucleoside analogue antiviral (prodrug)",
+      "super_class": "Antivirals",
+      "route": "Oral",
+      "aware_category": "NOT_APPLICABLE",
+      "aware_category_source": "The WHO AWaRe classification covers antibacterials. This agent is not an antibacterial and is not assigned an AWaRe group by any source held here.",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "hepatic_dosing",
+        "pregnancy_category",
+        "lactation_safety",
+        "interactions"
+      ],
+      "coverage_note": "Added from the ICMR Treatment Guidelines 2022-23 edition (operator-attested), which states the indication and dose only. The fields listed in coverage_gaps are not stated in any document held by this repository and have NOT been supplied from memory. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "CMV reactivation or disease"
+      ],
+      "dosing_from_held_sources": {
+        "stated_dose": "Dose not stated in the held chapter",
+        "source_document_id": "ICMR-STG-2022-23",
+        "verbatim_passage": "Ganciclovir or Valgancyclovir",
+        "source_page": null,
+        "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+        "attribution_basis": "OPERATOR_ATTESTATION",
+        "prior_edition_cross_reference": {
+          "document_id": "ICMR-STG-2019-ED2",
+          "page": 137,
+          "section": "11.1 Prophylaxis and treatment in Hematopoietic Stem Cell Transplantation",
+          "text_continuity_score": 1.0,
+          "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+        }
+      },
+      "unverified_sources": [],
+      "aware_classification_status": "NOT_AN_ANTIBACTERIAL"
+    },
+    "foscarnet": {
+      "name": "Foscarnet",
+      "class": "Pyrophosphate analogue antiviral",
+      "super_class": "Antivirals",
+      "route": "IV",
+      "aware_category": "NOT_APPLICABLE",
+      "aware_category_source": "The WHO AWaRe classification covers antibacterials. This agent is not an antibacterial and is not assigned an AWaRe group by any source held here.",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "hepatic_dosing",
+        "pregnancy_category",
+        "lactation_safety",
+        "interactions"
+      ],
+      "coverage_note": "Added from the ICMR Treatment Guidelines 2022-23 edition (operator-attested), which states the indication and dose only. The fields listed in coverage_gaps are not stated in any document held by this repository and have NOT been supplied from memory. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "Herpes simplex - alternative",
+        "Varicella zoster - alternative",
+        "CMV where ganciclovir has failed - drug of choice"
+      ],
+      "dosing_from_held_sources": {
+        "stated_dose": "Dose not stated in the held chapter",
+        "source_document_id": "ICMR-STG-2022-23",
+        "verbatim_passage": "Ganciclovir or Valgancyclovir Foscarnet or Cidofovir",
+        "source_page": null,
+        "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+        "attribution_basis": "OPERATOR_ATTESTATION",
+        "prior_edition_cross_reference": {
+          "document_id": "ICMR-STG-2019-ED2",
+          "page": 137,
+          "section": "11.1 Prophylaxis and treatment in Hematopoietic Stem Cell Transplantation",
+          "text_continuity_score": 1.0,
+          "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+        }
+      },
+      "unverified_sources": [],
+      "aware_classification_status": "NOT_AN_ANTIBACTERIAL"
+    },
+    "cidofovir": {
+      "name": "Cidofovir",
+      "class": "Nucleotide analogue antiviral",
+      "super_class": "Antivirals",
+      "route": "IV",
+      "aware_category": "NOT_APPLICABLE",
+      "aware_category_source": "The WHO AWaRe classification covers antibacterials. This agent is not an antibacterial and is not assigned an AWaRe group by any source held here.",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "hepatic_dosing",
+        "pregnancy_category",
+        "lactation_safety",
+        "interactions"
+      ],
+      "coverage_note": "Added from the ICMR Treatment Guidelines 2022-23 edition (operator-attested), which states the indication and dose only. The fields listed in coverage_gaps are not stated in any document held by this repository and have NOT been supplied from memory. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "CMV reactivation or disease - alternative"
+      ],
+      "dosing_from_held_sources": {
+        "stated_dose": "Dose not stated in the held chapter",
+        "source_document_id": "ICMR-STG-2022-23",
+        "verbatim_passage": "Foscarnet or Cidofovir",
+        "source_page": null,
+        "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+        "attribution_basis": "OPERATOR_ATTESTATION",
+        "prior_edition_cross_reference": {
+          "document_id": "ICMR-STG-2019-ED2",
+          "page": 137,
+          "section": "11.1 Prophylaxis and treatment in Hematopoietic Stem Cell Transplantation",
+          "text_continuity_score": 1.0,
+          "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+        }
+      },
+      "unverified_sources": [],
+      "aware_classification_status": "NOT_AN_ANTIBACTERIAL"
+    },
+    "oseltamivir": {
+      "name": "Oseltamivir",
+      "class": "Neuraminidase inhibitor",
+      "super_class": "Antivirals",
+      "route": "Oral",
+      "aware_category": "NOT_APPLICABLE",
+      "aware_category_source": "The WHO AWaRe classification covers antibacterials. This agent is not an antibacterial and is not assigned an AWaRe group by any source held here.",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "hepatic_dosing",
+        "pregnancy_category",
+        "lactation_safety",
+        "interactions"
+      ],
+      "coverage_note": "Added from the ICMR Treatment Guidelines 2022-23 edition (operator-attested), which states the indication and dose only. The fields listed in coverage_gaps are not stated in any document held by this repository and have NOT been supplied from memory. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "Suspected influenza in community acquired pneumonia in the transplant setting"
+      ],
+      "dosing_from_held_sources": {
+        "stated_dose": "Dose not stated in the held chapter",
+        "source_document_id": "ICMR-STG-2022-23",
+        "verbatim_passage": "consider early empirical use of oseltamivir",
+        "source_page": null,
+        "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+        "attribution_basis": "OPERATOR_ATTESTATION",
+        "prior_edition_cross_reference": {
+          "document_id": "ICMR-STG-2019-ED2",
+          "page": 135,
+          "section": "11.1 Prophylaxis and treatment in Hematopoietic Stem Cell Transplantation",
+          "text_continuity_score": 1.0,
+          "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+        }
+      },
+      "unverified_sources": [],
+      "aware_classification_status": "NOT_AN_ANTIBACTERIAL",
+      "clinical_notes_from_held_sources": "Oseltamivir may be discontinued once influenza PCR is negative."
+    },
+    "artesunate": {
+      "name": "Artesunate",
+      "class": "Artemisinin derivative",
+      "super_class": "Antimalarials",
+      "route": "IV",
+      "aware_category": "NOT_APPLICABLE",
+      "aware_category_source": "The WHO AWaRe classification covers antibacterials. This agent is not an antibacterial and is not assigned an AWaRe group by any source held here.",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "hepatic_dosing",
+        "pregnancy_category",
+        "lactation_safety",
+        "interactions"
+      ],
+      "coverage_note": "Added from the ICMR Treatment Guidelines 2022-23 edition (operator-attested), which states the indication and dose only. The fields listed in coverage_gaps are not stated in any document held by this repository and have NOT been supplied from memory. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "Empiric therapy in acute febrile encephalopathy where cerebral malaria is possible"
+      ],
+      "dosing_from_held_sources": {
+        "stated_dose": "2.4 mg/kg at 0, 12 and 24 hours then q24 hourly (adult); under 20 kg 3 mg/kg at 0, 12 and 24 hours then q24 hourly",
+        "source_document_id": "ICMR-STG-2022-23",
+        "verbatim_passage": "Artesunate 2.4 mg/kg 0,12 and 24 hours and then q 24 hourly",
+        "source_page": null,
+        "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+        "attribution_basis": "OPERATOR_ATTESTATION",
+        "prior_edition_cross_reference": {
+          "document_id": "ICMR-STG-2019-ED2",
+          "page": 88,
+          "section": "7.2.6 Management",
+          "text_continuity_score": 1.0,
+          "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+        }
+      },
+      "unverified_sources": [],
+      "aware_classification_status": "NOT_AN_ANTIBACTERIAL"
+    },
+    "primaquine": {
+      "name": "Primaquine",
+      "class": "8-aminoquinoline",
+      "super_class": "Antimalarials",
+      "route": "Oral",
+      "aware_category": "NOT_APPLICABLE",
+      "aware_category_source": "The WHO AWaRe classification covers antibacterials. This agent is not an antibacterial and is not assigned an AWaRe group by any source held here.",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "hepatic_dosing",
+        "pregnancy_category",
+        "lactation_safety",
+        "interactions"
+      ],
+      "coverage_note": "Added from the ICMR Treatment Guidelines 2022-23 edition (operator-attested), which states the indication and dose only. The fields listed in coverage_gaps are not stated in any document held by this repository and have NOT been supplied from memory. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "Pneumocystis jirovecii pneumonia with clindamycin, in sulpha allergy"
+      ],
+      "dosing_from_held_sources": {
+        "stated_dose": "Dose not stated in the held chapter",
+        "source_document_id": "ICMR-STG-2022-23",
+        "verbatim_passage": "Clindamycin plus primaquine (if sulpha allergy)",
+        "source_page": null,
+        "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+        "attribution_basis": "OPERATOR_ATTESTATION",
+        "prior_edition_cross_reference": {
+          "document_id": "ICMR-STG-2019-ED2",
+          "page": 140,
+          "section": "11.2 Solid organ transplant",
+          "text_continuity_score": 1.0,
+          "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+        }
+      },
+      "unverified_sources": [],
+      "aware_classification_status": "NOT_AN_ANTIBACTERIAL"
     }
-  }
+  },
+  "source_documents": {
+    "ICMR-STW-VOL3-2022": "Standard Treatment Workflows of India, Vol. 3, 2022 (sha256 38ae15831b78518cb2372785c363a7d061a8a6f5b42592ee2a0dd43cedae6c10)",
+    "ICMR-STW-PTB-EPTB-2022": "Standard Treatment Workflows of India on Paediatric and Extrapulmonary Tuberculosis, 2022 (sha256 95f06c22b936875baf358853e598e4425dfc667d1857fae8d64c9d3884490ad2)",
+    "ICMR-STG-2019-ED2": "ICMR Treatment Guidelines for Antimicrobial Use in Common Syndromes, 2nd edition (2019) (sha256 74e988ffe0603263ce131d043a187302d5845fbc4ff30aa74f9190ce99ff5016) - held and hash-verified; used only for prior-edition cross-references",
+    "ICMR-STG-2022-23": "ICMR Treatment Guidelines for Antimicrobial Use in Common Syndromes, 2022-23 edition (operator-attested; no official PDF held, so no page-level citation is available)"
+  },
+  "coverage_policy": "Entries carrying knowledge_coverage='PARTIAL' are sourced from a held guideline document for indication and dose only. The fields named in their coverage_gaps are NOT held by this repository and were not inferred. COVERAGE-001 fires for these drugs so a clinician is told the safety assessment is incomplete rather than being given a silent all-clear."
 }

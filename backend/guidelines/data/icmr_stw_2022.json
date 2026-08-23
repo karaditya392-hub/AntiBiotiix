@@ -1,0 +1,1146 @@
+{
+  "collection_id": "ICMR-STW-2022",
+  "collection_title": "Standard Treatment Workflows of India (ICMR / Department of Health Research, 2022)",
+  "last_updated": "2026-08-23",
+  "curator": "Ingested from primary PDFs held by the operator; every condition carries its source document, page and a normalized extract.",
+  "precedence_rank": 2,
+  "provenance_note": "This collection is a SEPARATE ICMR publication series from the ICMR Treatment Guidelines for Antimicrobial Use in Common Syndromes. It must not be cited as, merged with, or presented as that document or as any edition of it. Every condition below records source_document_id, source_page and a verbatim_extract taken from the named PDF.",
+  "verbatim_normalization": "verbatim_extract values are taken from the source PDF text layer with only the following changes: typographic ligatures expanded, soft line-wrap newlines collapsed to single spaces, and PDF glyph artefacts (e.g. '/uni03BC', '/zero.slashcap') removed. No clinical wording, drug, dose or duration has been altered, paraphrased or added.",
+  "documents": {
+    "ICMR-STW-VOL3-2022": {
+      "document_id": "ICMR-STW-VOL3-2022",
+      "title": "Standard Treatment Workflows of India, Vol. 3, 2022",
+      "issuing_org": "Indian Council of Medical Research (ICMR) and Department of Health Research, Ministry of Health and Family Welfare, Government of India",
+      "geographic_scope": "National (India)",
+      "version": "Vol. 3, 2022",
+      "publication_date": "2022-07",
+      "pdf_creation_date": "2022-07-08",
+      "source_url": "https://stw.icmr.org.in/",
+      "source_file": "STW_Vol_3_2022.pdf",
+      "file_sha256": "38ae15831b78518cb2372785c363a7d061a8a6f5b42592ee2a0dd43cedae6c10",
+      "page_count": 80,
+      "hash_verified": true,
+      "hash_verified_on": "2026-08-23",
+      "suggested_citation": "Standard Treatment Workflows of India, 2022, Vol. 3, New Delhi, Indian Council of Medical Research, Department of Health Research, Ministry of Health and Family Welfare, Government of India.",
+      "scope_caveat": "A multi-specialty workflow atlas (dermatology, endocrinology, gastroenterology, general surgery, haematology, neonatology, oncology, ophthalmology, orthopaedics, paediatric surgery). It is NOT an antimicrobial stewardship guideline. Antimicrobial content is confined to the individual workflows indexed below and must not be generalized beyond them.",
+      "advisory_statement": "These broad guidelines are advisory, and are based on expert opinions and available scientific evidence. There may be variations in the management of an individual patient based on his/her specific condition, as decided by the treating physician."
+    },
+    "ICMR-STW-PTB-EPTB-2022": {
+      "document_id": "ICMR-STW-PTB-EPTB-2022",
+      "title": "Standard Treatment Workflows of India on Paediatric and Extrapulmonary Tuberculosis",
+      "issuing_org": "Indian Council of Medical Research (ICMR) and Department of Health Research, Ministry of Health and Family Welfare, Government of India; in partnership with the Central TB Division, Ministry of Health and Family Welfare",
+      "geographic_scope": "National (India)",
+      "version": "Special Edition on Paediatric and Extrapulmonary Tuberculosis, 2022",
+      "publication_date": "2022-03",
+      "pdf_creation_date": "2022-03-23",
+      "source_url": "https://stw.icmr.org.in/",
+      "source_file": "ICMR_STW_PTB_EPTB.pdf",
+      "file_sha256": "95f06c22b936875baf358853e598e4425dfc667d1857fae8d64c9d3884490ad2",
+      "page_count": 32,
+      "hash_verified": true,
+      "hash_verified_on": "2026-08-23",
+      "scope_caveat": "Tuberculosis only. Contains no WHO AWaRe classification content (the string 'AWaRe' does not occur in this document). Treatment is aligned to the National TB Elimination Programme (NTEP).",
+      "advisory_statement": "These broad guidelines are advisory, and are based on expert opinions and available scientific evidence. There may be variations in the management of an individual patient based on his/her specific condition, as decided by the treating physician."
+    }
+  },
+  "shared_regimens": {
+    "ssti_antibiotics": {
+      "regimen_id": "STW-SSTI-ABX",
+      "title": "Antibiotics for skin and soft tissue infections",
+      "source_document_id": "ICMR-STW-VOL3-2022",
+      "source_page": 11,
+      "prefer_beta_lactams": [
+        {
+          "drug": "Amoxycillin",
+          "adult_dose": "500 mg TDS",
+          "paediatric_dose": "25-50 mg/kg/day"
+        },
+        {
+          "drug": "Cloxacillin",
+          "adult_dose": "500 mg QID",
+          "paediatric_dose": "50 mg/kg/day"
+        },
+        {
+          "drug": "Cephalexin",
+          "adult_dose": "250-500 mg QID",
+          "paediatric_dose": "25-50 mg/kg/day"
+        },
+        {
+          "drug": "Amoxicillin-Clavulanate",
+          "adult_dose": "625 mg TDS",
+          "paediatric_dose": null
+        }
+      ],
+      "if_allergic_to_penicillins": [
+        {
+          "drug": "Erythromycin",
+          "adult_dose": "500 mg QID",
+          "paediatric_dose": "40 mg/kg/day"
+        },
+        {
+          "drug": "Clindamycin",
+          "adult_dose": "300-600 mg BD/TID",
+          "paediatric_dose": "20 mg/kg/day"
+        }
+      ],
+      "topical_antibiotics": [
+        {
+          "drug": "Mupirocin",
+          "formulation": "cream 2%"
+        },
+        {
+          "drug": "Fusidic acid",
+          "formulation": "cream 2%"
+        },
+        {
+          "drug": "Framycetin",
+          "formulation": "cream 1%"
+        }
+      ],
+      "nasal_carriers": {
+        "drug": "Mupirocin",
+        "formulation": "2% ointment",
+        "regimen": "for 5 days a month"
+      },
+      "mrsa_oral": [
+        {
+          "drug": "Cotrimoxazole",
+          "adult_dose": "2 DS tablets BD"
+        },
+        {
+          "drug": "Doxycycline",
+          "adult_dose": "100 mg BD"
+        },
+        {
+          "drug": "Minocycline",
+          "adult_dose": "200 mg BD",
+          "spelling_in_source": "Minocycine"
+        },
+        {
+          "drug": "Linezolid",
+          "adult_dose": "600 mg BD"
+        }
+      ],
+      "mrsa_iv": [
+        {
+          "drug": "Vancomycin",
+          "adult_dose": "15 mg/kg BD"
+        },
+        {
+          "drug": "Linezolid",
+          "adult_dose": "600 mg BD"
+        },
+        {
+          "drug": "Clindamycin",
+          "adult_dose": "600-900 mg TDS"
+        }
+      ],
+      "suspect_mrsa_coverage_if": [
+        "Poor immune status",
+        "Severe systemic signs",
+        "MRSA infection elsewhere",
+        "If no improvement in 48-72 hours",
+        "Penetrating trauma"
+      ],
+      "red_flags": [
+        "Temperature >100.4 degF, WBC >12,000 or <4000/uL, heart rate >90 bpm, or respiratory rate >24/min may indicate sepsis",
+        "Severe pain followed by deceptive absence may indicate necrotising fasciitis",
+        "Dark discoloration of overlying skin"
+      ],
+      "investigations": [
+        "Swabs for gram staining and pus culture are desirable",
+        "Blood cultures and biopsies are not routinely recommended, but useful with co-morbid conditions (malignancy on chemotherapy, immunocompromised states, animal bites etc.)"
+      ],
+      "stewardship_caveat": "ANTIBIOTIC SUSCEPTIBILITY PATTERNS MAY VARY WITH REGION AND TIME",
+      "verbatim_extract": "ANTIBIOTICS FOR SKIN AND SOFT TISSUE INFECTIONS. PREFER B-LACTAMS: Amoxycillin 500mg TDS (25-50 mg/kg/day); Cloxacillin 500mg QID (50mg/kg/day); Cephalexin 250-500mg QID (25-50 mg/kg/day); Amoxicillin clavulanate combination: 625mg TDS. IF ALLERGIC TO PENICILLINS: Erythromycin 500mg QID (40 mg/kg/day); Clindamycin: 300-600mg BD/TID (20mg/kg/day). TOPICAL ANTIBIOTICS: Mupirocin cream 2%; Fusidic acid cream 2%; Framycetin cream 1%. FOR NASAL CARRIERS: 2% Mupirocin ointment for 5 days a month. ORAL ANTIBIOTICS FOR SUSPECTED OR CONFIRMED MRSA INFECTION: Cotrimoxazole 2 DS tablets BD; Doxycycline 100 mg BD; Minocycine 200 mg BD; Linezolid 600 mg BD. IV ANTIBIOTICS FOR MRSA: Vancomycin: 15 mg/kg BD; Linezolid: 600 mg BD; Clindamycin: 600-900 mg TDS."
+    },
+    "ntep_ds_tb": {
+      "regimen_id": "STW-NTEP-DSTB",
+      "title": "Regimen for Drug-Sensitive TB cases: 2HRZE/4HRE (as per NTEP)",
+      "source_document_id": "ICMR-STW-PTB-EPTB-2022",
+      "source_page": 26,
+      "applies_to": "H & R sensitive TB cases and cases where the sensitivity pattern cannot be established",
+      "intensive_phase": "8 weeks (56 doses) of isoniazid (H), rifampicin (R), pyrazinamide (Z) and ethambutol (E) given under direct observation in daily dosages as per weight band categories",
+      "continuation_phase": "16 weeks (112 doses) of isoniazid, rifampicin and ethambutol in daily dosages. Only pyrazinamide is stopped in the continuation phase. The CP needs to be extended upto 24 weeks in certain forms of TB like CNS TB, Skeletal TB.",
+      "first_line_daily_doses": [
+        {
+          "drug": "Isoniazid",
+          "code": "H",
+          "dose": "5 mg/kg daily (4 to 6 mg/kg)"
+        },
+        {
+          "drug": "Rifampicin",
+          "code": "R",
+          "dose": "10 mg/kg daily (8 to 12 mg/kg)"
+        },
+        {
+          "drug": "Pyrazinamide",
+          "code": "Z",
+          "dose": "25 mg/kg daily (20 to 30 mg/kg)"
+        },
+        {
+          "drug": "Ethambutol",
+          "code": "E",
+          "dose": "15 mg/kg daily (12 to 18 mg/kg)"
+        },
+        {
+          "drug": "Streptomycin",
+          "code": "S",
+          "dose": "15 mg/kg daily (15 to 20 mg/kg)",
+          "note": "Streptomycin is administered only in certain situations, like TB meningitis or if any first line drug need to be replaced due to ADR as per weight of the patient"
+        }
+      ],
+      "adult_fdc": {
+        "intensive_phase_fdc": "4-FDC (HRZE) H: 75mg; R: 150 mg; Z: 400 mg; E: 275 mg",
+        "continuation_phase_fdc": "3-FDC (HRE) H: 75mg; R: 150 mg; E: 275 mg",
+        "weight_bands": [
+          {
+            "weight_kg": "25 to 34",
+            "ip_tablets": 2,
+            "cp_tablets": 2
+          },
+          {
+            "weight_kg": "35 to 49",
+            "ip_tablets": 3,
+            "cp_tablets": 3
+          },
+          {
+            "weight_kg": "50 to 64",
+            "ip_tablets": 4,
+            "cp_tablets": 4
+          },
+          {
+            "weight_kg": "65 to 75",
+            "ip_tablets": 5,
+            "cp_tablets": 5
+          },
+          {
+            "weight_kg": "> 75",
+            "ip_tablets": 6,
+            "cp_tablets": 6
+          }
+        ],
+        "weight_band_escalation": "During treatment if weight of the patient increases by > 5 kg and crosses the next weight band then patient should be given the next higher weight band FDC drugs"
+      },
+      "adjunct": "Pyridoxine may be given at a dosage of 10 mg per day",
+      "verbatim_extract": "Regimen for Drug-Sensitive TB cases: 2HRZE/4HRE. This regimen is for H & R sensitive TB cases and cases where the sensitivity pattern can not be established. Treatment is given in two phases: 1. Intensive phase consists of 8 weeks (56 doses) of isoniazid (H), rifampicin (R), pyrazinamide (Z) and ethambutol (E) given under direct observation in daily dosages as per weight band categories. 2. Continuation phase consists of 16 weeks (112 doses) of isoniazid, rifampicin and ethambutol in daily dosages. Only pyrazinamide will be stopped in the continuation phase. The CP needs to be extended upto 24 weeks in certain forms of TB like CNS TB, Skeletal TB."
+    }
+  },
+  "conditions": {
+    "impetigo": {
+      "condition_name": "Impetigo",
+      "icd10": "L01",
+      "specialty": "Dermatology",
+      "infection_type": "Bacterial skin and soft tissue infection",
+      "presentation": [
+        "Wet yellow brown crusts overlying red inflamed skin",
+        "Types: Non bullous (NBI; commoner), bullous (BI)",
+        "Affected age group usually children",
+        "Common sites: Face (perinasal, perioral) > extremities; extensive with scabies/ atopic eczema"
+      ],
+      "medications": {
+        "topical_first_line": [
+          "Mupirocin",
+          "Fusidic acid",
+          "Framycetin"
+        ],
+        "oral_when_indicated": [
+          "Amoxycillin",
+          "Cloxacillin",
+          "Cephalexin",
+          "Amoxicillin-Clavulanate"
+        ],
+        "if_penicillin_allergic": [
+          "Erythromycin",
+          "Clindamycin"
+        ],
+        "regimen_ref": "STW-SSTI-ABX"
+      },
+      "duration": "Topical antibiotics for 5 days",
+      "escalation": "Oral antibiotics for extensive involvement or numerous lesions, lymphadenopathy or in outbreaks to prevent transmission",
+      "source_document_id": "ICMR-STW-VOL3-2022",
+      "source_page": 11,
+      "verbatim_extract": "1. IMPETIGO CLINICAL FEATURES Wet yellow brown crusts overlying red inflamed skin. Types Non bullous (NBI; commoner), bullous (BI). Affected age group usually children. Common sites Face (perinasal, perioral) > extremities; extensive with scabies/ atopic eczema. MANAGEMENT: Topical antibiotics for 5 days. Oral antibiotics for extensive involvement or numerous lesions, lymphadenopathy or in outbreaks to prevent transmission."
+    },
+    "ecthyma": {
+      "condition_name": "Ecthyma",
+      "icd10": "L08",
+      "specialty": "Dermatology",
+      "infection_type": "Bacterial skin and soft tissue infection",
+      "presentation": [
+        "Black thick crust (eschar) with underlying ulcer",
+        "Surrounding redness and edema"
+      ],
+      "medications": {
+        "oral_first_line": [
+          "Amoxycillin",
+          "Cloxacillin",
+          "Cephalexin",
+          "Amoxicillin-Clavulanate"
+        ],
+        "if_penicillin_allergic": [
+          "Erythromycin",
+          "Clindamycin"
+        ],
+        "topical_adjunct": [
+          "Mupirocin",
+          "Fusidic acid",
+          "Framycetin"
+        ],
+        "regimen_ref": "STW-SSTI-ABX"
+      },
+      "duration": "Oral antibiotics for 7 days",
+      "escalation": "Gentle crust removal may be attempted after soakage with sterile saline; topical antibiotics over the exposed ulcer",
+      "source_document_id": "ICMR-STW-VOL3-2022",
+      "source_page": 11,
+      "verbatim_extract": "2. ECTHYMA CLINICAL FEATURES Black thick crust (eschar) with underlying ulcer & surrounding redness & edema. MANAGEMENT: Treat with oral antibiotics for 7 days. Gentle crust removal may be attempted after soakage with sterile saline; topical antibiotics over the exposed ulcer."
+    },
+    "folliculitis": {
+      "condition_name": "Folliculitis",
+      "icd10": "L73.9",
+      "specialty": "Dermatology",
+      "infection_type": "Bacterial skin and soft tissue infection",
+      "presentation": [
+        "Hair follicle centred pustule/ papule",
+        "Rule out non bacterial causes: oils, chemicals, waxing, epilation, occlusive dressing",
+        "Recurrent infection or outbreak in multiple members of family may indicate nasal Staphylococcus aureus carriage or human-pet transmission"
+      ],
+      "medications": {
+        "topical_first_line": [
+          "Mupirocin",
+          "Fusidic acid",
+          "Framycetin"
+        ],
+        "oral_when_multiple_lesions": [
+          "Amoxycillin",
+          "Cloxacillin",
+          "Cephalexin",
+          "Amoxicillin-Clavulanate"
+        ],
+        "if_penicillin_allergic": [
+          "Erythromycin",
+          "Clindamycin"
+        ],
+        "analgesia": [
+          "Paracetamol 500mg SOS",
+          "Ibuprofen 400mg SOS"
+        ],
+        "nasal_carriage": [
+          "Mupirocin 2% ointment for 5 days a month"
+        ],
+        "regimen_ref": "STW-SSTI-ABX"
+      },
+      "duration": "Topical antibiotics for 5 days",
+      "escalation": "Oral antibiotics for multiple lesions",
+      "source_document_id": "ICMR-STW-VOL3-2022",
+      "source_page": 11,
+      "verbatim_extract": "3. FOLLICULITIS CLINICAL FEATURES Hair follicle centred pustule/ papule. Rule out non bacterial causes: oils, chemicals, waxing, epilation, occlusive dressing. RECURRENT FOLLICULITIS Recurrent infection or outbreak in multiple members of family may indicate nasal Staphylococcus aureus carriage or human-pet transmission. MANAGEMENT: Topical antibiotics for 5 days. Oral antibiotics for multiple lesions. Anti-inflammatory: Paracetamol 500mg/ Ibuprofen 400mg SOS for pain relief."
+    },
+    "furuncle": {
+      "condition_name": "Furuncle (boil)",
+      "icd10": "L02",
+      "specialty": "Dermatology",
+      "infection_type": "Bacterial skin and soft tissue infection",
+      "presentation": [
+        "Painful follicle centric nodule/ pus point/ impending bulla/ ulcer",
+        "Marked surrounding erythema, edema and induration"
+      ],
+      "medications": {
+        "small_lesion": [
+          "Oral antibiotics",
+          "Topical antibiotics to reduce contamination of surrounding skin"
+        ],
+        "oral_options": [
+          "Amoxycillin",
+          "Cloxacillin",
+          "Cephalexin",
+          "Amoxicillin-Clavulanate"
+        ],
+        "if_penicillin_allergic": [
+          "Erythromycin",
+          "Clindamycin"
+        ],
+        "large_lesion_iv": [
+          "Ceftriaxone",
+          "Amoxicillin-Clavulanate",
+          "Clindamycin"
+        ],
+        "regimen_ref": "STW-SSTI-ABX"
+      },
+      "escalation": "For recurrent/ severe lesions: evaluate for nasal carriage, diabetes, underlying skin conditions (scabies, atopic dermatitis)",
+      "source_document_id": "ICMR-STW-VOL3-2022",
+      "source_page": 11,
+      "verbatim_extract": "4. FURUNCLE CLINICAL FEATURES Painful follicle centric nodule/ pus point/ impending bulla/ ulcer with marked surrounding erythema, edema and induration. MANAGEMENT SMALL: Oral antibiotics + Topical antibiotics: to reduce contamination of surrounding skin. For recurrent/ severe lesions: evaluate for nasal carriage, diabetes, underlying skin conditions (scabies, atopic dermatitis)."
+    },
+    "carbuncle": {
+      "condition_name": "Carbuncle",
+      "icd10": "L02",
+      "specialty": "Dermatology",
+      "infection_type": "Bacterial skin and soft tissue infection",
+      "presentation": [
+        "Confluence of multiple closely spaced furuncles",
+        "Pus draining from multiple follicular orifices",
+        "Commonly nape of neck > breasts, buttocks in uncontrolled diabetes"
+      ],
+      "medications": {
+        "oral_options": [
+          "Amoxycillin",
+          "Cloxacillin",
+          "Cephalexin",
+          "Amoxicillin-Clavulanate"
+        ],
+        "if_penicillin_allergic": [
+          "Erythromycin",
+          "Clindamycin"
+        ],
+        "large_lesion_iv": [
+          "Ceftriaxone",
+          "Amoxicillin-Clavulanate",
+          "Clindamycin"
+        ],
+        "regimen_ref": "STW-SSTI-ABX"
+      },
+      "comorbidity_note": "In immunocompromised/ diabetics: consider the need for gram negative coverage",
+      "source_document_id": "ICMR-STW-VOL3-2022",
+      "source_page": 11,
+      "verbatim_extract": "5. CARBUNCLE CLINICAL FEATURES Confluence of multiple closely spaced furuncles + pus draining from multiple follicular orifices. Commonly nape of neck> breasts, buttocks in uncontrolled diabetes. In immunocompromised/ diabetics: consider the need for gram negative coverage."
+    },
+    "cutaneous_abscess": {
+      "condition_name": "Cutaneous abscess",
+      "icd10": "L02",
+      "specialty": "Dermatology",
+      "infection_type": "Bacterial skin and soft tissue infection",
+      "presentation": [
+        "Painful, warm, red fluctuant skin swelling"
+      ],
+      "medications": {
+        "severely_ill_iv_first_line": [
+          "Inj Ceftriaxone 2g BD",
+          "Inj Amoxicillin-clavulanate 1.2gm TDS"
+        ],
+        "severely_ill_iv_alternative": [
+          "Inj Clindamycin 600-900mg TDS"
+        ],
+        "regimen_ref": "STW-SSTI-ABX"
+      },
+      "procedure": "Incision and drainage/ debridement",
+      "ancillary_antibiotic_indications": "Ancillary antibiotics if systemic inflammatory signs, associated septic phlebitis, multiple/ large abscesses, prominent cellulitis & immunocompromised state",
+      "source_document_id": "ICMR-STW-VOL3-2022",
+      "source_page": 11,
+      "verbatim_extract": "6. CUTANEOUS ABSCESS CLINICAL FEATURES Painful, warm, red fluctuant skin swelling. HOSPITALIZATION AND IV TREATMENT FOR SEVERELY ILL PATIENTS: Inj Ceftriaxone 2g BD OR Inj Amoxicillin-clavulanate 1.2gm TDS. Alternatively - Inj Clindamycin 600-900mg TDS. INCISION AND DRAINAGE: Incision and drainage/ debridement. Ancillary antibiotics if systemic inflammatory signs, associated septic phlebitis, multiple/ large abscesses, prominent cellulitis & immunocompromised state."
+    },
+    "cellulitis": {
+      "condition_name": "Cellulitis",
+      "icd10": "L03",
+      "specialty": "Dermatology",
+      "infection_type": "Bacterial skin and soft tissue infection",
+      "presentation": [
+        "Acute spreading infection of skin involving subcutaneous tissue",
+        "Painful, red, tender, diffuse swelling mostly involving the limbs",
+        "Cellulitis with bullae in more advanced disease"
+      ],
+      "severity_tiers": {
+        "MILD": {
+          "definition": "Typical cellulitis/ erysipelas with no focus of purulence",
+          "medications": [
+            "Oral antibiotics (see STW-SSTI-ABX)",
+            "Ibuprofen 400mg BD",
+            "Indomethacin 75mg BD"
+          ],
+          "setting": "Outpatient treatment with oral antibiotics; elevation of affected area (to allow for dependent drainage); treatment of predisposing factors"
+        },
+        "MODERATE": {
+          "definition": "Typical cellulitis/ erysipelas with systemic signs of infection",
+          "medications": [
+            "Inj Ceftriaxone 2g BD",
+            "Inj Amoxicillin-clavulanate 1.2gm TDS"
+          ],
+          "if_penicillin_allergic": [
+            "Inj Clindamycin 600-900mg IV TDS"
+          ],
+          "setting": "Hospitalization and parenteral antibiotics"
+        },
+        "SEVERE": {
+          "definition": "With poor response to oral antibiotics, immunocompromised, signs of deeper infection like bullae, skin sloughing or systemic signs of infection like hypotension, or with organ dysfunction",
+          "medications": [
+            "Vancomycin",
+            "Piperacillin-Tazobactam"
+          ],
+          "setting": "Empiric broad spectrum IV antibiotic coverage; surgical debridement; sensitivity profile based modification of antibiotics"
+        }
+      },
+      "medications": {
+        "mrsa_oral": [
+          "Cotrimoxazole",
+          "Doxycycline",
+          "Minocycline",
+          "Linezolid"
+        ],
+        "mrsa_iv": [
+          "Vancomycin",
+          "Linezolid",
+          "Clindamycin"
+        ],
+        "regimen_ref": "STW-SSTI-ABX"
+      },
+      "source_document_id": "ICMR-STW-VOL3-2022",
+      "source_page": 11,
+      "verbatim_extract": "7. CELLULITIS CLINICAL FEATURES Acute spreading infection of skin involving subcutaneous tissue; Painful, red, tender, diffuse swelling mostly involving the limbs. CATEGORIZE DISEASE SEVERITY. MILD: Typical cellulitis/ erysipelas with no focus of purulence. MANAGEMENT: Outpatient treatment with oral antibiotics; Elevation of affected area (to allow for dependent drainage); treatment of predisposing factors; Anti-inflammatory (Ibuprofen 400mg BD, Indomethacin 75mg BD). MODERATE: Typical cellulitis/ erysipelas with systemic signs of infection. MANAGEMENT: Hospitalization and parenteral antibiotics: Inj Ceftriaxone 2g BD OR Inj Amoxicillin-clavulanate 1.2gm TDS. Alternatively (allergic to penicillins) Inj Clindamycin 600-900mg IV TDS. SEVERE: With poor response to oral antibiotics, immunocompromised, signs of deeper infection like bullae, skin sloughing or systemic signs of infection like hypotension, or with organ dysfunction. MANAGEMENT: Empiric broad spectrum IV antibiotic coverage: Vancomycin + Piperacillin/ tazobactum; Surgical debridement; Sensitivity profile based modification of antibiotics."
+    },
+    "erysipelas": {
+      "condition_name": "Erysipelas",
+      "icd10": "A46",
+      "specialty": "Dermatology",
+      "infection_type": "Bacterial skin and soft tissue infection",
+      "presentation": [
+        "A more superficial, bright red, edematous, painful area with a clear demarcated edge",
+        "Common sites: lower extremities > face",
+        "Often associated with lymphangitis and lymphadenopathy",
+        "Broken skin/ portal of entry may be visualised"
+      ],
+      "severity_tiers": {
+        "MILD": {
+          "definition": "Typical cellulitis/ erysipelas with no focus of purulence",
+          "medications": [
+            "Oral antibiotics (see STW-SSTI-ABX)"
+          ]
+        },
+        "MODERATE": {
+          "definition": "Typical cellulitis/ erysipelas with systemic signs of infection",
+          "medications": [
+            "Inj Ceftriaxone 2g BD",
+            "Inj Amoxicillin-clavulanate 1.2gm TDS"
+          ],
+          "if_penicillin_allergic": [
+            "Inj Clindamycin 600-900mg IV TDS"
+          ]
+        },
+        "SEVERE": {
+          "definition": "Poor response, immunocompromised, deeper infection, hypotension or organ dysfunction",
+          "medications": [
+            "Vancomycin",
+            "Piperacillin-Tazobactam"
+          ]
+        }
+      },
+      "medications": {
+        "regimen_ref": "STW-SSTI-ABX"
+      },
+      "source_document_id": "ICMR-STW-VOL3-2022",
+      "source_page": 11,
+      "verbatim_extract": "8. ERYSIPELAS CLINICAL FEATURES A more superficial, bright red, edematous, painful area with a clear demarcated edge; common sites: lower extremities>face. Often associated with lymphangitis and lymphadenopathy; broken skin/ portal of entry may be visualised."
+    },
+    "staphylococcal_scalded_skin_syndrome": {
+      "condition_name": "Staphylococcal Scalded Skin Syndrome",
+      "icd10": "L00",
+      "specialty": "Dermatology",
+      "infection_type": "Bacterial skin and soft tissue infection (toxin-mediated)",
+      "presentation": [
+        "Superficial peeling of skin due to toxin producing strains of staphylococcus",
+        "Starts as tender and warm erythema and progresses to localised or generalised exfoliation with fever, malaise +/- dehydration and electrolyte disturbances",
+        "Follows a local staphylococcal infection of either skin, throat, nose, umbilicus, or gut",
+        "Bacteria cannot be demonstrated from blisters (cultures from original site may be positive)"
+      ],
+      "medications": {
+        "mild_oral": [
+          "Oral anti-staphylococcal antibiotics (e.g. Cloxacillin)"
+        ],
+        "severe_iv": [
+          "IV antibiotic"
+        ],
+        "mrsa_consideration": [
+          "Vancomycin",
+          "Linezolid",
+          "Clindamycin"
+        ],
+        "regimen_ref": "STW-SSTI-ABX"
+      },
+      "setting": "Treatment: preferably in-patient",
+      "prognosis": "Usually remits within a week in children, high mortality in adults",
+      "source_document_id": "ICMR-STW-VOL3-2022",
+      "source_page": 11,
+      "verbatim_extract": "9. STAPHYLOCOCCAL SCALDED SKIN SYNDROME. Superficial peeling of skin due to toxin producing strains of staphylococcus. Starts as tender and warm erythema and progresses to localised or generalised exfoliation with fever, malaise +/- dehydration and electrolyte disturbances. Follows a local staphylococcal infection of either skin, throat, nose, umbilicus, or gut. Bacteria cannot be demonstrated from blisters (cultures from original site may be positive). Treatment: preferably in-patient. Mild cases: oral anti-staphylococcal antibiotics; severe cases: IV antibiotic. Consider methicillin resistant Staphylococcus aureus (MRSA) coverage. Usually remits within a week in children, high mortality in adults."
+    },
+    "rosacea": {
+      "condition_name": "Rosacea",
+      "icd10": "L71",
+      "specialty": "Dermatology",
+      "infection_type": "Non-infectious inflammatory dermatosis treated with antibacterial agents",
+      "presentation": [
+        "Photosensitivity",
+        "Persistent erythema, telangiectasia +/- papules and pustules in absence of comedones",
+        "Sites: Convexities of the face (cheeks, forehead, nose, chin)",
+        "Bulbous enlargement of nose - rhinophyma",
+        "Symptoms: Sensitivity to hot and spicy food, and emotional triggers"
+      ],
+      "severity_tiers": {
+        "MILD_PAPULOPUSTULAR": {
+          "medications": [
+            "Azelaic acid 15% topical",
+            "Metronidazole 1% topical",
+            "Ivermectin 1% topical"
+          ]
+        },
+        "MODERATE": {
+          "definition": "Not controlled with topicals",
+          "medications": [
+            "Cap Doxycycline 100mg OD for minimum of 4-6 weeks"
+          ]
+        },
+        "SEVERE_PHYMATOUS_OCULAR": {
+          "medications": [
+            "Refer to a specialist for low dose Isotretinoin/interventional treatment"
+          ]
+        }
+      },
+      "medications": {
+        "systemic_antibacterial": [
+          "Doxycycline"
+        ],
+        "topical_antibacterial": [
+          "Metronidazole"
+        ]
+      },
+      "stewardship_note": "Doxycycline here is prescribed for a non-infectious inflammatory indication at a minimum 4-6 week duration. Duration-based stewardship alerts must not treat this as an untreated bacterial infection.",
+      "general_measures": "Avoid triggers (alcohol, caffeine, spicy food, cosmetics, topical steroids); Photoprotection",
+      "source_document_id": "ICMR-STW-VOL3-2022",
+      "source_page": 9,
+      "verbatim_extract": "ROSACEA: Avoid triggers (alcohol, caffeine, spicy food, cosmetics, topical steroids). Photoprotection. Mild papulopustular rosacea: topical Azelaic acid (15%) or Metronidazole (1%) or Ivermectin (1%). Moderate disease, not controlled with topicals: Cap Doxycycline 100mg OD for minimum of 4-6 weeks. Severe/phymatous/ ocular rosacea: refer to a specialist for low dose Isotretinoin/interventional treatment."
+    },
+    "acne_vulgaris": {
+      "condition_name": "Acne",
+      "icd10": "L70",
+      "specialty": "Dermatology",
+      "infection_type": "Non-infectious inflammatory dermatosis treated with antibacterial agents",
+      "presentation": [
+        "Comedones (open-blackheads, closed-whiteheads)",
+        "Papules, pustules",
+        "Painful nodules containing pus",
+        "Cysts",
+        "Scarring",
+        "Sites: Face and/or trunk",
+        "Symptoms: None/pain/pricking"
+      ],
+      "medications": {
+        "topical_combinations": [
+          "Clindamycin 1% + Tretinoin 0.025% gel",
+          "Adapalene 0.1% + Clindamycin phosphate 1%",
+          "Clindamycin 1% + Benzoyl peroxide 5% cream",
+          "Adapalene 0.1% + Benzoyl peroxide 2.5% gel"
+        ],
+        "moderate_not_controlled_with_topicals": [
+          "Cap Doxycycline 100mg OD for minimum of 4-6 weeks"
+        ],
+        "severe_nodulocystic": [
+          "Isotretinoin treatment at tertiary level after documentation of normal lipid profile and liver function"
+        ]
+      },
+      "stewardship_note": "Topical antibiotics like Clindamycin are effective acne treatments, but are not recommended as monotherapy because of the risk of bacterial resistance. Benzoyl peroxide is effective in the prevention of bacterial resistance and is recommended for patients on topical or systemic antibiotic therapy.",
+      "source_document_id": "ICMR-STW-VOL3-2022",
+      "source_page": [
+        9,
+        18
+      ],
+      "verbatim_extract": "ACNE: Comedones (open-blackheads, closed-whiteheads) +/- any one or more of the following: Papules, pustules; Painful nodules containing pus; Cysts; Scarring. Sites: Face and/or trunk. Moderate acne, not controlled with topicals: Cap Doxycycline 100mg OD for minimum of 4-6 weeks. Severe nodulocystic acne: Isotretinoin treatment at tertiary level after documentation of normal lipid profile and liver function. RATIONAL TOPICAL COMBINATIONS FOR ACNE: Clindamycin 1%+Tretinoin 0.025% gel; Adapalene 0.1% +Clindamycin phosphate 1%; Clindamycin 1% + Benzoyl peroxide 5% cream; Adapalene 0.1% + Benzoyl peroxide 2.5% gel. GENERAL PRINCIPLES FOR TOPICAL ANTIBIOTIC USE IN ACNE: Topical antibiotics like Clindamycin are effective acne treatments, but are not recommended as monotherapy because of the risk of bacterial resistance. BPO is effective in the prevention of bacterial resistance and is recommended for patients on topical or systemic antibiotic therapy."
+    },
+    "spontaneous_bacterial_peritonitis": {
+      "condition_name": "Spontaneous Bacterial Peritonitis (in liver failure)",
+      "icd10": "K72.9",
+      "specialty": "Gastroenterology / Hepatology",
+      "infection_type": "Intra-abdominal infection",
+      "presentation": [
+        "Sepsis in a patient with liver failure",
+        "Ascitic fluid analysis and culture required"
+      ],
+      "medications": {
+        "sbp_first_line": [
+          "IV Ceftriaxone 1g BD may be tried"
+        ],
+        "unidentified_source": [
+          "Broad spectrum antibiotics within an hour"
+        ],
+        "adjunct": [
+          "IV Albumin 20-40g over 6-12 hours to prevent hepatorenal syndrome"
+        ]
+      },
+      "caveat": "The source states 'may be tried' for Ceftriaxone in SBP and does not name a specific broad-spectrum agent for unidentified-source sepsis. Do not present an unnamed agent as an ICMR recommendation.",
+      "source_document_id": "ICMR-STW-VOL3-2022",
+      "source_page": 34,
+      "verbatim_extract": "SEPSIS: Fluid resuscitation. I.V. antibiotics: For unidentified source: Broad spectrum antibiotics within an hour. For SBP: IV Ceftriaxone 1g BD may be tried. To prevent hepatorenal syndrome: IV Albumin 20-40g over 6-12 hours."
+    },
+    "empyema_thoracis_children": {
+      "condition_name": "Empyema Thoracis in Children",
+      "icd10": "J86",
+      "specialty": "Paediatric Surgery / Paediatrics",
+      "infection_type": "Pleural space infection",
+      "presentation": [
+        "Fever",
+        "Chest pain",
+        "Cough",
+        "Respiratory distress",
+        "Abdominal pain and vomiting",
+        "Auscultation - decreased breath sounds & crackles",
+        "Dullness to percussion"
+      ],
+      "common_organisms": [
+        "S pneumoniae",
+        "S aureus",
+        "group A streptococci"
+      ],
+      "medications": {
+        "empiric": [
+          "3rd Gen Cephalosporins (e.g. Ceftriaxone, Cefotaxime)",
+          "Extended Penicillins like Co-Amoxiclav"
+        ],
+        "de_escalation": [
+          "Change based on cultures, continue until afebrile/ ICD removed"
+        ]
+      },
+      "duration": "1-4 weeks; discharged with standard antibiotic cover of 1-2 weeks",
+      "escalation": "Any child with diagnosed pneumonia with no improvement and spiking fever after 48 hours of antibiotic treatment may signal empyema",
+      "caveat": "The source names the drug CLASS ('3rd Gen Cephalosporins') rather than a specific molecule; Ceftriaxone and Cefotaxime are listed here as class exemplars and are not named on this page of the source.",
+      "source_document_id": "ICMR-STW-VOL3-2022",
+      "source_page": 71,
+      "verbatim_extract": "TREATMENT: Child not sick; investigation reveals a small effusion- IV fluids, Oxygen, IV Antibiotics, Analgesics. Child looks sick; investigation reveals larger effusions & respiratory compromise - IV Antibiotics and Intercostal Chest tube Drainage. Antibiotics: 3rd Gen Cephalosporins/Extended Penicillins like Co-Amoxiclav, for 1-4 weeks. Change based on cultures, Continue until afebrile/ ICD removed."
+    },
+    "diabetic_foot_infection": {
+      "condition_name": "Diabetic Foot Infection",
+      "icd10": "Z86.31",
+      "specialty": "General Surgery / Endocrinology",
+      "infection_type": "Diabetic foot / soft tissue and bone infection",
+      "presentation": [
+        "Swelling/ induration",
+        "Pain/ tenderness",
+        "Warmth, redness (0.5-2cm)",
+        "Purulent discharge"
+      ],
+      "severity_tiers": {
+        "NON_INFECTED_WOUND": {
+          "medications": [
+            "No antibiotics"
+          ]
+        },
+        "MILD_INFECTION": {
+          "definition": "At least two of: swelling/induration, pain/tenderness, warmth, redness (0.5-2cm), purulent discharge",
+          "medications": [
+            "Give oral antibiotics for 1-2 weeks (Target only aerobic gram-positive cocci)"
+          ]
+        },
+        "MODERATE_INFECTION": {
+          "definition": "Redness; deep tissues affected (abscess, osteomyelitis, fasciitis, septic arthritis); no systemic signs",
+          "medications": [
+            "Refer to higher centre"
+          ]
+        },
+        "SEVERE_INFECTION": {
+          "definition": "Local findings + systemic findings of SIRS (at least two of): Temperature >38C or <36C, heart rate >90/min, respiratory rate >20/min or PaCO2 <32 mm Hg, WBC >12000 or <4000 or immature bands >10%",
+          "medications": [
+            "Refer to higher centre"
+          ]
+        }
+      },
+      "medications": {
+        "mild_oral_target": "Aerobic gram-positive cocci only",
+        "candidate_agents_from_ssti_regimen": [
+          "Amoxycillin",
+          "Cloxacillin",
+          "Cephalexin",
+          "Amoxicillin-Clavulanate"
+        ]
+      },
+      "caveat": "The diabetic foot workflow specifies the antibiotic TARGET (aerobic gram-positive cocci) and duration but names no specific molecule. The candidate agents listed are drawn from the same document's SSTI regimen (page 11) and are flagged as such, not quoted from page 38.",
+      "stewardship_note": "Antibiotics are insufficient unless combined with appropriate wound care.",
+      "source_document_id": "ICMR-STW-VOL3-2022",
+      "source_page": 38,
+      "verbatim_extract": "INFECTION AND ANTIBIOTICS GUIDANCE. NON INFECTED WOUND: No antibiotics. MILD INFECTION: At least two of: Swelling/ induration; Pain/ tenderness; Warmth, redness (0.5-2cm); Purulent discharge. Give oral antibiotics for 1-2 weeks (Target only aerobic gram-positive cocci). MODERATE INFECTION: Redness; Deep tissues affected (abscess, osteomyelitis, fasciitis, septic arthritis); No systemic signs. Refer to higher centre. SEVERE INFECTION: Local findings + systemic findings of SIRS (at least two of): Temperature >38C or <36C, Heart rate > 90/min, Respiratory rate > 20/min or PaCO2 <32 mm Hg, WBC >12000 or < 4000 or immature bands >10%. Refer to higher centre. Note: Antibiotics are insufficient unless combined with appropriate wound care."
+    },
+    "paediatric_abdominal_tuberculosis": {
+      "condition_name": "Paediatric Abdominal Tuberculosis",
+      "icd10": "A18.31",
+      "specialty": "Tuberculosis",
+      "infection_type": "Mycobacterium tuberculosis infection",
+      "presentation": [
+        "Abdominal TB in a child",
+        "Peritoneal TB findings on examination"
+      ],
+      "medications": {
+        "regimen": "2HRZE + 4HRE",
+        "drugs": [
+          "Isoniazid",
+          "Rifampicin",
+          "Pyrazinamide",
+          "Ethambutol"
+        ],
+        "adjunct": "Pyridoxine 10 mg/day",
+        "regimen_ref": "STW-NTEP-DSTB",
+        "corticosteroids": "Steroids - not useful and not recommended"
+      },
+      "duration": "ATT for 6 months",
+      "source_document_id": "ICMR-STW-PTB-EPTB-2022",
+      "source_page": 8,
+      "verbatim_extract": "ATT for 6 months (2HRZE + 4HRE). Pyridoxine supplementation- 10 mg/day. Steroids- not useful & not recommended. DO NOT start Empirical ATT with isolated findings."
+    },
+    "paediatric_intrathoracic_tuberculosis": {
+      "condition_name": "Paediatric Intrathoracic Tuberculosis (pulmonary, pleural, mediastinal)",
+      "icd10": "A15",
+      "specialty": "Tuberculosis",
+      "infection_type": "Mycobacterium tuberculosis infection",
+      "presentation": [
+        "Weight loss >=5%; or no weight gain in past 3 months despite adequate nutrition",
+        "Persistent fever, cough"
+      ],
+      "medications": {
+        "regimen": "2HRZE/4RHE",
+        "drugs": [
+          "Isoniazid",
+          "Rifampicin",
+          "Pyrazinamide",
+          "Ethambutol"
+        ],
+        "adjunct": "Pyridoxine 10 mg/day",
+        "regimen_ref": "STW-NTEP-DSTB",
+        "corticosteroids": "Consider steroids in miliary TB (Prednisolone daily or Dexamethasone 0.6 mg/kg/day)"
+      },
+      "duration": "6 months; follow up patients clinically at end of 6, 12, 18 & 24 months after treatment completion",
+      "source_document_id": "ICMR-STW-PTB-EPTB-2022",
+      "source_page": 9,
+      "verbatim_extract": "Give 1st line ATT 2HRZE/4RHE. Add Pyridoxine 10 mg/day for 6 months. Consider steroids in miliary TB. After treatment completion, follow up patients clinically at end of 6, 12, 18 & 24 months. A=Adult FDC (HRZE = 75/150/400/275; HRE = 75/150/275).",
+      "caveat": "Do not start ATT on the basis of a positive TST alone."
+    },
+    "paediatric_lymph_node_tuberculosis": {
+      "condition_name": "Paediatric Lymph Node Tuberculosis",
+      "icd10": "A18.2",
+      "specialty": "Tuberculosis",
+      "infection_type": "Mycobacterium tuberculosis infection",
+      "presentation": [
+        "Matted lymph nodes",
+        "Cold abscess",
+        "Discharging sinus",
+        "Chest X-ray changes"
+      ],
+      "medications": {
+        "regimen": "2HRZE + 4HRE (standard doses)",
+        "drugs": [
+          "Isoniazid",
+          "Rifampicin",
+          "Pyrazinamide",
+          "Ethambutol"
+        ],
+        "adjunct": "Pyridoxine 10 mg/day",
+        "regimen_ref": "STW-NTEP-DSTB"
+      },
+      "duration": "6 months",
+      "source_document_id": "ICMR-STW-PTB-EPTB-2022",
+      "source_page": 10,
+      "verbatim_extract": "Treat with 2 HRZE + 4 HRE (standard doses) if new case. At the end of 6 months therapy, can be kept on observation."
+    },
+    "paediatric_osteoarticular_tuberculosis": {
+      "condition_name": "Paediatric Osteoarticular Tuberculosis",
+      "icd10": "A18.0",
+      "specialty": "Tuberculosis",
+      "infection_type": "Mycobacterium tuberculosis infection",
+      "presentation": [
+        "Persistent Fever",
+        "Anorexia",
+        "Weight loss (>5% in last 3 months)",
+        "Bone or joint involvement"
+      ],
+      "medications": {
+        "regimen": "2HRZE + 10HRE (standard doses)",
+        "drugs": [
+          "Isoniazid",
+          "Rifampicin",
+          "Pyrazinamide",
+          "Ethambutol"
+        ],
+        "adjunct": "Pyridoxine 10 mg/day",
+        "regimen_ref": "STW-NTEP-DSTB"
+      },
+      "duration": "12 months",
+      "source_document_id": "ICMR-STW-PTB-EPTB-2022",
+      "source_page": 11,
+      "verbatim_extract": "Regimen: 2HRZE + 10HRE (Standard doses) + Pyridoxine 10 mg/day. Follow up every month during treatment & subsequently every 3 months. Confirm microbiologically in all cases, if possible, before ATT."
+    },
+    "paediatric_tubercular_meningitis": {
+      "condition_name": "Paediatric Tubercular Meningitis",
+      "icd10": "A17.0",
+      "specialty": "Tuberculosis",
+      "infection_type": "Mycobacterium tuberculosis infection",
+      "presentation": [
+        "Meningeal signs in a child",
+        "CSF findings consistent with tubercular meningitis"
+      ],
+      "medications": {
+        "regimen": "2HRZE + 10HRE (in appropriate doses)",
+        "drugs": [
+          "Isoniazid",
+          "Rifampicin",
+          "Pyrazinamide",
+          "Ethambutol"
+        ],
+        "adjunct": "Pyridoxine 10 mg/day",
+        "regimen_ref": "STW-NTEP-DSTB",
+        "corticosteroids": "Prednisolone 2 mg/kg/day for 4 weeks (or equivalent dose of another steroid formulation)"
+      },
+      "duration": "12 months",
+      "source_document_id": "ICMR-STW-PTB-EPTB-2022",
+      "source_page": 12,
+      "verbatim_extract": "Anti TB drug regimen: 2 HRZE and 10 HRE (in appropriate doses); Pyridoxine 10 mg/day. Corticosteroids: Prednisolone 2 mg/kg/day for 4 weeks."
+    },
+    "adult_abdominal_tuberculosis": {
+      "condition_name": "Adult Abdominal Tuberculosis",
+      "icd10": "A18.3",
+      "specialty": "Tuberculosis",
+      "infection_type": "Mycobacterium tuberculosis infection",
+      "presentation": [
+        "Abdominal pain, ascites or bowel symptoms suggestive of abdominal TB"
+      ],
+      "medications": {
+        "regimen": "2HRZE/4HRE",
+        "drugs": [
+          "Isoniazid",
+          "Rifampicin",
+          "Pyrazinamide",
+          "Ethambutol"
+        ],
+        "adjunct": "Pyridoxine 10 mg/day",
+        "regimen_ref": "STW-NTEP-DSTB"
+      },
+      "duration": "6 months",
+      "source_document_id": "ICMR-STW-PTB-EPTB-2022",
+      "source_page": 14,
+      "verbatim_extract": "START ATT (2HRZE, 4HRE). Assess ATT induced hepatotoxicity with serial LFTs. Complete ATT (exclude alternative diagnosis).",
+      "caveat": "Assess ATT induced hepatotoxicity with serial LFTs."
+    },
+    "adult_lymph_node_tuberculosis": {
+      "condition_name": "Adult Lymph Node Tuberculosis",
+      "icd10": "A18.2",
+      "specialty": "Tuberculosis",
+      "infection_type": "Mycobacterium tuberculosis infection",
+      "presentation": [
+        "Peripheral or abdominal/mediastinal lymphadenopathy"
+      ],
+      "medications": {
+        "regimen": "As per NTEP (2HRZE/4HRE)",
+        "drugs": [
+          "Isoniazid",
+          "Rifampicin",
+          "Pyrazinamide",
+          "Ethambutol"
+        ],
+        "adjunct": "Pyridoxine 10 mg/day",
+        "regimen_ref": "STW-NTEP-DSTB"
+      },
+      "duration": "6 months, assessed by response to therapy at 3 months",
+      "source_document_id": "ICMR-STW-PTB-EPTB-2022",
+      "source_page": 15,
+      "verbatim_extract": "Response to therapy at 3 months. Continue ATT. Paradoxical inflammation may occur up to 3 months of starting treatment."
+    },
+    "adult_musculoskeletal_tuberculosis": {
+      "condition_name": "Adult Musculoskeletal Tuberculosis",
+      "icd10": "A18.0",
+      "specialty": "Tuberculosis",
+      "infection_type": "Mycobacterium tuberculosis infection",
+      "presentation": [
+        "Bone, joint or spinal involvement",
+        "Raised ESR/CRP"
+      ],
+      "medications": {
+        "regimen": "First line ATT; intensive 4 drug regime (not more than 4 months)",
+        "drugs": [
+          "Isoniazid",
+          "Rifampicin",
+          "Pyrazinamide",
+          "Ethambutol"
+        ],
+        "adjunct": "Pyridoxine 10 mg/day",
+        "regimen_ref": "STW-NTEP-DSTB"
+      },
+      "duration": "Standard 12 months regime",
+      "source_document_id": "ICMR-STW-PTB-EPTB-2022",
+      "source_page": 16,
+      "verbatim_extract": "Intensive 4 drug regime (not more than 4 months). CRP decreasing continue for standard 12 months regime. Stop ATT after 12 months if all three parameters clinical, Lab (ESR, CRP) are satisfactory. In case of spine decision to stop ATT to be taken by evaluating healed status. Follow up every 3 months during continuation phase with CRP/LFT.",
+      "caveat": "Early (<3 months) deterioration suggests paradoxical reaction; late (>4 months) suggests possible drug resistance."
+    },
+    "adult_pericardial_tuberculosis": {
+      "condition_name": "Adult Pericardial Tuberculosis",
+      "icd10": "A18.84",
+      "specialty": "Tuberculosis",
+      "infection_type": "Mycobacterium tuberculosis infection",
+      "presentation": [
+        "Pericardial effusion",
+        "Features of pericardial tuberculosis"
+      ],
+      "medications": {
+        "regimen": "ATT as per NTEP, with steroids",
+        "drugs": [
+          "Isoniazid",
+          "Rifampicin",
+          "Pyrazinamide",
+          "Ethambutol"
+        ],
+        "adjunct": "Pyridoxine 10 mg/day",
+        "regimen_ref": "STW-NTEP-DSTB",
+        "corticosteroids": "Prednisolone 60 mg/day for 4 weeks, then 30 mg/day tapering; total duration of systemic steroids is 11 weeks"
+      },
+      "duration": "As per NTEP; total duration of systemic steroids is 11 weeks",
+      "source_document_id": "ICMR-STW-PTB-EPTB-2022",
+      "source_page": 17,
+      "verbatim_extract": "Steroids are recommended in large pericardial effusion. Give Prednisolone 60 mg/day for 4 weeks, 30 mg/day thereafter on a tapering schedule. Total duration of systemic steroids is 11 weeks. Non response to steroids & ATT: stop steroids but continue ATT."
+    },
+    "adult_pleural_tuberculosis": {
+      "condition_name": "Adult Pleural Tuberculosis",
+      "icd10": "A15.6",
+      "specialty": "Tuberculosis",
+      "infection_type": "Mycobacterium tuberculosis infection",
+      "presentation": [
+        "Pleural effusion",
+        "Features of pleural tuberculosis"
+      ],
+      "medications": {
+        "regimen": "ATT as per NTEP (2HRZE/4HRE)",
+        "drugs": [
+          "Isoniazid",
+          "Rifampicin",
+          "Pyrazinamide",
+          "Ethambutol"
+        ],
+        "adjunct": "Pyridoxine 10 mg/day",
+        "regimen_ref": "STW-NTEP-DSTB"
+      },
+      "duration": "6 months",
+      "source_document_id": "ICMR-STW-PTB-EPTB-2022",
+      "source_page": 18,
+      "verbatim_extract": "A follow up CXR at 4-8 weeks after starting ATT is recommended."
+    },
+    "adult_tubercular_meningitis": {
+      "condition_name": "Adult Tubercular Meningitis",
+      "icd10": "A17.0",
+      "specialty": "Tuberculosis",
+      "infection_type": "Mycobacterium tuberculosis infection",
+      "presentation": [
+        "Meningitis with CSF profile suggestive of tuberculosis",
+        "Past history of TB & ATT relevant"
+      ],
+      "medications": {
+        "regimen": "Intensive Phase: 2 months of RHZE or RHZS; Continuation phase: 3 drugs - RHE for at least 10 months",
+        "drugs": [
+          "Isoniazid",
+          "Rifampicin",
+          "Pyrazinamide",
+          "Ethambutol",
+          "Streptomycin"
+        ],
+        "adjunct": "Pyridoxine 10 mg/day",
+        "regimen_ref": "STW-NTEP-DSTB",
+        "corticosteroids": "Preferably Dexamethasone 0.4 mg/kg/day IV in 3-4 divided doses during hospital stay; if not feasible oral Dexamethasone 0.4 mg/kg/day in divided doses or oral Prednisolone 1 mg/kg/day, discharged on tapering oral steroids"
+      },
+      "duration": "At least 12 months",
+      "source_document_id": "ICMR-STW-PTB-EPTB-2022",
+      "source_page": 19,
+      "verbatim_extract": "Intensive Phase: 2 months of RHZE or RHZS. Continuation phase: 3 drugs-RHE for at least 10 months. STEROIDS: Preferably Dexamethasone 0.4 mg/kg/day intravenously in 3-4 divided doses during hospital stay. If not feasible, give oral Dexamethasone 0.4 mg/kg/day in divided doses or oral Prednisolone 1 mg/kg/day. Discharge on oral steroids on tapering doses. A negative NAAT result does not rule out TBM. The decision to give ATT should be based on clinical features and CSF profile.",
+      "caveat": "Streptomycin (RHZS) is an alternative to Ethambutol in the intensive phase for TB meningitis."
+    },
+    "cutaneous_tuberculosis": {
+      "condition_name": "Cutaneous Tuberculosis",
+      "icd10": "A18.4",
+      "specialty": "Tuberculosis",
+      "infection_type": "Mycobacterium tuberculosis infection",
+      "presentation": [
+        "Persistent, asymptomatic raised reddish/reddish brown lesion of >6 months which may show scarring at one end",
+        "Persistent, warty skin lesion of >6 months"
+      ],
+      "medications": {
+        "regimen": "ATT as per NTEP",
+        "drugs": [
+          "Isoniazid",
+          "Rifampicin",
+          "Pyrazinamide",
+          "Ethambutol"
+        ],
+        "adjunct": "Pyridoxine 10 mg/day",
+        "regimen_ref": "STW-NTEP-DSTB",
+        "corticosteroids": "No role of steroids, oral or topical"
+      },
+      "duration": "As per NTEP; full course of ATT",
+      "source_document_id": "ICMR-STW-PTB-EPTB-2022",
+      "source_page": 20,
+      "verbatim_extract": "Persistent, asymptomatic raised reddish/reddish brown lesion of >6 months which may show scarring at one end. Persistent, warty skin lesion of >6 months. Start ATT. Full course of ATT which led to resolution. No role of steroids, oral or topical, in cutaneous tuberculosis."
+    },
+    "female_genital_tuberculosis": {
+      "condition_name": "Female Genital Tuberculosis",
+      "icd10": "A18.17",
+      "specialty": "Tuberculosis",
+      "infection_type": "Mycobacterium tuberculosis infection",
+      "presentation": [
+        "Infertility or menstrual abnormality with positive FGTB testing"
+      ],
+      "medications": {
+        "regimen": "Treatment of FGTB should be as per NTEP",
+        "drugs": [
+          "Isoniazid",
+          "Rifampicin",
+          "Pyrazinamide",
+          "Ethambutol"
+        ],
+        "adjunct": "Pyridoxine 10 mg/day",
+        "regimen_ref": "STW-NTEP-DSTB"
+      },
+      "duration": "As per NTEP, guided by clinical presentation and response to ATT",
+      "source_document_id": "ICMR-STW-PTB-EPTB-2022",
+      "source_page": 21,
+      "verbatim_extract": "Definite FGTB needing ATT if any of the following tests are positive. Probable FGTB needing ATT if any of following positive. Negative FGTB: No ATT. Treatment of FGTB should be as per NTEP. Follow up at 1 month: Clinical Evaluation (General & Gynaecological); 3 months: Clinical Evaluation; 6 months: Clinical Evaluation & Investigations."
+    },
+    "genitourinary_tuberculosis": {
+      "condition_name": "Genitourinary Tuberculosis",
+      "icd10": "A18.10",
+      "specialty": "Tuberculosis",
+      "infection_type": "Mycobacterium tuberculosis infection",
+      "presentation": [
+        "Urinary symptoms with sterile pyuria or imaging suggestive of genitourinary TB"
+      ],
+      "medications": {
+        "regimen": "Treatment as per NTEP guidelines",
+        "drugs": [
+          "Isoniazid",
+          "Rifampicin",
+          "Pyrazinamide",
+          "Ethambutol"
+        ],
+        "adjunct": "Pyridoxine 10 mg/day",
+        "regimen_ref": "STW-NTEP-DSTB"
+      },
+      "duration": "9 to 12 months",
+      "source_document_id": "ICMR-STW-PTB-EPTB-2022",
+      "source_page": 22,
+      "verbatim_extract": "TREATMENT AS PER NTEP GUIDELINES. 9 to 12 months. After completion of ATT: Repeat culture if baseline culture positive."
+    },
+    "intraocular_tuberculosis": {
+      "condition_name": "Intraocular Tuberculosis",
+      "icd10": "A18.5",
+      "specialty": "Tuberculosis",
+      "infection_type": "Mycobacterium tuberculosis infection",
+      "presentation": [
+        "Uveitis or intraocular inflammation attributed to tuberculosis"
+      ],
+      "medications": {
+        "regimen": "2 months of RHEZ + 7 months of RH",
+        "drugs": [
+          "Isoniazid",
+          "Rifampicin",
+          "Pyrazinamide",
+          "Ethambutol"
+        ],
+        "adjunct": "Pyridoxine 10 mg/day",
+        "regimen_ref": "STW-NTEP-DSTB",
+        "corticosteroids": "Topical steroid eye drops; systemic corticosteroids for severe intraocular inflammation, with monitoring of body weight, blood sugar and blood pressure"
+      },
+      "duration": "9 months",
+      "source_document_id": "ICMR-STW-PTB-EPTB-2022",
+      "source_page": 23,
+      "verbatim_extract": "ATT: 2 months of RHEZ + 7 months of RH depending on response. Corticosteroids: Topical steroids eye drops. Systemic corticosteroids for severe inflammation. Frequency of follow up: 1-2 weeks in 1st month followed by monthly for 3 months & then 3 monthly. Systemic steroids: Monitor body weight, blood sugar & blood pressure.",
+      "caveat": "The source page carries the printed code ICD-10-A18.3; A18.5 is the correct ICD-10 code for tuberculosis of the eye and is used here. The printed code is recorded in printed_icd10_in_source.",
+      "printed_icd10_in_source": "A18.3"
+    }
+  }
+}

@@ -90,6 +90,34 @@ class ClinicalRuleEngine:
                     interacting_factor="Medication Outside Validated Knowledge Base",
                     citation_text="Clinical Decision Support Safety Architecture (Coverage Fail-Safe): Prescribed medication is outside the validated clinical knowledge base. Comprehensive safety checks (allergies, renal/hepatic adjustments, teratogenicity, interactions) cannot be evaluated. Manual clinician review required."
                 ))
+                continue
+
+            # Partial coverage is not coverage.
+            #
+            # Drugs sourced from a guideline that states only indication and dose
+            # have no renal, hepatic, pregnancy, lactation or interaction data in
+            # this repository. Having an entry at all is enough to silence the
+            # branch above, so without this check adding a drug would CONVERT a
+            # loud "not assessed" into a silent all-clear on exactly the checks
+            # that were never performed. The gaps are named so the clinician
+            # knows which ones to carry out themselves.
+            if drug_info.get("knowledge_coverage") == "PARTIAL":
+                gaps = drug_info.get("coverage_gaps") or []
+                gap_text = ", ".join(g.replace("_", " ") for g in gaps) or "one or more safety domains"
+                warnings.append(self._create_warning(
+                    prescription_id=prescription_id,
+                    rule=rule,
+                    prescribed_drug=item.medication_name,
+                    norm_drug=norm_drug,
+                    interacting_factor="Partial Knowledge Base Coverage",
+                    citation_text=(
+                        "Clinical Decision Support Safety Architecture (Coverage Fail-Safe): "
+                        f"{item.medication_name} is present in the knowledge base for indication and dose only, "
+                        "sourced from a held clinical guideline. The following safety domains are NOT held by "
+                        f"this system and have NOT been assessed: {gap_text}. This is an absence of data, not a "
+                        "finding of safety. Manual clinician review of the unassessed domains is required."
+                    )
+                ))
         return warnings
 
     def _check_allergies(self, prescription_id: str, patient: PatientCreate, items: List[PrescriptionItem]) -> List[SafetyWarning]:

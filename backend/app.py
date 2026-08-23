@@ -666,6 +666,17 @@ def analyze_prescription(prescription_id: str, db: Session = Depends(get_db)):
     retrieved_evidence = knowledge_base.retrieve_guideline_evidence(presc_db.diagnosis, k=3)
     guidelines_list = [guideline_info] if guideline_info else []
 
+    # ICMR Standard Treatment Workflows (2022) are returned in their OWN field,
+    # not appended to guideline_recommendations, because they are a different
+    # ICMR publication with a different scope and must be attributed as such.
+    stw_condition = knowledge_base.match_stw_condition(presc_db.diagnosis)
+
+    # Syndrome index of the ICMR Treatment Guidelines 2022-23 edition, surfaced
+    # separately from both the workflows and the syndrome file above. It travels
+    # with its attribution basis so a consumer can see the edition claim is
+    # operator-attested rather than verified against a held PDF.
+    stg_condition = knowledge_base.match_stg_condition(presc_db.diagnosis)
+
     # 3. Retrieve Local AMR Context (Section 13)
     local_amr = []
     for it in items_schema:
@@ -738,6 +749,8 @@ def analyze_prescription(prescription_id: str, db: Session = Depends(get_db)):
             }
         },
         "guideline_recommendations": guidelines_list,
+        "stw_workflow_condition": stw_condition,
+        "stg_2022_23_condition": stg_condition,
         "retrieved_guideline_evidence": retrieved_evidence,
         "local_amr_context": local_amr,
         "explanation": explainer_res["explanation"],
@@ -976,6 +989,86 @@ def get_amr_surveillance_data(drug: Optional[str] = None):
 @app.get("/api/guidelines/precedence")
 def get_guideline_precedence(syndrome: str = "uncomplicated_urinary_tract_infection"):
     return knowledge_base.resolve_guideline_precedence(syndrome)
+
+
+@app.get("/api/guidelines/stg-conditions")
+def list_stg_conditions(condition: Optional[str] = None, diagnosis: Optional[str] = None):
+    """
+    Browse the syndrome index of the ICMR Treatment Guidelines 2022-23 edition.
+
+    Every response carries the authority document record and the provenance block, so
+    a caller cannot render the clinical content without the attribution that qualifies
+    it: that the edition claim rests on operator attestation, that no official 2022-23
+    PDF is held, and that any page shown belongs to the prior (2019) edition.
+    """
+    collection = knowledge_base.stg_syndromes
+    auth_id = collection.get("authority_document_id")
+    envelope = {
+        "collection_id": collection.get("collection_id"),
+        "collection_title": collection.get("collection_title"),
+        "authority_document_id": auth_id,
+        "authority_document": collection.get("documents", {}).get(auth_id),
+        "prior_edition_document_id": collection.get("prior_edition_document_id"),
+        "provenance_note": collection.get("provenance_note"),
+        "transcription_note": collection.get("transcription_note"),
+        "verification_note": collection.get("verification_note"),
+    }
+
+    if condition:
+        record = knowledge_base.get_stg_condition(condition)
+        if not record:
+            raise HTTPException(status_code=404, detail=f"Unknown ICMR 2022-23 condition '{condition}'.")
+        return {**envelope, "condition": record}
+
+    if diagnosis:
+        match = knowledge_base.match_stg_condition(diagnosis)
+        return {**envelope, "query": diagnosis, "matched": bool(match), "condition": match}
+
+    index = knowledge_base.list_stg_conditions()
+    return {
+        **envelope,
+        "transcription_sources": collection.get("transcription_sources", {}),
+        "total_conditions": len(index),
+        "conditions": index,
+    }
+
+
+@app.get("/api/guidelines/stw-conditions")
+def list_stw_conditions(condition: Optional[str] = None, diagnosis: Optional[str] = None):
+    """
+    Browse the ICMR Standard Treatment Workflows (2022) conditions.
+
+    `condition` fetches one by key, `diagnosis` runs the same deterministic
+    matcher the analysis pipeline uses. The collection's provenance block is
+    always returned so the caller cannot present this content as the ICMR
+    antimicrobial treatment guidelines.
+    """
+    collection = knowledge_base.stw_collection
+    envelope = {
+        "collection_id": collection.get("collection_id"),
+        "collection_title": collection.get("collection_title"),
+        "provenance_note": collection.get("provenance_note"),
+        "verbatim_normalization": collection.get("verbatim_normalization"),
+        "documents": collection.get("documents", {}),
+    }
+
+    if condition:
+        record = knowledge_base.get_stw_condition(condition)
+        if not record:
+            raise HTTPException(status_code=404, detail=f"Unknown STW condition '{condition}'.")
+        return {**envelope, "condition": record}
+
+    if diagnosis:
+        match = knowledge_base.match_stw_condition(diagnosis)
+        return {**envelope, "query": diagnosis, "matched": bool(match), "condition": match}
+
+    index = knowledge_base.list_stw_conditions()
+    return {
+        **envelope,
+        "shared_regimens": collection.get("shared_regimens", {}),
+        "total_conditions": len(index),
+        "conditions": index,
+    }
 
 
 # ---------------------------------------------------------------------------

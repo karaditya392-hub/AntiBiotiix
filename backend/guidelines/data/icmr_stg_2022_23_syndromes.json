@@ -1,0 +1,3245 @@
+{
+  "collection_id": "ICMR-STG-2022-23-SYNDROMES",
+  "collection_title": "Syndrome and medication index of the ICMR Treatment Guidelines for Antimicrobial Use in Common Syndromes, 2022-23 edition",
+  "last_updated": "2026-08-23",
+  "authority_document_id": "ICMR-STG-2022-23",
+  "precedence_rank": 2,
+  "provenance_note": "Conditions in this file are attributed to the ICMR Treatment Guidelines 2022-23 edition on the basis of operator attestation. The seven files in transcription_sources are Google Docs exports carrying no issuing organization, author or date of their own; they are hashed and recorded as transcriptions, never as independent authorities. Because no official 2022-23 PDF is held, NO record in this file carries a page number in the authority document. Where the same text also occurs in the hash-verified 2019 edition, that location is recorded separately as a prior-edition cross-reference and must not be presented as a 2022-23 page.",
+  "transcription_note": "Measured against the ingested 2019 corpus, 80 of 82 extracts are verbatim identical and the remaining two exceed 70% four-gram overlap. Such continuity is expected between editions of the same guideline. A residue of content -- ceftazidime-avibactam for HAP/VAP among it -- is absent from the 2019 edition entirely and is flagged as new or revised in this edition.",
+  "transcription_sources": {
+    "Intra-abdominal Infections.txt": {
+      "sha256": "4d781c62e5f5fc7744a1b875f13f7cfa10349baa3b6b66f674c2a1aa3b99e4e6",
+      "format": "text/plain",
+      "maps_to_chapter": "5. Intra-abdominal infections"
+    },
+    "Skin and Soft Tissue Infections.txt": {
+      "sha256": "f9ca2ef24f9c86ec35d39b45534ee01a7d4081c87990845d945ddce6b0146d04",
+      "format": "text/plain",
+      "maps_to_chapter": "6. Skin and soft tissue infections"
+    },
+    "Bone and Joint Infections.txt": {
+      "sha256": "6a31bdb1f46451455ea534ab647123df510d777f77967ad100953bda6eeddd78",
+      "format": "text/plain",
+      "maps_to_chapter": "7. Bone and joint infections"
+    },
+    "CNS Infections.pdf": {
+      "sha256": "d12f3e8d81654a1d49f4b69db579ab2a463307620fe61189d92fd6c23510bd8a",
+      "format": "application/pdf (Skia/PDF m153 Google Docs Renderer)",
+      "maps_to_chapter": "8. Central nervous system infections"
+    },
+    "Urinary Tract Infections.pdf": {
+      "sha256": "7ba5a6cb57af7545b219be6f2422e3e2adce4616f6f0ce751fe83306bfa17bdf",
+      "format": "application/pdf (Skia/PDF m153 Google Docs Renderer)",
+      "maps_to_chapter": "9. Urinary tract infections"
+    },
+    "Hospital Acquired Infection.pdf": {
+      "sha256": "95a80ee321600010f37eec664e43721235348a246541ed94d17cff05dac78ab9",
+      "format": "application/pdf (Skia/PDF m153 Google Docs Renderer)",
+      "maps_to_chapter": "10. Hospital acquired infections"
+    },
+    "Infections in Immunocompromised host.pdf": {
+      "sha256": "c762ed7e161fb5dd73fb98a0b00faad13fd67c9e108c2660cccd53ca6f383b18",
+      "format": "application/pdf (Skia/PDF m153 Google Docs Renderer)",
+      "maps_to_chapter": "11. Infections in the immunocompromised host"
+    }
+  },
+  "conditions": {
+    "iai_community_mild_moderate": {
+      "condition_name": "Community acquired intra-abdominal infection, mild to moderate severity",
+      "chapter": "5. Intra-abdominal infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Intra-abdominal Infections.txt",
+      "verbatim_extract": "Community acquired intra-abdominal infection of mild to moderate severity",
+      "presentation": [
+        "Infection spreading from the viscus into the peritoneum causing localized or diffuse peritonitis",
+        "Community onset",
+        "Mild to moderate severity"
+      ],
+      "organisms": [
+        "E. coli",
+        "Klebsiella",
+        "Pseudomonas",
+        "Proteus",
+        "Enterobacter spp",
+        "Streptococcus species",
+        "Enterococcus fecalis",
+        "Enterococcus fecium",
+        "Bacteroides"
+      ],
+      "medications": {
+        "first_choice": [
+          "Cefoperazone-sulbactam"
+        ],
+        "alternative": [
+          "Piperacillin-tazobactam"
+        ],
+        "note": "If ESBL prevalence is under ten percent a third generation cephalosporin may be used, in which case metronidazole must be added."
+      },
+      "comments": "Empiric cover for Enterococcus, MRSA or Candida is not necessary in community acquired intra-abdominal infection. Double anaerobic cover is now recognized as a redundant practice world over.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 53,
+        "section": "5.1.2 Organisms involved",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "iai_community_high_severity": {
+      "condition_name": "Community acquired intra-abdominal infection, high severity",
+      "chapter": "5. Intra-abdominal infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Intra-abdominal Infections.txt",
+      "verbatim_extract": "Community acquired intra-abdominal infection with high severity",
+      "presentation": [
+        "Community onset",
+        "High severity or high risk patient"
+      ],
+      "medications": {
+        "first_choice": [
+          "Imipenem",
+          "Meropenem"
+        ]
+      },
+      "comments": "For severe infection, or where ESBL prevalence exceeds ten percent, include a beta-lactam-beta-lactamase inhibitor or a carbapenem.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 53,
+        "section": "5.1.2 Organisms involved",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "iai_healthcare_associated": {
+      "condition_name": "Healthcare associated intra-abdominal infection",
+      "chapter": "5. Intra-abdominal infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Intra-abdominal Infections.txt",
+      "verbatim_extract": "Healthcare associated intra-abdominal  infection",
+      "presentation": [
+        "Hospital acquired or healthcare associated onset",
+        "Often postoperative"
+      ],
+      "medications": {
+        "first_choice": [
+          "Imipenem or Meropenem",
+          "Vancomycin"
+        ],
+        "alternative": [
+          "Colistin",
+          "Tigecycline"
+        ],
+        "antifungal_if_risk_factors": [
+          "Echinocandin",
+          "Fluconazole"
+        ]
+      },
+      "duration": "10-14 days for healthcare associated infections, particularly with carbapenem resistant organisms, assuming adequate source control and resolution of clinical symptoms and signs",
+      "comments": "Based on the findings of intra-operative cultures cover for Enterococcus may either be stopped or changed. Carbapenem resistant gram negative organisms may be present and may need coverage.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 53,
+        "section": "5.1.2 Organisms involved",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "iai_infected_pancreatic_necrosis": {
+      "condition_name": "Infected pancreatic necrosis / pancreatic abscess",
+      "chapter": "5. Intra-abdominal infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Intra-abdominal Infections.txt",
+      "verbatim_extract": "Infected pancreatic necrosis, pancreatic abscess",
+      "presentation": [
+        "Infected necrosis or abscess complicating pancreatitis"
+      ],
+      "medications": {
+        "first_choice": [
+          "Imipenem-cilastatin",
+          "Vancomycin"
+        ],
+        "antifungal_if_risk_factors": [
+          "Fluconazole",
+          "Echinocandins"
+        ],
+        "if_nosocomial": [
+          "Colistin",
+          "Tigecycline"
+        ]
+      },
+      "comments": "Therapy to be adjusted as per the culture and sensitivity results from pancreatic aspirate or necrosectomy.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 53,
+        "section": "5.1.2 Organisms involved",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "iai_cholangitis_cholecystitis": {
+      "condition_name": "Cholangitis and cholecystitis",
+      "chapter": "5. Intra-abdominal infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Intra-abdominal Infections.txt",
+      "verbatim_extract": "Cholangitis, cholecystitis",
+      "presentation": [
+        "Biliary tract infection"
+      ],
+      "medications": {
+        "first_choice": [
+          "As for community associated complicated intra-abdominal infections (Cefoperazone-sulbactam)"
+        ],
+        "alternative": [
+          "Piperacillin-tazobactam"
+        ]
+      },
+      "comments": "Enterococcus may not be an important issue in cholangitis and cholecystitis.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 53,
+        "section": "5.1.2 Organisms involved",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "iai_liver_abscess": {
+      "condition_name": "Liver abscess",
+      "chapter": "5. Intra-abdominal infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Intra-abdominal Infections.txt",
+      "verbatim_extract": "Cefoperazone-sulbactam or piperacillin-tazobactam with metronidazole to cover for possible bacterial and amoebic etiology",
+      "presentation": [
+        "Hepatic abscess of bacterial or amoebic etiology"
+      ],
+      "medications": {
+        "first_choice": [
+          "Cefoperazone-sulbactam or Piperacillin-tazobactam",
+          "Metronidazole"
+        ]
+      },
+      "comments": "The treatment should be changed as per culture report and amoebic serology subsequently.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 54,
+        "section": "5.1.2 Organisms involved",
+        "text_continuity_score": 0.818,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "spontaneous_bacterial_peritonitis_stg": {
+      "condition_name": "Spontaneous Bacterial Peritonitis (SBP)",
+      "chapter": "5. Intra-abdominal infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Intra-abdominal Infections.txt",
+      "verbatim_extract": "Spontaneous bacterial peritonitis (SBP) refers to ascitic fluid infection with no recognizable source",
+      "presentation": [
+        "Ascitic fluid infection with no recognizable source, commonly in cirrhosis",
+        "Ascitic fluid absolute polymorphonuclear leukocyte (PMN) count > 250 cells/mm3",
+        "Positive ascitic fluid bacterial culture without an intra-abdominal surgically treatable source"
+      ],
+      "organisms": [
+        "Escherichia coli",
+        "Klebsiella",
+        "Staphylococcus",
+        "Enterococcus",
+        "Streptococcus"
+      ],
+      "medications": {
+        "first_choice": [
+          "Piperacillin-tazobactam",
+          "Cefoperazone-sulbactam"
+        ],
+        "alternative": [
+          "Imipenem",
+          "Meropenem"
+        ]
+      },
+      "comments": "Antibiotics should be tailored as per the culture and sensitivity data. Ascitic fluid (at least 10 ml) should be inoculated into a blood culture bottle at the bedside. Up to 50% of patients with SBP have concomitant bacteraemia.",
+      "caveat": "The guideline states that trimethoprim-sulfamethoxazole, ciprofloxacin and norfloxacin prophylaxis reported in western literature is unlikely to be useful in India, as resistance prevalence exceeds 20% even for community acquired isolates, and may drive further resistance.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 54,
+        "section": "5.1.2 Organisms involved",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "acute_watery_diarrhea": {
+      "condition_name": "Acute watery diarrhea",
+      "chapter": "5. Intra-abdominal infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Intra-abdominal Infections.txt",
+      "verbatim_extract": "Antimicrobial therapy is not typically indicated for the treatment of acute watery diarrhea in adults",
+      "presentation": [
+        "Passage of loose or watery stools, typically at least three times in a 24-hour period",
+        "Acute: 14 days or less in duration"
+      ],
+      "organisms": [
+        "Enterotoxigenic Escherichia coli",
+        "Vibrio cholerae (epidemic)",
+        "Norovirus",
+        "Campylobacter species",
+        "Nontyphoidal Salmonellae",
+        "Aeromonas species",
+        "Giardia lamblia"
+      ],
+      "medications": {
+        "first_choice": [
+          "No antimicrobial therapy - oral rehydration solution (ORS)"
+        ],
+        "severe_hypovolemia": [
+          "Intravenous fluids - Ringer's lactate preferred"
+        ]
+      },
+      "comments": "Antimicrobial therapy is not typically indicated for acute watery diarrhea in adults. An important exception is severe cholera in outbreak settings. Probiotics and prebiotics are not recommended except in postantibiotic-associated illness.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 58,
+        "section": "5.3.5 Treatment",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "acute_bloody_diarrhea": {
+      "condition_name": "Acute bloody diarrhea (dysentery)",
+      "chapter": "5. Intra-abdominal infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Intra-abdominal Infections.txt",
+      "verbatim_extract": "adults with bloody diarrhea should be treated promptly with an antimicrobial that is effective against Shigella",
+      "presentation": [
+        "Grossly bloody stool",
+        "Fever",
+        "Signs of inflammatory disease"
+      ],
+      "organisms": [
+        "Shigella species, particularly Shigella flexneri",
+        "Campylobacter jejuni",
+        "Enteroinvasive and enterohemorrhagic E. coli",
+        "Nontyphoidal Salmonella",
+        "Entamoeba histolytica"
+      ],
+      "medications": {
+        "first_choice": [
+          "Ciprofloxacin 500 mg b.d for 3 days"
+        ],
+        "alternative": [
+          "Ceftriaxone 2g i.v as single dose"
+        ]
+      },
+      "comments": "Stool microscopy and cultures must be sent routinely in dysentery syndromes. Loperamide should be avoided in dysentery. Ampicillin and TMP-SMX are no longer drugs of choice in India in view of high resistance.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 58,
+        "section": "5.3.5 Treatment",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "diarrhea_cholera": {
+      "condition_name": "Cholera",
+      "chapter": "5. Intra-abdominal infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Intra-abdominal Infections.txt",
+      "verbatim_extract": "Doxycycline (Not recommended in children and pregnant women) 300mg once",
+      "organisms": [
+        "Vibrio cholerae"
+      ],
+      "medications": {
+        "first_choice": [
+          "Doxycycline 300mg once"
+        ],
+        "alternative": [
+          "Azithromycin 1 g as a single dose"
+        ],
+        "contraindication": "Doxycycline not recommended in children and pregnant women"
+      },
+      "comments": "The antibiotic of choice is fluoroquinolones or azithromycin. Ampicillin or TMP-SMX are no longer drugs of choice in India in view of high resistance.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 58,
+        "section": "5.3.5 Treatment",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "diarrhea_shigella": {
+      "condition_name": "Shigellosis",
+      "chapter": "5. Intra-abdominal infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Intra-abdominal Infections.txt",
+      "verbatim_extract": "Ciprofloxacin 500 mg b.d for 3days Alternatively, Ceftriaxone 2g i.v as single dose",
+      "organisms": [
+        "Shigella species"
+      ],
+      "medications": {
+        "first_choice": [
+          "Ciprofloxacin 500 mg b.d for 3 days"
+        ],
+        "alternative": [
+          "Ceftriaxone 2g i.v as single dose"
+        ]
+      },
+      "comments": "The antibiotic of choice is fluoroquinolones or azithromycin. Ampicillin or TMP-SMX are no longer drugs of choice in India in view of high resistance.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 58,
+        "section": "5.3.5 Treatment",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "diarrhea_amoebiasis": {
+      "condition_name": "Amoebiasis",
+      "chapter": "5. Intra-abdominal infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Intra-abdominal Infections.txt",
+      "verbatim_extract": "Metronidazole 500 mg t.i.d for 5 days",
+      "organisms": [
+        "Entamoeba histolytica"
+      ],
+      "medications": {
+        "first_choice": [
+          "Metronidazole 500 mg t.i.d for 5 days"
+        ]
+      },
+      "comments": "The antibiotic of choice is fluoroquinolones or azithromycin. Ampicillin or TMP-SMX are no longer drugs of choice in India in view of high resistance.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 58,
+        "section": "5.3.5 Treatment",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "diarrhea_giardiasis": {
+      "condition_name": "Giardiasis",
+      "chapter": "5. Intra-abdominal infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Intra-abdominal Infections.txt",
+      "verbatim_extract": "Metronidazole 250 mg t.i.d for 5 days",
+      "organisms": [
+        "Giardia lamblia"
+      ],
+      "medications": {
+        "first_choice": [
+          "Metronidazole 250 mg t.i.d for 5 days"
+        ]
+      },
+      "comments": "The antibiotic of choice is fluoroquinolones or azithromycin. Ampicillin or TMP-SMX are no longer drugs of choice in India in view of high resistance.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 58,
+        "section": "5.3.5 Treatment",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "diarrhea_campylobacter": {
+      "condition_name": "Campylobacter enteritis",
+      "chapter": "5. Intra-abdominal infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Intra-abdominal Infections.txt",
+      "verbatim_extract": "Azithromycin 500 mg  for 3days",
+      "organisms": [
+        "Campylobacter jejuni"
+      ],
+      "medications": {
+        "first_choice": [
+          "Azithromycin 500 mg for 3 days"
+        ]
+      },
+      "comments": "The antibiotic of choice is fluoroquinolones or azithromycin. Ampicillin or TMP-SMX are no longer drugs of choice in India in view of high resistance.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 58,
+        "section": "5.3.5 Treatment",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "diarrhea_aeromonas": {
+      "condition_name": "Aeromonas enteritis",
+      "chapter": "5. Intra-abdominal infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Intra-abdominal Infections.txt",
+      "verbatim_extract": "Ciprofloxacin 500 mg b.i.d for  3days",
+      "organisms": [
+        "Aeromonas species"
+      ],
+      "medications": {
+        "first_choice": [
+          "Ciprofloxacin 500 mg b.i.d for 3 days"
+        ],
+        "alternative": [
+          "Norfloxacin 400 mg b.i.d for 3 days"
+        ]
+      },
+      "comments": "The antibiotic of choice is fluoroquinolones or azithromycin. Ampicillin or TMP-SMX are no longer drugs of choice in India in view of high resistance.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 58,
+        "section": "5.3.5 Treatment",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "cellulitis_stg": {
+      "condition_name": "Cellulitis",
+      "chapter": "6. Skin and soft tissue infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Skin and Soft Tissue Infections.txt",
+      "verbatim_extract": "Cellulitis is an acute spreading infection that involves subcutaneous tissue",
+      "presentation": [
+        "Acute spreading infection involving subcutaneous tissue",
+        "Rapidly intensifying pain and redness",
+        "Fever and lymphadenopathy may be present",
+        "The borders in cellulitis are not well demarcated"
+      ],
+      "organisms": [
+        "Streptococcus pyogenes (Group A Streptococcus)",
+        "Staphylococcus aureus",
+        "Rarely H. influenzae and Pneumococcus"
+      ],
+      "medications": {
+        "first_choice": [
+          "Cefazolin",
+          "Cephalexin",
+          "Amoxicillin-clavulanate"
+        ],
+        "adjunct": [
+          "+/- Clindamycin"
+        ]
+      },
+      "duration": "5-7 days (longer if clinically indicated)",
+      "comments": "Obtain blood/pus cultures before starting antibiotics. Consider poly-microbial pathogens in diabetics. Consider risk factors for MRSA and presence of TSS before using clindamycin.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 60,
+        "section": "6.1 Introduction",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "furunculosis": {
+      "condition_name": "Furunculosis",
+      "chapter": "6. Skin and soft tissue infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Skin and Soft Tissue Infections.txt",
+      "verbatim_extract": "Furunculosis is a deep infection of the hair follicle leading to abscess formation",
+      "presentation": [
+        "Deep infection of the hair follicle leading to abscess formation with accumulation of pus and necrotic tissue",
+        "Red, swollen, and tender nodules on hair-bearing parts of the body",
+        "Often tends to be recurrent and may spread among family members"
+      ],
+      "organisms": [
+        "Staphylococcus aureus"
+      ],
+      "medications": {
+        "first_choice": [
+          "Cefazolin",
+          "Cephalexin",
+          "Amoxicillin-clavulanate"
+        ]
+      },
+      "duration": "5-7 days",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 60,
+        "section": "6.1 Introduction",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "carbuncle_stg": {
+      "condition_name": "Carbuncle",
+      "chapter": "6. Skin and soft tissue infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Skin and Soft Tissue Infections.txt",
+      "verbatim_extract": "It is a coalescence of several inflamed follicles into a single inflammatory mass with purulent drainage",
+      "presentation": [
+        "Coalescence of several inflamed follicles into a single inflammatory mass",
+        "Purulent drainage from multiple follicles"
+      ],
+      "organisms": [
+        "Staphylococcus aureus"
+      ],
+      "medications": {
+        "first_choice": [
+          "Cefazolin",
+          "Cephalexin",
+          "Amoxicillin-clavulanate"
+        ]
+      },
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 60,
+        "section": "6.1 Introduction",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "erysipelas_stg": {
+      "condition_name": "Erysipelas",
+      "chapter": "6. Skin and soft tissue infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Skin and Soft Tissue Infections.txt",
+      "verbatim_extract": "It is characterized by abrupt onset of fiery red swelling of the face or extremities",
+      "presentation": [
+        "Abrupt onset of fiery red swelling of the face or extremities",
+        "Well defined indurated margins, particularly along the naso-labial fold",
+        "Rapid progression and intense pain"
+      ],
+      "organisms": [
+        "Beta-haemolytic streptococci",
+        "Propionibacterium acnes",
+        "MSSA"
+      ],
+      "medications": {
+        "first_choice": [
+          "Amoxicillin-clavulanate"
+        ]
+      },
+      "duration": "5-7 days",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 60,
+        "section": "6.1 Introduction",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "necrotizing_fasciitis": {
+      "condition_name": "Necrotizing fasciitis (polymicrobial)",
+      "chapter": "6. Skin and soft tissue infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Skin and Soft Tissue Infections.txt",
+      "verbatim_extract": "Necrotizing fasciitis is an infection of the deep soft tissues that result in progressive destruction of the muscle fascia",
+      "presentation": [
+        "Infection of the deep soft tissues with progressive destruction of the muscle fascia and overlying subcutaneous fat",
+        "Notorious for rapid progression"
+      ],
+      "organisms": [
+        "S. pyogenes",
+        "S. aureus",
+        "Anaerobes",
+        "Gram negative organisms (polymicrobial)"
+      ],
+      "medications": {
+        "first_choice": [
+          "Piperacillin-tazobactam",
+          "Clindamycin"
+        ],
+        "adjunct": [
+          "Consider use of IVIG for streptococcal NF/TSS"
+        ]
+      },
+      "duration": "Generally 14 days if adequate source control achieved",
+      "comments": "Early and aggressive surgical debridement is essential. Send blood and intraoperative specimens for bacterial cultures.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 60,
+        "section": "6.1 Introduction",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "necrotizing_fasciitis_aquatic": {
+      "condition_name": "Necrotizing fasciitis (water exposure)",
+      "chapter": "6. Skin and soft tissue infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Skin and Soft Tissue Infections.txt",
+      "verbatim_extract": "Aeromonas/ V.vulnificus (suspect when history of exposure to  fresh water or salt water respectively)",
+      "presentation": [
+        "Necrotizing fasciitis with a history of exposure to fresh water or salt water"
+      ],
+      "organisms": [
+        "Aeromonas (fresh water)",
+        "Vibrio vulnificus (salt water)"
+      ],
+      "medications": {
+        "first_choice": [
+          "Ciprofloxacin",
+          "Doxycycline"
+        ]
+      },
+      "duration": "Generally 14 days if adequate source control achieved",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 61,
+        "section": "6.1 Introduction",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "skin_abscess_stg": {
+      "condition_name": "Skin abscess",
+      "chapter": "6. Skin and soft tissue infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Skin and Soft Tissue Infections.txt",
+      "verbatim_extract": "Abscess S. pyogenes, Oral anaerobes Clindamycin",
+      "presentation": [
+        "Localized collection of pus in skin or soft tissue"
+      ],
+      "organisms": [
+        "S. pyogenes",
+        "Oral anaerobes"
+      ],
+      "medications": {
+        "first_choice": [
+          "Clindamycin",
+          "Ampicillin-sulbactam",
+          "Amoxicillin-clavulanate"
+        ]
+      },
+      "duration": "5-7 days",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 61,
+        "section": "6.1 Introduction",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "peritonsillar_abscess": {
+      "condition_name": "Peri-tonsillar abscess (Quinsy)",
+      "chapter": "6. Skin and soft tissue infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Skin and Soft Tissue Infections.txt",
+      "verbatim_extract": "Deep neck space infections usually arise from an infected dental source or the tonsils",
+      "presentation": [
+        "Deep neck space infection arising from an infected dental source or the tonsils, parotid gland, deep cervical lymph nodes, middle ear, or sinuses",
+        "Often progress rapidly and may develop a life-threatening complication"
+      ],
+      "organisms": [
+        "S. pyogenes",
+        "Oral anaerobes"
+      ],
+      "medications": {
+        "immunocompetent": [
+          "Clindamycin",
+          "Ampicillin-sulbactam",
+          "Amoxicillin-clavulanate"
+        ],
+        "immunosuppressed": [
+          "Piperacillin-tazobactam"
+        ],
+        "if_mrsa_risk": [
+          "Linezolid 600 mg orally or IV every 12 hours",
+          "Vancomycin 15 to 20 mg/kg IV every 12 hours"
+        ]
+      },
+      "comments": "Adequate antibiotics with surgical source control in case of loculated collections are essential. Patients with risk factors for MRSA infection should be treated empirically with linezolid (600 mg orally or IV every 12 hours) or vancomycin (15 to 20 mg/kg IV every 12 hours). Enterobacteriaceae must be considered as potential pathogens in immunosuppressed hosts.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 63,
+        "section": "6.3 Deep neck space infections",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "suppurative_parotitis": {
+      "condition_name": "Suppurative parotitis",
+      "chapter": "6. Skin and soft tissue infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Skin and Soft Tissue Infections.txt",
+      "verbatim_extract": "Deep neck space infections usually arise from an infected dental source or the tonsils",
+      "presentation": [
+        "Deep neck space infection arising from an infected dental source or the tonsils, parotid gland, deep cervical lymph nodes, middle ear, or sinuses",
+        "Often progress rapidly and may develop a life-threatening complication"
+      ],
+      "organisms": [
+        "Streptococci",
+        "Oral anaerobes"
+      ],
+      "medications": {
+        "immunocompetent": [
+          "Clindamycin",
+          "Ampicillin-sulbactam",
+          "Amoxicillin-clavulanate"
+        ],
+        "immunosuppressed": [
+          "Piperacillin-tazobactam",
+          "Clindamycin"
+        ],
+        "if_mrsa_risk": [
+          "Linezolid 600 mg orally or IV every 12 hours",
+          "Vancomycin 15 to 20 mg/kg IV every 12 hours"
+        ]
+      },
+      "comments": "Adequate antibiotics with surgical source control in case of loculated collections are essential. Patients with risk factors for MRSA infection should be treated empirically with linezolid (600 mg orally or IV every 12 hours) or vancomycin (15 to 20 mg/kg IV every 12 hours). Enterobacteriaceae must be considered as potential pathogens in immunosuppressed hosts.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 63,
+        "section": "6.3 Deep neck space infections",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "ludwigs_angina": {
+      "condition_name": "Ludwig's angina",
+      "chapter": "6. Skin and soft tissue infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Skin and Soft Tissue Infections.txt",
+      "verbatim_extract": "Deep neck space infections usually arise from an infected dental source or the tonsils",
+      "presentation": [
+        "Deep neck space infection arising from an infected dental source or the tonsils, parotid gland, deep cervical lymph nodes, middle ear, or sinuses",
+        "Often progress rapidly and may develop a life-threatening complication"
+      ],
+      "organisms": [
+        "Streptococci",
+        "Oral anaerobes"
+      ],
+      "medications": {
+        "immunocompetent": [
+          "Clindamycin",
+          "Ampicillin-sulbactam",
+          "Amoxicillin-clavulanate"
+        ],
+        "immunosuppressed": [
+          "Piperacillin-tazobactam",
+          "Clindamycin"
+        ],
+        "if_mrsa_risk": [
+          "Linezolid 600 mg orally or IV every 12 hours",
+          "Vancomycin 15 to 20 mg/kg IV every 12 hours"
+        ]
+      },
+      "comments": "Adequate antibiotics with surgical source control in case of loculated collections are essential. Patients with risk factors for MRSA infection should be treated empirically with linezolid (600 mg orally or IV every 12 hours) or vancomycin (15 to 20 mg/kg IV every 12 hours). Enterobacteriaceae must be considered as potential pathogens in immunosuppressed hosts.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 63,
+        "section": "6.3 Deep neck space infections",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "odontogenic_deep_neck_infection": {
+      "condition_name": "Odontogenic deep neck space infection",
+      "chapter": "6. Skin and soft tissue infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Skin and Soft Tissue Infections.txt",
+      "verbatim_extract": "Deep neck space infections usually arise from an infected dental source or the tonsils",
+      "presentation": [
+        "Deep neck space infection arising from an infected dental source or the tonsils, parotid gland, deep cervical lymph nodes, middle ear, or sinuses",
+        "Often progress rapidly and may develop a life-threatening complication"
+      ],
+      "organisms": [
+        "Viridans and other streptococci",
+        "Peptostreptococcus and other oral anaerobes"
+      ],
+      "medications": {
+        "immunocompetent": [
+          "Clindamycin",
+          "Ampicillin-sulbactam",
+          "Amoxicillin-clavulanate"
+        ],
+        "immunosuppressed": [
+          "Piperacillin-tazobactam",
+          "Clindamycin"
+        ],
+        "if_mrsa_risk": [
+          "Linezolid 600 mg orally or IV every 12 hours",
+          "Vancomycin 15 to 20 mg/kg IV every 12 hours"
+        ]
+      },
+      "comments": "Adequate antibiotics with surgical source control in case of loculated collections are essential. Patients with risk factors for MRSA infection should be treated empirically with linezolid (600 mg orally or IV every 12 hours) or vancomycin (15 to 20 mg/kg IV every 12 hours). Enterobacteriaceae must be considered as potential pathogens in immunosuppressed hosts.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 63,
+        "section": "6.3 Deep neck space infections",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "rhinogenic_deep_neck_infection": {
+      "condition_name": "Rhinogenic deep neck space infection",
+      "chapter": "6. Skin and soft tissue infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Skin and Soft Tissue Infections.txt",
+      "verbatim_extract": "Deep neck space infections usually arise from an infected dental source or the tonsils",
+      "presentation": [
+        "Deep neck space infection arising from an infected dental source or the tonsils, parotid gland, deep cervical lymph nodes, middle ear, or sinuses",
+        "Often progress rapidly and may develop a life-threatening complication"
+      ],
+      "organisms": [
+        "S. pneumoniae",
+        "H. influenzae",
+        "Streptococci",
+        "Anaerobes"
+      ],
+      "medications": {
+        "immunocompetent": [
+          "Ceftriaxone",
+          "Linezolid"
+        ],
+        "immunosuppressed": [
+          "Piperacillin-tazobactam",
+          "Clindamycin"
+        ],
+        "if_mrsa_risk": [
+          "Linezolid 600 mg orally or IV every 12 hours",
+          "Vancomycin 15 to 20 mg/kg IV every 12 hours"
+        ]
+      },
+      "comments": "Adequate antibiotics with surgical source control in case of loculated collections are essential. Patients with risk factors for MRSA infection should be treated empirically with linezolid (600 mg orally or IV every 12 hours) or vancomycin (15 to 20 mg/kg IV every 12 hours). Enterobacteriaceae must be considered as potential pathogens in immunosuppressed hosts.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 63,
+        "section": "6.3 Deep neck space infections",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "otologic_deep_neck_infection": {
+      "condition_name": "Otologic deep neck space infection",
+      "chapter": "6. Skin and soft tissue infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Skin and Soft Tissue Infections.txt",
+      "verbatim_extract": "Deep neck space infections usually arise from an infected dental source or the tonsils",
+      "presentation": [
+        "Deep neck space infection arising from an infected dental source or the tonsils, parotid gland, deep cervical lymph nodes, middle ear, or sinuses",
+        "Often progress rapidly and may develop a life-threatening complication"
+      ],
+      "organisms": [
+        "S. pneumoniae",
+        "H. influenzae",
+        "Streptococci",
+        "Anaerobes"
+      ],
+      "medications": {
+        "immunocompetent": [
+          "Ceftriaxone",
+          "Metronidazole"
+        ],
+        "immunosuppressed": [
+          "Piperacillin-tazobactam",
+          "Clindamycin"
+        ],
+        "if_mrsa_risk": [
+          "Linezolid 600 mg orally or IV every 12 hours",
+          "Vancomycin 15 to 20 mg/kg IV every 12 hours"
+        ]
+      },
+      "comments": "Adequate antibiotics with surgical source control in case of loculated collections are essential. Patients with risk factors for MRSA infection should be treated empirically with linezolid (600 mg orally or IV every 12 hours) or vancomycin (15 to 20 mg/kg IV every 12 hours). Enterobacteriaceae must be considered as potential pathogens in immunosuppressed hosts.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 63,
+        "section": "6.3 Deep neck space infections",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "prevertebral_abscess": {
+      "condition_name": "Prevertebral abscess",
+      "chapter": "6. Skin and soft tissue infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Skin and Soft Tissue Infections.txt",
+      "verbatim_extract": "Deep neck space infections usually arise from an infected dental source or the tonsils",
+      "presentation": [
+        "Deep neck space infection arising from an infected dental source or the tonsils, parotid gland, deep cervical lymph nodes, middle ear, or sinuses",
+        "Often progress rapidly and may develop a life-threatening complication"
+      ],
+      "organisms": [
+        "S. aureus",
+        "Facultative gram negative anaerobes"
+      ],
+      "medications": {
+        "immunocompetent": [
+          "Linezolid or Vancomycin",
+          "Ciprofloxacin"
+        ],
+        "immunosuppressed": [
+          "Piperacillin-tazobactam",
+          "Clindamycin"
+        ],
+        "if_mrsa_risk": [
+          "Linezolid 600 mg orally or IV every 12 hours",
+          "Vancomycin 15 to 20 mg/kg IV every 12 hours"
+        ]
+      },
+      "comments": "Adequate antibiotics with surgical source control in case of loculated collections are essential. Patients with risk factors for MRSA infection should be treated empirically with linezolid (600 mg orally or IV every 12 hours) or vancomycin (15 to 20 mg/kg IV every 12 hours). Enterobacteriaceae must be considered as potential pathogens in immunosuppressed hosts.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 63,
+        "section": "6.3 Deep neck space infections",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "lemierre_syndrome": {
+      "condition_name": "Lemierre syndrome (septic jugular thrombophlebitis)",
+      "chapter": "6. Skin and soft tissue infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Skin and Soft Tissue Infections.txt",
+      "verbatim_extract": "Deep neck space infections usually arise from an infected dental source or the tonsils",
+      "presentation": [
+        "Deep neck space infection arising from an infected dental source or the tonsils, parotid gland, deep cervical lymph nodes, middle ear, or sinuses",
+        "Often progress rapidly and may develop a life-threatening complication"
+      ],
+      "organisms": [
+        "Fusobacterium necrophorum",
+        "Streptococcus",
+        "Anaerobes"
+      ],
+      "medications": {
+        "immunocompetent": [
+          "Piperacillin-tazobactam",
+          "Clindamycin"
+        ],
+        "immunosuppressed": [
+          "Piperacillin-tazobactam",
+          "Clindamycin"
+        ],
+        "if_mrsa_risk": [
+          "Linezolid 600 mg orally or IV every 12 hours",
+          "Vancomycin 15 to 20 mg/kg IV every 12 hours"
+        ]
+      },
+      "comments": "Adequate antibiotics with surgical source control in case of loculated collections are essential. Patients with risk factors for MRSA infection should be treated empirically with linezolid (600 mg orally or IV every 12 hours) or vancomycin (15 to 20 mg/kg IV every 12 hours). Enterobacteriaceae must be considered as potential pathogens in immunosuppressed hosts.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 63,
+        "section": "6.3 Deep neck space infections",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "acute_osteomyelitis": {
+      "condition_name": "Acute osteomyelitis",
+      "chapter": "7. Bone and joint infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Bone and Joint Infections.txt",
+      "verbatim_extract": "Acute osteomyelitis (days-weeks) Absence of sequestra",
+      "presentation": [
+        "Duration days to weeks",
+        "Absence of sequestra",
+        "ESR and CRP often abnormal",
+        "White blood cell count can be normal or elevated"
+      ],
+      "organisms": [
+        "Staphylococcus aureus",
+        "Enterobacter species",
+        "Streptococcus species",
+        "Pseudomonas species",
+        "Gram negative bacilli"
+      ],
+      "medications": {
+        "principles": [
+          "Bactericidal drugs are preferred for deep seated infections",
+          "Agents with good bone penetration",
+          "Drugs with biofilm activity",
+          "Least toxic and most affordable regimen in view of prolonged duration"
+        ]
+      },
+      "duration": "IV treatment has been traditionally recommended, however switching to oral treatment after 2 weeks in selected cases appears to be equally successful",
+      "comments": "Blood culture should be obtained along with wound and bone culture for all patients presenting with acute osteomyelitis. Hematogenous osteomyelitis is usually monobacterial.",
+      "caveat": "The supplied chapter states the empiric PRINCIPLES for agent selection and refers directed antibiotic choices to a separate section that is not present in the supplied extract. No specific molecule is named here.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 66,
+        "section": "7.1 OSTEOMYELITIS",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "chronic_osteomyelitis": {
+      "condition_name": "Chronic osteomyelitis",
+      "chapter": "7. Bone and joint infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Bone and Joint Infections.txt",
+      "verbatim_extract": "Chronic osteomyelitis (months-years) Presence of sequestra",
+      "presentation": [
+        "Duration months to years",
+        "Presence of sequestra and/or sinus tract",
+        "Anaemia can be a feature",
+        "X-ray positive in the majority: osteopenia, periostitis, Brodie abscess"
+      ],
+      "organisms": [
+        "Staphylococcus aureus",
+        "Polymicrobial in contiguous osteomyelitis"
+      ],
+      "medications": {
+        "adjunct": [
+          "Local antibiotic cement spacer / antibiotic impregnated beads as adjunctive treatment"
+        ]
+      },
+      "comments": "Contrast enhanced MRI is the most sensitive and specific radiological investigation. Swab cultures and sinus tract cultures may be unreliable.",
+      "caveat": "No specific molecule is named in the supplied extract; directed choices are referred to a section not supplied.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 66,
+        "section": "7.1 OSTEOMYELITIS",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "septic_arthritis_native": {
+      "condition_name": "Septic arthritis of native joint",
+      "chapter": "7. Bone and joint infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Bone and Joint Infections.txt",
+      "verbatim_extract": "Most common bacteria causing septic arthritis are gram positive",
+      "presentation": [
+        "Leucocytosis, high ESR and CRP",
+        "Synovial WBC counts more than 50000 cells/mm3",
+        "Periarticular soft tissue swelling and fat pad oedema early",
+        "Loss of joint space, periarticular osteoporosis and periosteal reaction as infection worsens"
+      ],
+      "organisms": [
+        "Staphylococcus aureus (commonest)",
+        "Gram positive organisms",
+        "Gram negative in gastrointestinal or urogenital bacteremia"
+      ],
+      "medications": {
+        "principles": [
+          "Bactericidal agents with good bone and joint penetration"
+        ]
+      },
+      "comments": "Synovial fluid should be sent for WBC counts, gram stain and culture before starting antibiotics. Blood cultures should be obtained for all suspected cases before starting antibiotics.",
+      "caveat": "No specific molecule is named in the supplied extract.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 69,
+        "section": "7.1.5.3 Cultures:",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "prosthetic_joint_infection": {
+      "condition_name": "Prosthetic joint infection (PJI)",
+      "chapter": "7. Bone and joint infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Bone and Joint Infections.txt",
+      "verbatim_extract": "Prosthetic joint infection is the worst complication of joint replacement surgeries",
+      "presentation": [
+        "Sinus tract communicating with a prosthesis",
+        "Presence of pus",
+        "Acute inflammation on histopathologic evaluation of periprosthetic tissue",
+        "Two or more positive cultures with the same organism",
+        "Single positive culture with a virulent organism",
+        "ESR >30 and CRP >10; if both normal PJI is unlikely"
+      ],
+      "organisms": [
+        "Staphylococcus aureus",
+        "Coagulase-negative Staphylococci",
+        "Enterococci",
+        "Gram negative aerobic bacilli (quite common in the Indian setting)",
+        "Propionibacterium acnes for shoulder"
+      ],
+      "medications": {
+        "principles": [
+          "Bactericidal drugs with biofilm activity",
+          "Agents with good bone penetration"
+        ],
+        "adjunct": [
+          "Local antibiotic cement spacer / antibiotic impregnated beads"
+        ]
+      },
+      "comments": "At least 3 and optimally 5-6 samples of periprosthetic tissue must be obtained. Sonication of the prosthetic implant will detect biofilm organisms and improve microbiological yield. Definition is that of the Infectious Diseases Society of America (IDSA), 2012.",
+      "caveat": "Directed antibiotic choices are referred to a section not present in the supplied extract.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 70,
+        "section": "7.2.1.3 Clinical features",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "acute_febrile_encephalopathy": {
+      "condition_name": "Acute Febrile Encephalopathy / Acute Encephalitis Syndrome",
+      "chapter": "8. Central nervous system infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "CNS Infections.pdf",
+      "verbatim_extract": "acute onset of fever and a change in mental status",
+      "presentation": [
+        "Acute onset of fever AND a change in mental status (confusion, disorientation, coma, or inability to talk)",
+        "AND/OR new onset of seizures (excluding simple febrile seizures)"
+      ],
+      "organisms": [
+        "Acute bacterial meningitis",
+        "Acute viral encephalitis",
+        "Tubercular meningitis",
+        "Sepsis associated encephalopathy",
+        "Cerebral malaria",
+        "Mycoplasma",
+        "Rickettsia",
+        "Leptospira"
+      ],
+      "medications": {
+        "empiric": [
+          "Ceftriaxone",
+          "Acyclovir",
+          "Doxycycline",
+          "Artesunate"
+        ]
+      },
+      "comments": "Acute febrile encephalopathy is a medical emergency. Empiric therapy should be started immediately after drawing blood cultures pending results of tests, then narrowed based on the results of investigations. Non infectious causes include Reye's syndrome, ADEM, metabolic/toxic encephalopathy, NCSE and autoimmune encephalitis.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 80,
+        "section": "7.2.6 Management",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "acute_bacterial_meningitis": {
+      "condition_name": "Acute bacterial meningitis",
+      "chapter": "8. Central nervous system infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "CNS Infections.pdf",
+      "verbatim_extract": "The administration of dexamethasone 15- 20 minutes prior to giving the first dose",
+      "presentation": [
+        "Fever, altered sensorium, meningeal signs",
+        "CSF sent for cell count, sugar and protein, gram stain and culture"
+      ],
+      "organisms": [
+        "Streptococcus pneumoniae",
+        "Haemophilus influenzae",
+        "Meningococcus",
+        "MRSA and Candida in late onset neonatal meningitis"
+      ],
+      "medications": {
+        "adjunct_steroid": [
+          "Dexamethasone 0.15 mg/kg every 6 hours for 48-96 hours (10 mg 6 hourly in adults), given 15-20 minutes prior to the first dose of antibiotic"
+        ],
+        "escalation": [
+          "Consider adding rifampicin if cephalosporin MIC >= 4 microgram/mL, if the condition worsens after 48 hours of vancomycin + ceftriaxone, if dexamethasone has been given, or if repeat LP shows the presence of bacteria"
+        ]
+      },
+      "duration": "Generally 10-14 days for uncomplicated meningitis. Pathogen dependent: 7 days for meningococcus and H. influenzae, 10-14 days for pneumococcus, 2-3 weeks for group B Streptococcus, 3-6 weeks for Listeria, 3 weeks for gram negative meningitis.",
+      "comments": "Steroids are not recommended for meningitis in neonates. If the organism is cephalosporin susceptible, vancomycin can be stopped. In patients improving clinically there is no need to repeat CSF analysis.",
+      "caveat": "The supplied extract refers the empiric antibiotic regimen to a table that did not survive extraction from the supplied PDF. Ceftriaxone and vancomycin are named in the surrounding prose as the regimen being modified, and are recorded on that basis only.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 85,
+        "section": "7.2.6 Management",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "healthcare_associated_meningitis": {
+      "condition_name": "Healthcare associated meningitis / ventriculitis",
+      "chapter": "8. Central nervous system infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "CNS Infections.pdf",
+      "verbatim_extract": "Methicillin sensitive Staphylococcus Cloxacillin Ceftriaxone Methicillin resistant Staphylococcus Vancomycin Linezolid/Cotrimoxazole if susceptible Non ESBL gram negative Ceftriaxone Cefotaxime/ Ceftazidime ESBL gram negative Meropenem Cotrimoxazole/ Moxifloxacin",
+      "presentation": [
+        "Follows neurosurgery, head trauma, external ventricular drainage or lumbar puncture",
+        "Elevated CSF lactate (> 4 mmol/l) and procalcitonin help differentiate infective from chemical meningitis"
+      ],
+      "organisms": [
+        "Acinetobacter",
+        "Pseudomonas",
+        "Klebsiella",
+        "Staphylococcus aureus",
+        "Staphylococcus epidermidis"
+      ],
+      "medications": {
+        "empiric": [
+          "High dose meropenem",
+          "Vancomycin"
+        ],
+        "methicillin_sensitive_staphylococcus": {
+          "preferred": [
+            "Cloxacillin"
+          ],
+          "alternative": [
+            "Ceftriaxone"
+          ]
+        },
+        "methicillin_resistant_staphylococcus": {
+          "preferred": [
+            "Vancomycin"
+          ],
+          "alternative": [
+            "Linezolid",
+            "Cotrimoxazole if susceptible"
+          ]
+        },
+        "non_esbl_gram_negative": {
+          "preferred": [
+            "Ceftriaxone"
+          ],
+          "alternative": [
+            "Cefotaxime",
+            "Ceftazidime"
+          ]
+        },
+        "esbl_gram_negative": {
+          "preferred": [
+            "Meropenem"
+          ],
+          "alternative": [
+            "Cotrimoxazole",
+            "Moxifloxacin"
+          ]
+        },
+        "carbapenem_resistant_gram_negative": {
+          "preferred": [
+            "Systemic Colistin or Polymyxin B with high dose tigecycline / minocycline / fosfomycin / co-trimoxazole / quinolones / chloramphenicol depending on susceptibility"
+          ],
+          "intrathecal": [
+            "Intraventricular or intrathecal colistin, polymyxin or aminoglycosides"
+          ]
+        }
+      },
+      "duration": "Generally 2-3 weeks, varying with the causative organism",
+      "comments": "Surgical drainage of pus and removal of hardware may be needed. Intraventricular drugs are best administered through an Ommaya reservoir.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 87,
+        "section": "7.2.6 Management",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "csf_shunt_infection": {
+      "condition_name": "CSF shunt infection",
+      "chapter": "8. Central nervous system infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "CNS Infections.pdf",
+      "verbatim_extract": "The usual symptoms include fever with headache/ nausea/ lethargy, tenderness or erythema over the subcutaneous tunnel",
+      "presentation": [
+        "Fever with headache, nausea or lethargy",
+        "Tenderness or erythema over the subcutaneous tunnel",
+        "Symptoms of peritonitis or pleuritis with ventriculoperitoneal or ventriculopleural shunts"
+      ],
+      "organisms": [
+        "Coagulase negative Staphylococci",
+        "Staphylococcus aureus",
+        "Gram negative bacilli",
+        "Propionibacterium acnes"
+      ],
+      "medications": {
+        "empiric_culture_negative": [
+          "Ceftriaxone",
+          "Vancomycin"
+        ]
+      },
+      "duration": "7-10 days for CONS to 10-14 days for S. aureus and gram negative bacilli",
+      "comments": "The shunt should be removed and a temporary external ventricular drain inserted. The lab should be asked to incubate samples for 10 days to detect organisms such as Propionibacterium acnes.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 87,
+        "section": "7.2.6 Management",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "brain_abscess_hematogenous": {
+      "condition_name": "Brain abscess - hematogenous spread",
+      "chapter": "8. Central nervous system infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "CNS Infections.pdf",
+      "verbatim_extract": "The etiology of brain abscess is based on the underlying predisposing factor",
+      "presentation": [
+        "Hematogenous spread from cyanotic congenital heart disease, lung infections or endocarditis"
+      ],
+      "organisms": [
+        "Aerobic and microaerophilic Streptococci",
+        "S. aureus"
+      ],
+      "medications": {
+        "empiric": [
+          "Ceftriaxone",
+          "Metronidazole",
+          "with or without Vancomycin"
+        ]
+      },
+      "duration": "At least 4-6 weeks and till radiologic stabilization. Significantly shortened if abscess drainage is performed, and can be 3 weeks where excision of the abscess is done.",
+      "comments": "Drainage by aspiration is important for large abscesses or drug resistant organisms. Treatment should be modified as per cultures.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 87,
+        "section": "7.2.6 Management",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "brain_abscess_contiguous": {
+      "condition_name": "Brain abscess - contiguous spread",
+      "chapter": "8. Central nervous system infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "CNS Infections.pdf",
+      "verbatim_extract": "The etiology of brain abscess is based on the underlying predisposing factor",
+      "presentation": [
+        "Contiguous spread from otitis media, mastoiditis, sinusitis or dental infection"
+      ],
+      "organisms": [
+        "Aerobic, microaerophilic and anaerobic streptococci",
+        "Anaerobic gram negative bacilli",
+        "S. aureus",
+        "Pseudomonas"
+      ],
+      "medications": {
+        "empiric": [
+          "Ceftriaxone",
+          "Metronidazole"
+        ]
+      },
+      "duration": "At least 4-6 weeks and till radiologic stabilization. Significantly shortened if abscess drainage is performed, and can be 3 weeks where excision of the abscess is done.",
+      "comments": "Drainage by aspiration is important for large abscesses or drug resistant organisms. Treatment should be modified as per cultures.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 87,
+        "section": "7.2.6 Management",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "brain_abscess_neonatal": {
+      "condition_name": "Brain abscess - neonatal",
+      "chapter": "8. Central nervous system infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "CNS Infections.pdf",
+      "verbatim_extract": "The etiology of brain abscess is based on the underlying predisposing factor",
+      "presentation": [
+        "Neonates"
+      ],
+      "organisms": [
+        "Citrobacter",
+        "Enterobacteriaceae",
+        "Candida"
+      ],
+      "medications": {
+        "empiric": [
+          "Meropenem"
+        ]
+      },
+      "duration": "At least 4-6 weeks and till radiologic stabilization. Significantly shortened if abscess drainage is performed, and can be 3 weeks where excision of the abscess is done.",
+      "comments": "Drainage by aspiration is important for large abscesses or drug resistant organisms. Treatment should be modified as per cultures.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 87,
+        "section": "7.2.6 Management",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "brain_abscess_immunocompromised": {
+      "condition_name": "Brain abscess - HIV or immunocompromised host",
+      "chapter": "8. Central nervous system infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "CNS Infections.pdf",
+      "verbatim_extract": "HIV Mycobacterium tuberculosis, Nocardia, Toxoplasma, Cryptococcus, Listeria No empiric therapy",
+      "presentation": [
+        "Brain abscess in a patient with HIV or other immunocompromise"
+      ],
+      "organisms": [
+        "Mycobacterium tuberculosis",
+        "Nocardia",
+        "Toxoplasma",
+        "Cryptococcus",
+        "Listeria",
+        "Mucorales",
+        "Aspergillus",
+        "Candida"
+      ],
+      "medications": {
+        "empiric": [
+          "No empiric therapy"
+        ]
+      },
+      "comments": "The guideline states NO empiric therapy for this group: establish the etiology by blood cultures and aspiration of pus first. Imaging of the chest and abdomen should be done to see if an extra-CNS site can be sampled.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 88,
+        "section": "7.2.6 Management",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "asymptomatic_bacteriuria": {
+      "condition_name": "Asymptomatic bacteriuria (ASB)",
+      "chapter": "9. Urinary tract infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Urinary Tract Infections.pdf",
+      "verbatim_extract": "The presence of microbiologically significant bacteria in a non-contaminated urine specimen in a patient without signs and symptoms",
+      "presentation": [
+        "No clinical symptoms",
+        "May or may not have significant pyuria and/or dipstick leukocyte esterase test positive",
+        "Positive culture",
+        "Normal radiology"
+      ],
+      "organisms": [
+        "Enterobacteriaceae 73.2% (E. coli 49.24%, Klebsiella spp 17.44%, Proteus spp 1.4%, Citrobacter 1.3%)",
+        "Enterococcus species 10.9%",
+        "Non-fermenting gram-negative bacilli 8.2%",
+        "Staphylococcus aureus 0.9%"
+      ],
+      "medications": {
+        "first_choice": [
+          "No antibiotic treatment required"
+        ]
+      },
+      "comments": "No antibiotic treatment is required in asymptomatic bacteriuria. If pyuria persists, causes for sterile pyuria should be investigated.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 91,
+        "section": "9.1 UTI syndromes",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "acute_cystitis_stg": {
+      "condition_name": "Acute cystitis (simple UTI)",
+      "chapter": "9. Urinary tract infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Urinary Tract Infections.pdf",
+      "verbatim_extract": "Acute Cystitis: Syndrome involving dysuria, frequency and urgency with or without fever with chills",
+      "presentation": [
+        "Dysuria, frequency and urgency with or without fever with chills",
+        "Suprapubic tenderness",
+        "Significant pyuria and/or dipstick leukocyte esterase test positive",
+        "Bladder wall thickening on radiology"
+      ],
+      "organisms": [
+        "Enterobacteriaceae 73.2% (E. coli 49.24%, Klebsiella spp 17.44%, Proteus spp 1.4%, Citrobacter 1.3%)",
+        "Enterococcus species 10.9%",
+        "Non-fermenting gram-negative bacilli 8.2%",
+        "Staphylococcus aureus 0.9%"
+      ],
+      "medications": {
+        "drug_of_choice": [
+          "Nitrofurantoin",
+          "Fosfomycin"
+        ],
+        "alternative": [
+          "Co-trimoxazole",
+          "Ertapenem",
+          "Amikacin (can be used in children as well)"
+        ]
+      },
+      "comments": "Dosage adjustment as per eGFR. Fosfomycin and nitrofurantoin should be avoided when there is suspicion of pyelonephritis or prostatitis or presence of systemic features of infection. Fosfomycin susceptibility to be requested for, and used only for Gram-negative MDR organisms.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 91,
+        "section": "9.1 UTI syndromes",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "acute_pyelonephritis": {
+      "condition_name": "Acute pyelonephritis",
+      "chapter": "9. Urinary tract infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Urinary Tract Infections.pdf",
+      "verbatim_extract": "Acute Pyelonephritis: A clinical syndrome characterized by flank pain, tenderness or both and fever",
+      "presentation": [
+        "Flank pain, tenderness or both, and fever, with dysuria, urgency and frequency",
+        "Vomiting, renal angle tenderness",
+        "Hypotension",
+        "Features of septicemia in young infants",
+        "Ultrasound - renal swelling; CECT - renomegaly, decreased opacification, perinephric fat stranding"
+      ],
+      "organisms": [
+        "Enterobacteriaceae 73.2% (E. coli 49.24%, Klebsiella spp 17.44%, Proteus spp 1.4%, Citrobacter 1.3%)",
+        "Enterococcus species 10.9%",
+        "Non-fermenting gram-negative bacilli 8.2%",
+        "Staphylococcus aureus 0.9%"
+      ],
+      "medications": {
+        "drug_of_choice": [
+          "Piperacillin-tazobactam"
+        ],
+        "alternative": [
+          "Ertapenem",
+          "Imipenem",
+          "Meropenem",
+          "Amikacin (recommended for children as well)"
+        ]
+      },
+      "duration": "Minimum of 7 days. Total duration 14 days in children.",
+      "comments": "Dosage adjustment as per eGFR. Three strategies may be employed: hospital admission, completely outpatient parenteral antibiotic therapy (OPAT), or a single dose of parenteral antibiotic and supportive care in the emergency room before home discharge with subsequent OPAT.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 91,
+        "section": "9.1 UTI syndromes",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "complicated_uti": {
+      "condition_name": "Complicated UTI",
+      "chapter": "9. Urinary tract infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Urinary Tract Infections.pdf",
+      "verbatim_extract": "Complicated UTI: UTI occurring in a patient with co-morbid medical/ surgical conditions",
+      "presentation": [
+        "UTI in a patient with co-morbid medical or surgical conditions, e.g. diabetes mellitus, or anatomic abnormalities of the urinary tract e.g. stricture urethra",
+        "In young children, suspected pyelonephritis is termed complicated UTI"
+      ],
+      "organisms": [
+        "Enterobacteriaceae 73.2% (E. coli 49.24%, Klebsiella spp 17.44%, Proteus spp 1.4%, Citrobacter 1.3%)",
+        "Enterococcus species 10.9%",
+        "Non-fermenting gram-negative bacilli 8.2%",
+        "Staphylococcus aureus 0.9%"
+      ],
+      "medications": {
+        "drug_of_choice": [
+          "Piperacillin-tazobactam"
+        ],
+        "alternative": [
+          "Ertapenem",
+          "Imipenem",
+          "Meropenem",
+          "Amikacin"
+        ]
+      },
+      "duration": "Same treatment regimen as acute pyelonephritis except the duration is extended (7-14 days)",
+      "comments": "A significant percentage of young children with complicated UTI will have an underlying congenital abnormality of the kidney and urinary tract (CAKUT).",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 91,
+        "section": "9.1 UTI syndromes",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "acute_prostatitis": {
+      "condition_name": "Acute prostatitis",
+      "chapter": "9. Urinary tract infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Urinary Tract Infections.pdf",
+      "verbatim_extract": "Prostatitis requires a minimum of 21 days antibiotics",
+      "presentation": [
+        "Acute prostatic infection"
+      ],
+      "organisms": [
+        "Enterobacteriaceae 73.2% (E. coli 49.24%, Klebsiella spp 17.44%, Proteus spp 1.4%, Citrobacter 1.3%)",
+        "Enterococcus species 10.9%",
+        "Non-fermenting gram-negative bacilli 8.2%",
+        "Staphylococcus aureus 0.9%"
+      ],
+      "medications": {
+        "drug_of_choice": [
+          "Ertapenem 1 g IV once daily"
+        ],
+        "alternative": [
+          "Piperacillin-tazobactam",
+          "Imipenem",
+          "Meropenem",
+          "Trimethoprim-Sulfamethoxazole"
+        ]
+      },
+      "duration": "Minimum of 21 days",
+      "comments": "Urine and prostatic massage specimen for cultures to be collected before antibiotics.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 94,
+        "section": "9.1.4 Common organisms causing UTI (As per ICMR - AMRSN data 2017)",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "epididymo_orchitis_sti": {
+      "condition_name": "Epididymo-orchitis (high risk of sexually transmitted)",
+      "chapter": "9. Urinary tract infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Urinary Tract Infections.pdf",
+      "verbatim_extract": "Epididymo-orchitis (High risk of sexually transmitted) Ceftriaxone + Doxycycline",
+      "presentation": [
+        "Acute onset unilateral scrotal pain with or without swelling",
+        "Torsion to be ruled out",
+        "Colour Doppler ultrasound for testicular vascularity assessment"
+      ],
+      "organisms": [
+        "N. gonorrhoeae",
+        "C. trachomatis",
+        "M. genitalium"
+      ],
+      "medications": {
+        "drug_of_choice": [
+          "Ceftriaxone",
+          "Doxycycline"
+        ],
+        "alternative": [
+          "Ofloxacin",
+          "Levofloxacin"
+        ]
+      },
+      "duration": "Total duration of treatment is 14 days (except for Levofloxacin where it is 10 days)",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 94,
+        "section": "9.1.4 Common organisms causing UTI (As per ICMR - AMRSN data 2017)",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "epididymo_orchitis_enteric": {
+      "condition_name": "Epididymo-orchitis (low risk of sexually transmitted)",
+      "chapter": "9. Urinary tract infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Urinary Tract Infections.pdf",
+      "verbatim_extract": "Epididymo-orchitis (Low risk of sexually transmitted; likely due to enteric or urinary organisms) Ofloxacin",
+      "presentation": [
+        "Acute onset unilateral scrotal pain, likely due to enteric or urinary organisms"
+      ],
+      "organisms": [
+        "Enterobacteriaceae 73.2% (E. coli 49.24%, Klebsiella spp 17.44%, Proteus spp 1.4%, Citrobacter 1.3%)",
+        "Enterococcus species 10.9%",
+        "Non-fermenting gram-negative bacilli 8.2%",
+        "Staphylococcus aureus 0.9%"
+      ],
+      "medications": {
+        "drug_of_choice": [
+          "Ofloxacin"
+        ],
+        "alternative": [
+          "Levofloxacin"
+        ]
+      },
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 95,
+        "section": "9.1.4 Common organisms causing UTI (As per ICMR - AMRSN data 2017)",
+        "text_continuity_score": 0.727,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "uti_in_children": {
+      "condition_name": "Urinary tract infection in children",
+      "chapter": "9. Urinary tract infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Urinary Tract Infections.pdf",
+      "verbatim_extract": "Cystitis can be treated with nitrofurantoin or amoxycillin for duration of 5-7 days",
+      "presentation": [
+        "UTI in a paediatric patient",
+        "In infants may present as septicemia without overt clinical source"
+      ],
+      "organisms": [
+        "Enterobacteriaceae 73.2% (E. coli 49.24%, Klebsiella spp 17.44%, Proteus spp 1.4%, Citrobacter 1.3%)",
+        "Enterococcus species 10.9%",
+        "Non-fermenting gram-negative bacilli 8.2%",
+        "Staphylococcus aureus 0.9%"
+      ],
+      "medications": {
+        "cystitis": [
+          "Nitrofurantoin",
+          "Amoxycillin"
+        ],
+        "pyelonephritis_or_complicated": [
+          "Amikacin as a single dose for the first few days till the child is accepting oral feeds, then an oral preparation based on susceptibility"
+        ],
+        "vesicoureteric_reflux_prophylaxis": [
+          "Co-trimoxazole",
+          "Nitrofurantoin"
+        ]
+      },
+      "duration": "Cystitis 5-7 days. Acute pyelonephritis and complicated UTI 14 days.",
+      "comments": "There is no role for short-term treatment in children. Prophylaxis for vesicoureteric reflux is given as a single nighttime dose; co-trimoxazole or nitrofurantoin is preferred in children beyond three months of age.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 95,
+        "section": "9.1.4 Common organisms causing UTI (As per ICMR - AMRSN data 2017)",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "surgical_site_infection": {
+      "condition_name": "Surgical site infection (SSI)",
+      "chapter": "10. Hospital acquired infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Hospital Acquired Infection.pdf",
+      "verbatim_extract": "Infection occurs within 30 days after the operation",
+      "presentation": [
+        "Infection occurring within 30 days after the operation",
+        "Superficial incisional, deep incisional or organ/space"
+      ],
+      "organisms": [
+        "Enterobacteriaceae 73.2%",
+        "Staphylococcus aureus",
+        "Enterococcus sp.",
+        "Non-fermenting gram negative bacilli"
+      ],
+      "medications": {
+        "note": "Antimicrobial prophylaxis is classified by surgical wound class; a single dose is as effective as multiple doses, and antimicrobial prophylaxis after wound closure is unnecessary."
+      },
+      "comments": "Samples from pus or wound swab, with immediate transport to the lab.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 101,
+        "section": "10.3.2 Criteria for defining a Surgical Site Infection (SSI)",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "clabsi": {
+      "condition_name": "Central line-associated bloodstream infection (CLABSI)",
+      "chapter": "10. Hospital acquired infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Hospital Acquired Infection.pdf",
+      "verbatim_extract": "Central Line-Associated Bloodstream Infections (CLABSI) is defined as a laboratory-confirmed BSI",
+      "presentation": [
+        "Fever in a patient with a central venous catheter with no other apparent source",
+        "Erythema, induration or tenderness within 2 cm of the catheter exit site",
+        "Clinical signs of sepsis that start abruptly after catheter infusion"
+      ],
+      "organisms": [
+        "E. coli",
+        "Klebsiella spp",
+        "Acinetobacter spp",
+        "Pseudomonas spp",
+        "Enterobacter/Citrobacter/Proteus/Serratia",
+        "Burkholderia cepacia complex",
+        "Stenotrophomonas maltophilia",
+        "Candida species"
+      ],
+      "medications": {
+        "e_coli_carbapenem_sensitive": [
+          "Imipenem/cilastatin IV 500 mg q6h",
+          "Meropenem IV 1g q8h",
+          "Cefoperazone-sulbactam (2:1) IV 3 g q12h",
+          "Piperacillin-tazobactam IV 4.5g q6h"
+        ],
+        "klebsiella_carbapenem_sensitive": [
+          "Imipenem/cilastatin IV 500 mg q6h",
+          "Meropenem IV 1g q8h",
+          "Cefoperazone-sulbactam (2:1) IV 3 g q12h",
+          "Piperacillin-tazobactam IV 4.5g q6h"
+        ],
+        "acinetobacter_carbapenem_sensitive": [
+          "Meropenem IV 1g q8h",
+          "Piperacillin-tazobactam IV 4.5g q6h"
+        ],
+        "pseudomonas_carbapenem_sensitive": [
+          "Meropenem IV 1g q8h",
+          "Piperacillin-tazobactam IV 4.5g q6h",
+          "Ceftazidime 2 g IV q8h",
+          "Cefepime 2 g IV q8h"
+        ],
+        "enterobacter_citrobacter_proteus_serratia": [
+          "Imipenem/cilastatin IV 500 mg q6h",
+          "Meropenem IV 1g q8h"
+        ],
+        "burkholderia_cepacia": [
+          "Meropenem IV 1g q8h",
+          "Ceftazidime 2 g IV q8h",
+          "Minocycline 200 mg loading dose and 100mg q12h"
+        ],
+        "stenotrophomonas_maltophilia": [
+          "Minocycline 200 mg stat and 100mg q12h",
+          "Trimethoprim-sulfamethoxazole 3-5 mg/kg IV q8h"
+        ]
+      },
+      "duration": "Usually 7-14 days",
+      "comments": "For all gram negative infection in patients on short-term catheters, catheter removal is essential. Initial empiric coverage with antibiotics belonging to two different classes is recommended when MDR organisms are prevalent. Antibiotic lock therapy may be used if catheter salvage is essential, but only in combination with systemic antimicrobial therapy. Meropenem is superior to piperacillin-tazobactam while treating ceftriaxone resistant, carbapenem-sensitive E. coli/Klebsiella infections.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 109,
+        "section": "10.3.9 Route of administration and dose selection:",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "clabsi_candida": {
+      "condition_name": "CLABSI due to Candida species",
+      "chapter": "10. Hospital acquired infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Hospital Acquired Infection.pdf",
+      "verbatim_extract": "Antifungal therapy is recommended for all cases of CLABSI due to Candida species",
+      "presentation": [
+        "Candidaemia in a patient with a central line"
+      ],
+      "organisms": [
+        "C. albicans",
+        "C. tropicalis",
+        "C. parapsilosis",
+        "C. auris",
+        "C. haemulonii",
+        "C. krusei",
+        "C. glabrata"
+      ],
+      "medications": {
+        "unspeciated_albicans_tropicalis_parapsilosis": {
+          "preferred": [
+            "Micafungin 100 mg IV daily",
+            "Anidulafungin 200 mg loading then 100 mg daily",
+            "Caspofungin 70 mg loading then 50 mg daily"
+          ],
+          "alternative": [
+            "Amphotericin B (lipid) 3-5 mg/kg daily",
+            "Amphotericin B deoxycholate 0.5-1 mg/kg daily",
+            "Voriconazole 400 mg (6 mg/kg) q12h for 2 doses then 200 mg (3 mg/kg) q12h",
+            "Fluconazole 800-mg loading dose, then 400 mg daily"
+          ]
+        },
+        "c_auris_haemulonii_krusei": {
+          "preferred": [
+            "Micafungin 100 mg daily",
+            "Anidulafungin 200 mg loading then 100 mg daily"
+          ],
+          "alternative": [
+            "Voriconazole 400 mg (6 mg/kg) bid for 2 doses then 200 mg (3 mg/kg) bid"
+          ]
+        },
+        "c_glabrata": {
+          "preferred": [
+            "Voriconazole 400 mg (6 mg/kg) bid for 2 doses then 200 mg (3 mg/kg) bid",
+            "Micafungin 100 mg daily",
+            "Anidulafungin 200 mg loading then 100 mg daily"
+          ],
+          "alternative": [
+            "Fluconazole (step down) 800 mg daily",
+            "Amphotericin B (lipid)"
+          ]
+        }
+      },
+      "duration": "Treat 14 days after first negative blood culture result or resolution of signs and symptoms associated with candidemia, whichever is longer",
+      "comments": "Catheter removal is essential. Ophthalmological examination is recommended for all patients. Fluconazole may be used as a step down agent after 5-7 days of initial echinocandin therapy if the isolate is susceptible, the patient has no previous azole exposure and is not critically ill.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 115,
+        "section": "10.4.2 When to suspect",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "hap_vap": {
+      "condition_name": "Hospital acquired and ventilator associated pneumonia (HAP/VAP)",
+      "chapter": "10. Hospital acquired infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Hospital Acquired Infection.pdf",
+      "verbatim_extract": "Hospital Acquired Pneumonia (HAP) is pneumonia that develops 48 hours or more after admission",
+      "presentation": [
+        "Pneumonia developing 48 hours or more after admission, not incubating at the time of admission"
+      ],
+      "organisms": [
+        "Acinetobacter baumannii",
+        "Klebsiella pneumoniae",
+        "Pseudomonas aeruginosa",
+        "MRSA"
+      ],
+      "medications": {
+        "note": "Levofloxacin (750 mg IV q24h) may be used as an alternative to amikacin as a second anti-pseudomonal agent. Consider adding nebulized colistin for carbapenem resistant organisms along with IV colistin."
+      },
+      "severity_tiers": {
+        "EMPIRIC_EARLY_ONSET": {
+          "definition": "Early onset, minimum prior antibiotic exposure",
+          "medications": [
+            "Cefoperazone-sulbactam or Piperacillin-tazobactam, either alone or with Amikacin"
+          ]
+        },
+        "EMPIRIC_LATE_ONSET": {
+          "definition": "Late onset or prior antibiotic exposure",
+          "medications": [
+            "Meropenem or Imipenem-cilastatin plus either Amikacin",
+            "Ceftazidime-avibactam + Aztreonam",
+            "Colistin/Polymyxin B in settings where carbapenem resistance is >20%"
+          ]
+        },
+        "CULTURE_PROVEN": {
+          "definition": "Culture proved VAP/HAP",
+          "medications": [
+            "Choose any one according to culture sensitivity from: Piperacillin-tazobactam, Cefoperazone-sulbactam, Imipenem-cilastatin, Meropenem, Colistin, Polymyxin B"
+          ]
+        },
+        "MRSA": {
+          "definition": "MRSA confirmed or suspected",
+          "medications": [
+            "Inj. Linezolid"
+          ],
+          "alternative": [
+            "Inj. Vancomycin",
+            "Inj. Teicoplanin"
+          ]
+        }
+      },
+      "duration": "7 days if there is a good clinical response, or longer if clinically indicated (immunodeficiency, empyema, lung abscess, cavitations, necrotising pneumonia)",
+      "comments": "Colistin and Polymyxin B should be used only when there is resistance to all the other tested antibiotics. Tigecycline is not recommended routinely in the treatment of VAP. Faropenem should not be used as step-down therapy in VAP/HAP susceptible to carbapenems. Empirical therapy for MRSA is recommended if prevalence is >10-20% in the setting. De-escalation should be done once culture reports are available.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 117,
+        "section": "10.5 Pneumonia",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "clostridioides_difficile_infection": {
+      "condition_name": "Clostridium difficile infection (CDI)",
+      "chapter": "10. Hospital acquired infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Hospital Acquired Infection.pdf",
+      "verbatim_extract": "The treatment strategies for CDI include discontinuing antibiotics as soon as possible",
+      "presentation": [
+        "Antibiotic associated diarrhoea",
+        "Non-severe: leukocytosis with WBC count <= 15 000 cells/mL and serum creatinine < 1.5 mg/dL",
+        "Fulminant: hypotension or shock, ileus, megacolon"
+      ],
+      "organisms": [
+        "Clostridium difficile"
+      ],
+      "severity_tiers": {
+        "INITIAL_NON_SEVERE": {
+          "medications": [
+            "Vancomycin 125 mg given 4 times daily for 10 days"
+          ],
+          "alternative": [
+            "Metronidazole 400 mg 3 times per day by mouth for 10 days, where oral vancomycin is not available"
+          ]
+        },
+        "INITIAL_FULMINANT": {
+          "medications": [
+            "Vancomycin 500 mg 4 times per day by mouth or by nasogastric tube; if ileus, consider adding rectal instillation of vancomycin"
+          ],
+          "alternative": [
+            "Intravenous metronidazole 500 mg every 8 hours together with oral or rectal vancomycin, particularly if ileus is present"
+          ]
+        },
+        "FIRST_RECURRENCE": {
+          "medications": [
+            "Vancomycin 125 mg given 4 times daily for 10 days if metronidazole was used for the initial episode",
+            "Prolonged tapered and pulsed vancomycin regimen if a standard regimen was used for the initial episode"
+          ]
+        },
+        "SECOND_OR_SUBSEQUENT_RECURRENCE": {
+          "medications": [
+            "Vancomycin in a tapered and pulsed regimen",
+            "Vancomycin 125 mg 4 times per day by mouth for 10 days followed by rifaximin 400 mg 3 times daily for 20 days",
+            "Faecal microbiota transplantation"
+          ]
+        }
+      },
+      "duration": "10 day treatment courses; consider extending to 14 days in patients with delayed response, particularly those treated with metronidazole",
+      "comments": "Discontinue the precipitating antibiotics as soon as possible. For children with an initial episode of severe CDI, oral vancomycin is recommended over metronidazole. Appropriate antibiotic treatment for at least 2 recurrences should be tried prior to offering faecal microbiota transplantation.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 121,
+        "section": "10.5 Pneumonia",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "catheter_associated_uti": {
+      "condition_name": "Catheter associated urinary tract infection (CA-UTI)",
+      "chapter": "10. Hospital acquired infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Hospital Acquired Infection.pdf",
+      "verbatim_extract": "Patients with CA-UTI -not severely ill/without upper UTI symptoms Nitrofurantoin 100 mg PO BID Fosfomycin 3 g PO once stat Levofloxacin 750 mg PO daily Ciprofloxacin 500 mg PO BID Amikacin 15 mg/kg single dose Patients with CA-UTI who are severely ill -Piperacillin/tazobactam 4.5 g IV q6hr -Ertapenem 1 g IV q24hr",
+      "presentation": [
+        "New onset fever",
+        "Supra-pubic tenderness",
+        "Costo-vertebral angle pain or tenderness, acute haematuria",
+        "Urinary urgency, urinary frequency, dysuria",
+        "Urine culture with >= 1000 cfu/mL of >= 1 bacterial species",
+        "In spinal cord injury: increased spasticity, autonomic dysreflexia, or sense of unease"
+      ],
+      "organisms": [
+        "Escherichia coli",
+        "Klebsiella species",
+        "Pseudomonas species",
+        "Proteus mirabilis",
+        "Morganella morganii",
+        "Enterobacter species",
+        "Acinetobacter species",
+        "Staphylococcus aureus",
+        "Coagulase negative Staphylococcus",
+        "Enterococcus faecalis/faecium",
+        "Candida species"
+      ],
+      "severity_tiers": {
+        "ASYMPTOMATIC_CA_ASB": {
+          "medications": [
+            "Not recommended"
+          ],
+          "definition": "Only recommended before urologic surgery or implantation of prosthesis in the urinary tract, and in pregnancy"
+        },
+        "SYMPTOMATIC_NOT_SEVERELY_ILL": {
+          "definition": "Not severely ill, without upper UTI symptoms",
+          "medications": [
+            "Nitrofurantoin 100 mg PO BID",
+            "Fosfomycin 3 g PO once stat",
+            "Levofloxacin 750 mg PO daily",
+            "Ciprofloxacin 500 mg PO BID",
+            "Amikacin 15 mg/kg single dose"
+          ]
+        },
+        "SEVERELY_ILL": {
+          "medications": [
+            "Piperacillin/tazobactam 4.5 g IV q6hr",
+            "Ertapenem 1 g IV q24hr",
+            "Meropenem 1 g IV q8hr (preferably used in patients with sepsis and septic shock)"
+          ]
+        },
+        "POST_OP_SOLID_ORGAN_TRANSPLANT": {
+          "definition": "Post-op infections following solid organ transplant with CA-UTI (kidney, liver, heart, lung)",
+          "medications": [
+            "Piperacillin-tazobactam 4.5 g IV q6h",
+            "Cefoperazone-sulbactam 3 g IV q12h"
+          ],
+          "alternative": [
+            "Imipenem-cilastatin 1g IV q8h",
+            "Ertapenem 1 g IV q24hr",
+            "Meropenem 1g IV q8h"
+          ]
+        }
+      },
+      "duration": "7 days for CA-UTI associated pyelonephritis with timely resolution of symptoms, 10-14 days with delayed clinical response. In the absence of pyelonephritis symptoms, women younger than 65 years may be treated for 3 days after the indwelling catheter is removed.",
+      "comments": "Removal of the indwelling catheter is a key consideration. Because of the possibility of biofilm formation, it may be reasonable to replace the catheter before therapy if it has been in place for >7 days. Routine use of prophylactic antimicrobials at the time of catheter removal or replacement has not been shown to be beneficial. For multidrug resistant organisms colistin may be necessary; its empiric use is preferably avoided.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 127,
+        "section": "10.7.8 Antimicrobial Therapy",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "candiduria": {
+      "condition_name": "Candiduria",
+      "chapter": "10. Hospital acquired infections",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Hospital Acquired Infection.pdf",
+      "verbatim_extract": "Candiduria - Indication Symptomatic Neutropenia (rule out candidemia) urological surgery",
+      "presentation": [
+        "Candida isolated in urine",
+        "Treat if symptomatic, neutropenic, or undergoing urological surgery"
+      ],
+      "organisms": [
+        "Candida species",
+        "Candida glabrata",
+        "Candida krusei"
+      ],
+      "medications": {
+        "susceptible_strains": [
+          "Fluconazole"
+        ],
+        "c_glabrata_and_c_krusei": [
+          "Flucytosine"
+        ]
+      },
+      "comments": "Isolation of Candida in urine usually suggests colonization. Always rule out obstructive uropathy with imaging if symptomatic candidal urinary infection is suspected.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 127,
+        "section": "10.7.8 Antimicrobial Therapy",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "febrile_neutropenia": {
+      "condition_name": "Febrile neutropenia / sepsis",
+      "chapter": "11. Infections in the immunocompromised host",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Infections in Immunocompromised host.pdf",
+      "verbatim_extract": "Febrile Neutropenia (FN)/ sepsis Escherichia coli, Klebsiella pneumoniae, Pseudomonas aeruginosa",
+      "presentation": [
+        "Fever in a neutropenic patient",
+        "Sepsis in the transplant setting"
+      ],
+      "organisms": [
+        "Escherichia coli",
+        "Klebsiella pneumoniae",
+        "Pseudomonas aeruginosa",
+        "Acinetobacter species",
+        "Staphylococcus aureus",
+        "Coagulase Negative Staphylococci",
+        "Enterococcus species",
+        "Candida species"
+      ],
+      "medications": {
+        "empiric": [
+          "Piperacillin-tazobactam",
+          "Amikacin"
+        ]
+      },
+      "severity_tiers": {
+        "FIRST_LINE": {
+          "medications": [
+            "Piperacillin-tazobactam",
+            "Amikacin"
+          ]
+        },
+        "SECOND_LINE": {
+          "medications": [
+            "Meropenem",
+            "with or without Teicoplanin or Vancomycin"
+          ]
+        },
+        "THIRD_LINE_OR_SEPTIC_SHOCK": {
+          "medications": [
+            "Meropenem",
+            "Colistin or Polymyxin B",
+            "with or without Teicoplanin or Vancomycin",
+            "Caspofungin",
+            "with or without Fosfomycin or Tigecycline"
+          ]
+        }
+      },
+      "duration": "Continue broad-spectrum antibiotics until the patient is afebrile for at least 2 days and the neutrophil count is >500 cells/mm3 on at least one occasion",
+      "comments": "If blood cultures are negative at 3 days following initiation of antibiotic, teicoplanin/vancomycin may be discontinued. Fosfomycin should be considered only where colistin resistant Klebsiella/E. coli/Enterobacter are suspected.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 134,
+        "section": "11.1 Prophylaxis and treatment in Hematopoietic Stem Cell Transplantation",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "bmt_community_acquired_pneumonia": {
+      "condition_name": "Community acquired pneumonia in the transplant setting",
+      "chapter": "11. Infections in the immunocompromised host",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Infections in Immunocompromised host.pdf",
+      "verbatim_extract": "Antimicrobial therapy in the bone marrow transplant setting",
+      "presentation": [
+        "Bone marrow transplant / haematopoietic stem cell transplant setting"
+      ],
+      "organisms": [
+        "Streptococcus pneumoniae",
+        "Haemophilus influenzae",
+        "Mycoplasma",
+        "Chlamydia",
+        "Legionella",
+        "Respiratory viruses"
+      ],
+      "medications": {
+        "empiric": [
+          "Piperacillin-tazobactam",
+          "Clarithromycin or Azithromycin"
+        ],
+        "alternative": [
+          "Meropenem",
+          "Clarithromycin or Azithromycin",
+          "Teicoplanin or Vancomycin"
+        ]
+      },
+      "comments": "If viral infection is suspected consider respiratory viral PCR and early empirical use of oseltamivir. Oseltamivir may be discontinued once influenza PCR is negative.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 134,
+        "section": "11.1 Prophylaxis and treatment in Hematopoietic Stem Cell Transplantation",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "bmt_healthcare_associated_pneumonia": {
+      "condition_name": "Healthcare associated pneumonia in the transplant setting",
+      "chapter": "11. Infections in the immunocompromised host",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Infections in Immunocompromised host.pdf",
+      "verbatim_extract": "Antimicrobial therapy in the bone marrow transplant setting",
+      "presentation": [
+        "Bone marrow transplant / haematopoietic stem cell transplant setting"
+      ],
+      "organisms": [
+        "E. coli",
+        "Klebsiella",
+        "Pseudomonas",
+        "Acinetobacter",
+        "Staphylococcus aureus (MRSA and MSSA)"
+      ],
+      "medications": {
+        "empiric": [
+          "Meropenem",
+          "Polymyxin B",
+          "Teicoplanin or Vancomycin"
+        ]
+      },
+      "comments": "Consider use of colistin with meropenem and teicoplanin/vancomycin in severe infection requiring ventilation, discontinued once cultures are negative and the patient is stable. Consider aerosolized colistin as an adjunct for multi-drug resistant pathogens.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 134,
+        "section": "11.1 Prophylaxis and treatment in Hematopoietic Stem Cell Transplantation",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "bmt_bloodstream_infection": {
+      "condition_name": "Blood stream infection in the transplant setting",
+      "chapter": "11. Infections in the immunocompromised host",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Infections in Immunocompromised host.pdf",
+      "verbatim_extract": "Antimicrobial therapy in the bone marrow transplant setting",
+      "presentation": [
+        "Bone marrow transplant / haematopoietic stem cell transplant setting"
+      ],
+      "organisms": [
+        "E. coli",
+        "Klebsiella",
+        "Pseudomonas",
+        "Acinetobacter",
+        "Staphylococcus aureus",
+        "Staphylococcus epidermidis",
+        "Enterococcus species",
+        "Candida (albicans and non-albicans)"
+      ],
+      "medications": {
+        "empiric": [
+          "Meropenem",
+          "Amikacin"
+        ],
+        "alternative": [
+          "Meropenem",
+          "with or without Colistin",
+          "with or without Teicoplanin or Vancomycin",
+          "with or without Caspofungin"
+        ]
+      },
+      "duration": "Duration of treatment depends on the source of blood stream infection",
+      "comments": "Stable patient: meropenem + amikacin. Second line or unstable patient: escalate as listed.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 134,
+        "section": "11.1 Prophylaxis and treatment in Hematopoietic Stem Cell Transplantation",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "bmt_iv_catheter_infection": {
+      "condition_name": "Intravenous catheter associated infection in the transplant setting",
+      "chapter": "11. Infections in the immunocompromised host",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Infections in Immunocompromised host.pdf",
+      "verbatim_extract": "Antimicrobial therapy in the bone marrow transplant setting",
+      "presentation": [
+        "Bone marrow transplant / haematopoietic stem cell transplant setting"
+      ],
+      "organisms": [
+        "Staphylococcus aureus",
+        "Staphylococcus epidermidis",
+        "Coliforms (Enterobacteriaceae)",
+        "Non-fermentative Gram negative bacilli"
+      ],
+      "medications": {
+        "empiric": [
+          "Meropenem",
+          "Vancomycin"
+        ],
+        "alternative": [
+          "Meropenem",
+          "Teicoplanin or Vancomycin",
+          "Colistin"
+        ]
+      },
+      "comments": "Consider the use of colistin/polymyxin B or anti-fungal agents based on specific clinical or laboratory diagnosis.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 134,
+        "section": "11.1 Prophylaxis and treatment in Hematopoietic Stem Cell Transplantation",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "bmt_skin_soft_tissue_infection": {
+      "condition_name": "Skin and soft tissue infection in the transplant setting",
+      "chapter": "11. Infections in the immunocompromised host",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Infections in Immunocompromised host.pdf",
+      "verbatim_extract": "Antimicrobial therapy in the bone marrow transplant setting",
+      "presentation": [
+        "Bone marrow transplant / haematopoietic stem cell transplant setting"
+      ],
+      "organisms": [
+        "Staphylococcus aureus",
+        "Streptococcus species",
+        "Coliforms",
+        "Non-fermentative Gram Negative Bacilli",
+        "Candida",
+        "Zygomycetes",
+        "Aspergillus",
+        "Fusarium"
+      ],
+      "medications": {
+        "empiric": [
+          "Piperacillin-tazobactam",
+          "Teicoplanin or Vancomycin"
+        ],
+        "alternative": [
+          "Necrotizing fasciitis: Meropenem",
+          "Teicoplanin or Vancomycin",
+          "Clindamycin"
+        ]
+      },
+      "comments": "For MRSA coverage consider teicoplanin/vancomycin. Consider clindamycin where anti-toxin activity is desired, e.g. necrotizing fasciitis.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 134,
+        "section": "11.1 Prophylaxis and treatment in Hematopoietic Stem Cell Transplantation",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "bmt_intra_abdominal_infection": {
+      "condition_name": "Intra-abdominal infection in the transplant setting",
+      "chapter": "11. Infections in the immunocompromised host",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Infections in Immunocompromised host.pdf",
+      "verbatim_extract": "Antimicrobial therapy in the bone marrow transplant setting",
+      "presentation": [
+        "Bone marrow transplant / haematopoietic stem cell transplant setting"
+      ],
+      "organisms": [
+        "Coliforms",
+        "Non-fermentative Gram Negative Bacilli",
+        "Anaerobes",
+        "Enterococcus species",
+        "Candida"
+      ],
+      "medications": {
+        "empiric": [
+          "Piperacillin-tazobactam",
+          "Amikacin",
+          "with or without Metronidazole"
+        ],
+        "alternative": [
+          "Meropenem",
+          "Teicoplanin or Vancomycin",
+          "with or without Metronidazole"
+        ]
+      },
+      "comments": "Piperacillin-tazobactam and meropenem provide good anaerobic cover. Addition of metronidazole to be considered only if enhanced anaerobic coverage is considered essential.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 134,
+        "section": "11.1 Prophylaxis and treatment in Hematopoietic Stem Cell Transplantation",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "bmt_urinary_tract_infection": {
+      "condition_name": "Urinary tract infection in the transplant setting",
+      "chapter": "11. Infections in the immunocompromised host",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Infections in Immunocompromised host.pdf",
+      "verbatim_extract": "Antimicrobial therapy in the bone marrow transplant setting",
+      "presentation": [
+        "Bone marrow transplant / haematopoietic stem cell transplant setting"
+      ],
+      "organisms": [
+        "Coliforms",
+        "Non-fermentative Gram Negative Bacilli",
+        "Enterococcus species",
+        "Coagulase negative Staphylococci",
+        "Candida"
+      ],
+      "medications": {
+        "empiric": [
+          "Piperacillin-tazobactam",
+          "Amikacin"
+        ],
+        "alternative": [
+          "Meropenem",
+          "Teicoplanin or Vancomycin"
+        ]
+      },
+      "comments": "Consider the use of anti-fungal agents based on specific clinical or laboratory diagnosis.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 134,
+        "section": "11.1 Prophylaxis and treatment in Hematopoietic Stem Cell Transplantation",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "bmt_antibiotic_associated_diarrhoea": {
+      "condition_name": "Antibiotic associated diarrhoea in the transplant setting",
+      "chapter": "11. Infections in the immunocompromised host",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Infections in Immunocompromised host.pdf",
+      "verbatim_extract": "Antimicrobial therapy in the bone marrow transplant setting",
+      "presentation": [
+        "Bone marrow transplant / haematopoietic stem cell transplant setting"
+      ],
+      "organisms": [
+        "Clostridium difficile"
+      ],
+      "medications": {
+        "empiric": [
+          "Oral metronidazole"
+        ],
+        "alternative": [
+          "Oral vancomycin"
+        ]
+      },
+      "comments": "Oral vancomycin may be used as first line in severe infections.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 134,
+        "section": "11.1 Prophylaxis and treatment in Hematopoietic Stem Cell Transplantation",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "invasive_pulmonary_aspergillosis": {
+      "condition_name": "Invasive pulmonary aspergillosis",
+      "chapter": "11. Infections in the immunocompromised host",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Infections in Immunocompromised host.pdf",
+      "verbatim_extract": "Antimicrobial therapy in the bone marrow transplant setting",
+      "presentation": [
+        "Bone marrow transplant / haematopoietic stem cell transplant setting"
+      ],
+      "organisms": [
+        "Aspergillus flavus",
+        "Aspergillus fumigatus",
+        "Aspergillus nidulans",
+        "Aspergillus niger",
+        "Aspergillus terreus"
+      ],
+      "medications": {
+        "first_choice": [
+          "Voriconazole"
+        ],
+        "alternative": [
+          "Amphotericin B (preferably liposomal, otherwise conventional)"
+        ]
+      },
+      "duration": "Approximately 6 weeks. Treatment should be continued until lesions have resolved or are clinically stable.",
+      "comments": "Consider voriconazole therapeutic drug level monitoring (TDM) wherever feasible.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 134,
+        "section": "11.1 Prophylaxis and treatment in Hematopoietic Stem Cell Transplantation",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "mucormycosis": {
+      "condition_name": "Mucormycosis",
+      "chapter": "11. Infections in the immunocompromised host",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Infections in Immunocompromised host.pdf",
+      "verbatim_extract": "Antimicrobial therapy in the bone marrow transplant setting",
+      "presentation": [
+        "Bone marrow transplant / haematopoietic stem cell transplant setting"
+      ],
+      "organisms": [
+        "Apophysomyces",
+        "Basidiobolus",
+        "Conidiobolus",
+        "Cunninghamella",
+        "Mortierella",
+        "Mucor",
+        "Lichtheimia (Absidia)",
+        "Rhizomucor",
+        "Rhizopus",
+        "Saksenaea",
+        "Syncephalestrum"
+      ],
+      "medications": {
+        "first_choice": [
+          "Liposomal Amphotericin B with surgical debridement wherever feasible"
+        ],
+        "alternative": [
+          "Caspofungin may be considered along with liposomal amphotericin B"
+        ]
+      },
+      "duration": "Continue until resolution of clinical signs and symptoms, resolution or stabilization of residual radiographic signs, and resolution of underlying immunosuppression.",
+      "comments": "Surgical debridement as far as possible. Adjunctive therapies may be tried in case of non response.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 134,
+        "section": "11.1 Prophylaxis and treatment in Hematopoietic Stem Cell Transplantation",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "herpes_simplex_immunocompromised": {
+      "condition_name": "Herpes simplex in the immunocompromised host",
+      "chapter": "11. Infections in the immunocompromised host",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Infections in Immunocompromised host.pdf",
+      "verbatim_extract": "Antimicrobial therapy in the bone marrow transplant setting",
+      "presentation": [
+        "Bone marrow transplant / haematopoietic stem cell transplant setting"
+      ],
+      "organisms": [
+        "Herpes Simplex Virus Type 1 and Type 2 (HSV1, HSV2)"
+      ],
+      "medications": {
+        "first_choice": [
+          "Acyclovir",
+          "Valacyclovir"
+        ],
+        "alternative": [
+          "Foscarnet"
+        ]
+      },
+      "duration": "Dose and duration of therapy depend on organ involvement.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 134,
+        "section": "11.1 Prophylaxis and treatment in Hematopoietic Stem Cell Transplantation",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "varicella_zoster_immunocompromised": {
+      "condition_name": "Varicella or disseminated zoster in the immunocompromised host",
+      "chapter": "11. Infections in the immunocompromised host",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Infections in Immunocompromised host.pdf",
+      "verbatim_extract": "Antimicrobial therapy in the bone marrow transplant setting",
+      "presentation": [
+        "Bone marrow transplant / haematopoietic stem cell transplant setting"
+      ],
+      "organisms": [
+        "Varicella Zoster Virus"
+      ],
+      "medications": {
+        "first_choice": [
+          "Acyclovir",
+          "Valacyclovir"
+        ],
+        "alternative": [
+          "Foscarnet"
+        ]
+      },
+      "comments": "Intravenous therapy is recommended in all severe and complicated cases.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 134,
+        "section": "11.1 Prophylaxis and treatment in Hematopoietic Stem Cell Transplantation",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "cmv_reactivation": {
+      "condition_name": "CMV reactivation or disease",
+      "chapter": "11. Infections in the immunocompromised host",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Infections in Immunocompromised host.pdf",
+      "verbatim_extract": "Antimicrobial therapy in the bone marrow transplant setting",
+      "presentation": [
+        "Bone marrow transplant / haematopoietic stem cell transplant setting"
+      ],
+      "organisms": [
+        "Cytomegalovirus"
+      ],
+      "medications": {
+        "first_choice": [
+          "Ganciclovir",
+          "Valganciclovir"
+        ],
+        "alternative": [
+          "Foscarnet",
+          "Cidofovir"
+        ]
+      },
+      "duration": "Treat till resolution of clinical symptoms and signs or resolution of viremia (2 negative viral load reports).",
+      "comments": "Presents as colitis, pneumonitis, hepatitis, retinitis or encephalitis. In case of treatment failure with ganciclovir, foscarnet is the drug of choice.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 134,
+        "section": "11.1 Prophylaxis and treatment in Hematopoietic Stem Cell Transplantation",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "pneumocystis_jirovecii_pneumonia": {
+      "condition_name": "Pneumocystis jirovecii pneumonia (PCP)",
+      "chapter": "11. Infections in the immunocompromised host",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Infections in Immunocompromised host.pdf",
+      "verbatim_extract": "Pneumocystis jirovecii Co-trimoxazole Clindamycin plus primaquine (if sulpha allergy)",
+      "presentation": [
+        "Pneumonia in an immunocompromised host"
+      ],
+      "organisms": [
+        "Pneumocystis jirovecii"
+      ],
+      "medications": {
+        "first_choice": [
+          "Co-trimoxazole"
+        ],
+        "if_sulpha_allergy": [
+          "Clindamycin",
+          "Primaquine"
+        ]
+      },
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 140,
+        "section": "11.2 Solid organ transplant",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "sot_acute_bacterial_meningitis": {
+      "condition_name": "Acute bacterial meningitis in solid organ transplant",
+      "chapter": "11. Infections in the immunocompromised host",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Infections in Immunocompromised host.pdf",
+      "verbatim_extract": "Ceftriaxone or cefotaxime plus ampicillin (for listeria) Plus vancomycin",
+      "presentation": [
+        "Solid organ transplant recipient"
+      ],
+      "organisms": [
+        "S. pneumoniae",
+        "Listeria monocytogenes",
+        "Haemophilus influenzae",
+        "Neisseria meningitidis"
+      ],
+      "medications": {
+        "empiric": [
+          "Ceftriaxone or Cefotaxime",
+          "Ampicillin (for Listeria)",
+          "Vancomycin"
+        ],
+        "alternative": [
+          "Moxifloxacin",
+          "Meropenem"
+        ]
+      },
+      "duration": "10-14 days; 21 days for Listeria or gram-negative infections",
+      "comments": "Exclude TB and Cryptococcus. If penicillin allergic, use cotrimoxazole (TMP component) or meropenem to cover for Listeria.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 139,
+        "section": "11.2 Solid organ transplant",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "sot_brain_abscess": {
+      "condition_name": "Brain abscess or subdural empyema in solid organ transplant",
+      "chapter": "11. Infections in the immunocompromised host",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Infections in Immunocompromised host.pdf",
+      "verbatim_extract": "Brain abscess, subdural empyema Streptococci, Bacteroides spp, Enterobacteriaceae",
+      "presentation": [
+        "Solid organ transplant recipient"
+      ],
+      "organisms": [
+        "Streptococci",
+        "Bacteroides spp",
+        "Enterobacteriaceae",
+        "S. aureus",
+        "TB",
+        "Nocardia",
+        "Aspergillus"
+      ],
+      "medications": {
+        "empiric": [
+          "Ceftriaxone or Cefotaxime",
+          "Metronidazole"
+        ],
+        "alternative": [
+          "Meropenem"
+        ]
+      },
+      "duration": "Based on clinical and radiological response, minimum 8 weeks",
+      "comments": "Aspiration or surgical drainage required unless the abscess is <2.5cm and the patient is neurologically stable.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 139,
+        "section": "11.2 Solid organ transplant",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "nocardiosis": {
+      "condition_name": "Nocardia infection",
+      "chapter": "11. Infections in the immunocompromised host",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Infections in Immunocompromised host.pdf",
+      "verbatim_extract": "Nocardia spp Co-trimoxazole (TMP component) IV/PO plus imipenem/ceftriaxone",
+      "presentation": [
+        "Solid organ transplant recipient"
+      ],
+      "organisms": [
+        "Nocardia spp"
+      ],
+      "medications": {
+        "empiric": [
+          "Co-trimoxazole (TMP component) IV/PO",
+          "Imipenem or Ceftriaxone"
+        ],
+        "alternative": [
+          "Linezolid"
+        ]
+      },
+      "duration": "3-6 weeks of IV therapy followed by 12 months PO",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 139,
+        "section": "11.2 Solid organ transplant",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "sot_pneumonia": {
+      "condition_name": "Pneumonia in solid organ transplant",
+      "chapter": "11. Infections in the immunocompromised host",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Infections in Immunocompromised host.pdf",
+      "verbatim_extract": "Piperacillin-tazobactam plus azithromycin or doxycycline",
+      "presentation": [
+        "Solid organ transplant recipient"
+      ],
+      "organisms": [
+        "S. pneumoniae",
+        "H. influenzae",
+        "Legionella spp",
+        "K. pneumoniae",
+        "P. aeruginosa",
+        "Acinetobacter spp"
+      ],
+      "medications": {
+        "empiric": [
+          "Piperacillin-tazobactam",
+          "Azithromycin or Doxycycline"
+        ],
+        "alternative": [
+          "Imipenem-cilastatin"
+        ]
+      },
+      "duration": "5-7 days",
+      "comments": "If MRSA is a concern, add linezolid. Avoid fluoroquinolones unless TB is excluded. Consider TB, influenza, Nocardia and fungi.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 139,
+        "section": "11.2 Solid organ transplant",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "sot_lung_abscess_empyema": {
+      "condition_name": "Lung abscess and empyema in solid organ transplant",
+      "chapter": "11. Infections in the immunocompromised host",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Infections in Immunocompromised host.pdf",
+      "verbatim_extract": "Lung abscess, empyema S. pneumoniae, viridans streptococci",
+      "presentation": [
+        "Solid organ transplant recipient"
+      ],
+      "organisms": [
+        "S. pneumoniae",
+        "Viridans streptococci",
+        "K. pneumoniae",
+        "P. aeruginosa",
+        "S. aureus"
+      ],
+      "medications": {
+        "empiric": [
+          "Piperacillin-tazobactam"
+        ],
+        "alternative": [
+          "Cefoperazone-sulbactam",
+          "Clindamycin"
+        ]
+      },
+      "duration": "3-4 weeks",
+      "comments": "Drainage of the pleural space is essential for empyema.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 140,
+        "section": "11.2 Solid organ transplant",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "acute_bacterial_pharyngitis": {
+      "condition_name": "Acute bacterial pharyngitis",
+      "chapter": "11. Infections in the immunocompromised host",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Infections in Immunocompromised host.pdf",
+      "verbatim_extract": "Acute bacterial pharyngitis Streptococcus pyogenes Benzathine penicillin or amoxycillin",
+      "presentation": [
+        "Solid organ transplant recipient"
+      ],
+      "organisms": [
+        "Streptococcus pyogenes"
+      ],
+      "medications": {
+        "empiric": [
+          "Benzathine penicillin",
+          "Amoxycillin"
+        ]
+      },
+      "comments": "Most cases are viral. Confirm bacterial etiology before antibiotic treatment.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 140,
+        "section": "11.2 Solid organ transplant",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "sot_head_neck_space_infection": {
+      "condition_name": "Head and neck space infection in solid organ transplant",
+      "chapter": "11. Infections in the immunocompromised host",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Infections in Immunocompromised host.pdf",
+      "verbatim_extract": "Head & neck space infections Polymicrobial, S. pyogenes, S. aureus, viridans streptococci, oral anaerobes",
+      "presentation": [
+        "Solid organ transplant recipient"
+      ],
+      "organisms": [
+        "Polymicrobial",
+        "S. pyogenes",
+        "S. aureus",
+        "Viridans streptococci",
+        "Oral anaerobes"
+      ],
+      "medications": {
+        "empiric": [
+          "Clindamycin",
+          "Amoxicillin-clavulanate"
+        ],
+        "alternative": [
+          "Piperacillin-tazobactam"
+        ]
+      },
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 140,
+        "section": "11.2 Solid organ transplant",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "acute_sinusitis_sot": {
+      "condition_name": "Acute sinusitis in solid organ transplant",
+      "chapter": "11. Infections in the immunocompromised host",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Infections in Immunocompromised host.pdf",
+      "verbatim_extract": "Acute sinusitis Viral, S. pneumoniae, H. influenzae, M. catarrhalis",
+      "presentation": [
+        "Solid organ transplant recipient"
+      ],
+      "organisms": [
+        "Viral",
+        "S. pneumoniae",
+        "H. influenzae",
+        "M. catarrhalis"
+      ],
+      "medications": {
+        "empiric": [
+          "Amoxicillin-clavulanate"
+        ],
+        "alternative": [
+          "Piperacillin-tazobactam"
+        ]
+      },
+      "comments": "Exclude fungal etiology.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 140,
+        "section": "11.2 Solid organ transplant",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "acute_bronchitis_sot": {
+      "condition_name": "Acute bronchitis in solid organ transplant",
+      "chapter": "11. Infections in the immunocompromised host",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Infections in Immunocompromised host.pdf",
+      "verbatim_extract": "Acute bronchitis Mostly viral Antibiotics not needed",
+      "presentation": [
+        "Solid organ transplant recipient"
+      ],
+      "organisms": [
+        "Mostly viral"
+      ],
+      "medications": {
+        "empiric": [
+          "Antibiotics not needed"
+        ]
+      },
+      "comments": "The guideline states antibiotics are not needed; most cases are viral.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 140,
+        "section": "11.2 Solid organ transplant",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    },
+    "sot_chronic_prostatitis": {
+      "condition_name": "Chronic prostatitis in solid organ transplant",
+      "chapter": "11. Infections in the immunocompromised host",
+      "source_document_id": "ICMR-STG-2022-23",
+      "transcription_file": "Infections in Immunocompromised host.pdf",
+      "verbatim_extract": "Collect urine or preferably prostatic fluid",
+      "presentation": [
+        "Solid organ transplant recipient"
+      ],
+      "organisms": [
+        "Enterobacteriaceae"
+      ],
+      "medications": {
+        "empiric": [
+          "Ciprofloxacin"
+        ],
+        "alternative": [
+          "Co-trimoxazole"
+        ]
+      },
+      "comments": "Collect urine or preferably prostatic fluid for culture.",
+      "source_page": null,
+      "source_page_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "attribution_basis": "OPERATOR_ATTESTATION",
+      "prior_edition_cross_reference": {
+        "document_id": "ICMR-STG-2019-ED2",
+        "page": 142,
+        "section": "11.2 Solid organ transplant",
+        "text_continuity_score": 1.0,
+        "note": "The same passage occurs in the previous (2nd, 2019) edition at this page, which IS held and hash-verified. Recorded as evidence of text continuity between editions and as a reading aid. It is NOT a page of the 2022-23 edition and must never be rendered as one."
+      }
+    }
+  },
+  "verification_note": "Two distinct claims are tracked per record and must not be conflated. (1) attribution_basis: the edition attribution, which rests on operator attestation and is NOT independently verified. (2) prior_edition_cross_reference: whether the text was located in the hash-verified 2019 corpus, which IS independently verified and is re-checked by the test suite. A record can be cross-referenced and still be misattributed, so (2) is never evidence for (1).",
+  "prior_edition_document_id": "ICMR-STG-2019-ED2",
+  "documents": {
+    "ICMR-STG-2022-23": {
+      "document_id": "ICMR-STG-2022-23",
+      "title": "Treatment Guidelines for Antimicrobial Use in Common Syndromes",
+      "issuing_org": "Indian Council of Medical Research (ICMR), New Delhi, India",
+      "geographic_scope": "National (India)",
+      "version": "2022-23 edition",
+      "source_url": "https://amrtg.icmr.org.in/dashboard.html",
+      "official_pdf_held": false,
+      "file_sha256": null,
+      "page_count": null,
+      "provenance_basis": "OPERATOR_ATTESTATION",
+      "provenance_statement": "The operator states that the seven chapter files listed in transcription_sources are from the ICMR 2022-23 edition. No official 2022-23 PDF is held by this repository, so this attribution rests on operator attestation and cannot be cryptographically or bibliographically verified here. The transcription files themselves are hashed and those hashes ARE verifiable.",
+      "page_citation_status": "NO_OFFICIAL_PDF_HELD_PAGE_CITATION_UNAVAILABLE",
+      "coverage_caveat": "Seven chapters only (intra-abdominal, skin and soft tissue, bone and joint, CNS, urinary tract, hospital acquired, immunocompromised host). This is NOT the complete 2022-23 guideline; chapters outside this set are not held in any form."
+    }
+  }
+}
