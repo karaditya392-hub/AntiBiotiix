@@ -1,6 +1,6 @@
 {
   "catalog_version": "3.0.0",
-  "last_updated": "2023-12-01",
+  "last_updated": "2026-08-23",
   "review_cycle": "Annual",
   "rules": [
     {
@@ -526,5 +526,5 @@
       "unverified_sources": []
     }
   ],
-  "version_reconciliation_note": "Rule citations reconciled against documents actually held in this repository. The ICMR source ingested here is the 2nd edition (2019); earlier catalog entries claimed 'Edition 3 (2022-2023)', which is not present. Authorities listed in unverified_sources are named in clinical rationale but have no ingested document and must not be presented to a clinician as retrievable evidence."
+  "version_reconciliation_note": "Rule citations reconciled against documents actually held in this repository. The ICMR source INGESTED and hash-verified here is the 2nd edition (2019); rule-level evidence therefore cites 2019 and must not be presented as any later edition. UPDATE 2026-08-23: seven chapters of the ICMR 2022-23 edition (intra-abdominal, skin and soft tissue, bone and joint, CNS, urinary tract, hospital acquired, immunocompromised host) are now held as operator-attested TRANSCRIPTIONS and indexed in icmr_stg_2022_23_syndromes.json. They are not the official PDF, carry no verifiable page numbers, and cover only part of the guideline, so the earlier statement that the 2022-23 edition 'is not present' is superseded but the rule catalog still cites 2019 for evidence. Authorities listed in unverified_sources are named in clinical rationale but have no ingested document and must not be presented to a clinician as retrievable evidence."
 }

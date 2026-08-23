@@ -30,7 +30,7 @@ MIN_CHUNK_CHARS = 120
 class Chunk:
     document_id: str
     version: str
-    page: int
+    page: Optional[int]
     section: Optional[str]
     char_start: int
     char_end: int
@@ -48,10 +48,17 @@ class DocumentMeta:
     source_url: str
     source_file: str
     file_sha256: str
-    page_count: int
+    page_count: Optional[int]
     precedence_rank: int
     ingested_at: str
     notes: str = ""
+    # How this document reached the corpus, and therefore how much a citation
+    # drawn from it is worth. An official PDF yields a real page in a real
+    # edition; a transcription does not, and must not be rendered as though it
+    # does. See backend.rag.store.PAGE_* for the rendering contract.
+    source_type: str = "OFFICIAL_PDF"
+    page_reference_kind: str = "OFFICIAL_DOCUMENT_PAGE"
+    provenance_basis: str = "HASH_VERIFIED_PDF"
 
 
 def sha256_file(path: Path) -> str:
@@ -115,7 +122,8 @@ def extract_pages(pdf_path: Path) -> List[str]:
 
 
 def chunk_page(
-    document_id: str, version: str, page_no: int, text: str, current_section: Optional[str]
+    document_id: str, version: str, page_no: Optional[int], text: str,
+    current_section: Optional[str]
 ) -> tuple[List[Chunk], Optional[str]]:
     """Split one page into overlapping chunks, tracking the last seen heading."""
     chunks: List[Chunk] = []
@@ -179,6 +187,9 @@ def ingest_pdf(pdf_path: Path, meta: dict) -> tuple[DocumentMeta, List[Chunk]]:
         precedence_rank=meta["precedence_rank"],
         ingested_at=datetime.datetime.now(datetime.timezone.utc).isoformat(),
         notes=meta.get("notes", ""),
+        source_type=meta.get("source_type", "OFFICIAL_PDF"),
+        page_reference_kind=meta.get("page_reference_kind", "OFFICIAL_DOCUMENT_PAGE"),
+        provenance_basis=meta.get("provenance_basis", "HASH_VERIFIED_PDF"),
     )
 
     chunks: List[Chunk] = []
@@ -189,16 +200,56 @@ def ingest_pdf(pdf_path: Path, meta: dict) -> tuple[DocumentMeta, List[Chunk]]:
     return doc, chunks
 
 
+def ingest_text(txt_path: Path, meta: dict) -> tuple[DocumentMeta, List[Chunk]]:
+    """
+    Ingest a plain-text transcription.
+
+    A text file has no pages, so every chunk carries page=None and the document is
+    marked NO_PAGINATION. The alternative -- synthesising page numbers from chunk
+    order -- would manufacture exactly the false locator this pipeline exists to
+    avoid. The file is still hashed: the hash proves which transcription was read,
+    even though it says nothing about which edition the text came from.
+    """
+    raw = txt_path.read_text(encoding="utf-8", errors="replace")
+    text = _clean_page_text(raw)
+    if not text.strip():
+        raise RuntimeError(f"{txt_path.name}: file is empty. Refusing to ingest an empty corpus.")
+
+    doc = DocumentMeta(
+        document_id=meta["document_id"],
+        title=meta["title"],
+        issuing_org=meta["issuing_org"],
+        geographic_scope=meta["geographic_scope"],
+        version=meta["version"],
+        publication_date=meta["publication_date"],
+        source_url=meta["source_url"],
+        source_file=txt_path.name,
+        file_sha256=sha256_file(txt_path),
+        page_count=None,
+        precedence_rank=meta["precedence_rank"],
+        ingested_at=datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        notes=meta.get("notes", ""),
+        source_type=meta.get("source_type", "PLAIN_TEXT_TRANSCRIPTION"),
+        page_reference_kind=meta.get("page_reference_kind", "NO_PAGINATION"),
+        provenance_basis=meta.get("provenance_basis", "OPERATOR_ATTESTATION"),
+    )
+
+    chunks, _ = chunk_page(doc.document_id, doc.version, None, text, None)
+    return doc, chunks
+
+
 def main() -> int:
-    p = argparse.ArgumentParser(description="Ingest a guideline PDF into the RAG corpus.")
-    p.add_argument("--pdf", required=True, type=Path)
+    p = argparse.ArgumentParser(description="Ingest a guideline document into the RAG corpus.")
+    src = p.add_mutually_exclusive_group(required=True)
+    src.add_argument("--pdf", type=Path)
+    src.add_argument("--text", type=Path, help="Plain-text transcription (no page numbers)")
     p.add_argument("--manifest", required=True, type=Path,
                    help="JSON file of document provenance metadata")
     p.add_argument("--out", type=Path, default=Path("backend/guidelines/data/rag"))
     a = p.parse_args()
 
     meta = json.loads(a.manifest.read_text(encoding="utf-8"))
-    doc, chunks = ingest_pdf(a.pdf, meta)
+    doc, chunks = ingest_pdf(a.pdf, meta) if a.pdf else ingest_text(a.text, meta)
     a.out.mkdir(parents=True, exist_ok=True)
     payload = {"document": asdict(doc), "chunks": [asdict(c) for c in chunks]}
     out = a.out / f"{doc.document_id}.json"
