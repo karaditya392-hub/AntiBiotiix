@@ -28,3 +28,13 @@ venv/
 
 # --- scratch / throwaway verification scripts ---
 scratch/
+
+# --- frontend build tooling ---
+frontend-src/node_modules/
+frontend-src/*.tsbuildinfo
+
+# NOTE: frontend/ is the Vite BUILD OUTPUT and IS committed on purpose, for the
+# same reason the RAG corpus is: backend/app.py serves it directly, so the app
+# must work straight after clone without an npm install + build step.
+# Source lives in frontend-src/. The pre-migration vanilla UI is kept in
+# frontend-legacy/ as the reference the console markup is generated from.
