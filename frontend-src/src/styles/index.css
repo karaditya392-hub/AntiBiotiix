@@ -1,0 +1,45 @@
+/*
+ * AntiBioTix — global foundation.
+ *
+ * The console's visual system lives in legacy.css (the original clinical console
+ * stylesheet plus the Manus design pass). Tailwind is loaded for the landing page
+ * and any new presentational components; it deliberately does not restyle the
+ * console, so the proven markup keeps the styling app.js expects.
+ */
+@import "tailwindcss";
+
+:root {
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+  margin: 0;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+/* The landing page paints its own full-viewport surface; without this the console
+   stylesheet's body rules would show through behind it. */
+body[data-surface="landing"] {
+  background: #0b292b;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
