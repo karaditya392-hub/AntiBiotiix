@@ -115,6 +115,25 @@ class ClinicalRuleEngine:
         # Normalized token matching for allergies (Spec §4)
         documented_allergies = [a.strip() for a in patient.allergies if a and a.strip()]
 
+        # Provenance for each allergy, when the caller supplied it. A patient
+        # self-report still fires the rule -- withholding a safety check because
+        # the report is unverified would be the wrong trade -- but the warning
+        # must say which kind of report it came from, so a clinician knows
+        # whether to confirm it before acting.
+        provenance = getattr(patient, "allergy_provenance", None) or {}
+
+        def _allergy_provenance(raw: str) -> str:
+            src = provenance.get(raw.strip().lower())
+            if src == "SELF_REPORTED":
+                return (" [PATIENT-REPORTED, NOT YET CLINICIAN-VERIFIED - confirm the "
+                        "reaction history before relying on or dismissing this warning]")
+            return ""
+
+        def _allergy_label(raw: str) -> str:
+            src = provenance.get(raw.strip().lower())
+            tag = " (patient-reported, unverified)" if src == "SELF_REPORTED" else ""
+            return f"{raw.title()}{tag}"
+
         for item in items:
             drug_name = item.medication_name
             norm_drug = self.kb.normalize_drug_name(drug_name)
@@ -146,8 +165,8 @@ class ClinicalRuleEngine:
                             rule=rule,
                             prescribed_drug=drug_name,
                             norm_drug=norm_drug,
-                            interacting_factor=f"Documented Allergy: {raw_allergy.title()}",
-                            citation_text=f"ICMR Guidelines Section 2: Direct match with documented patient allergy '{raw_allergy}'. Prescribing this specific agent is contraindicated without formal desensitization or allergy delabeling."
+                            interacting_factor=f"Documented Allergy: {_allergy_label(raw_allergy)}",
+                            citation_text=f"ICMR Guidelines Section 2: Direct match with documented patient allergy '{raw_allergy}'. Prescribing this specific agent is contraindicated without formal desensitization or allergy delabeling.{_allergy_provenance(raw_allergy)}"
                         ))
                     continue
 
@@ -162,8 +181,8 @@ class ClinicalRuleEngine:
                             rule=rule,
                             prescribed_drug=drug_name,
                             norm_drug=norm_drug,
-                            interacting_factor=f"Documented Allergy: {raw_allergy.title()}",
-                            citation_text=f"ICMR Guidelines 2022 / JTFPP 2022: Prescribed drug {drug_name} belongs to the penicillin class and shares the beta-lactam core, presenting high allergic cross-reactivity with documented penicillin allergy."
+                            interacting_factor=f"Documented Allergy: {_allergy_label(raw_allergy)}",
+                            citation_text=f"ICMR Guidelines 2022 / JTFPP 2022: Prescribed drug {drug_name} belongs to the penicillin class and shares the beta-lactam core, presenting high allergic cross-reactivity with documented penicillin allergy.{_allergy_provenance(raw_allergy)}"
                         ))
                     continue
 
@@ -178,8 +197,8 @@ class ClinicalRuleEngine:
                             rule=rule,
                             prescribed_drug=drug_name,
                             norm_drug=norm_drug,
-                            interacting_factor=f"Documented Allergy: {raw_allergy.title()}",
-                            citation_text="ICMR Guidelines 2022: 3rd-generation cephalosporins (e.g. Ceftriaxone) have low cross-reactivity (<1%) with penicillins due to distinct R1/R2 side chains, but require clinical vigilance if prior reaction was severe IgE-mediated anaphylaxis."
+                            interacting_factor=f"Documented Allergy: {_allergy_label(raw_allergy)}",
+                            citation_text=f"ICMR Guidelines 2022: 3rd-generation cephalosporins (e.g. Ceftriaxone) have low cross-reactivity (<1%) with penicillins due to distinct R1/R2 side chains, but require clinical vigilance if prior reaction was severe IgE-mediated anaphylaxis.{_allergy_provenance(raw_allergy)}"
                         ))
 
         return warnings

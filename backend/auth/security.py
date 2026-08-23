@@ -9,6 +9,17 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 from backend.config import AUTHORIZED_OVERRIDE_ROLES, AUTHORIZED_RULE_AUTHORING_ROLES
 
+# Roles permitted to create patient records and edit medication lists. A PATIENT
+# principal is deliberately absent: patients may report their own allergies, but
+# medication reconciliation is a clinical act.
+PATIENT_MANAGEMENT_ROLES = [
+    "ATTENDING_PHYSICIAN",
+    "INFECTIOUS_DISEASE_SPECIALIST",
+    "CLINICAL_PHARMACIST",
+    "RESIDENT_PHYSICIAN",
+    "STAFF_NURSE",
+]
+
 # Server-side token registry mapping access_token -> {"clinician_id": ..., "clinician_role": ...}
 # In production, this would be backed by Redis / JWT secret / OAuth2 / SAML
 SESSION_REGISTRY: Dict[str, Dict[str, Any]] = {
@@ -38,6 +49,59 @@ def create_session_token(clinician_id: str, clinician_role: str) -> str:
         "clinician_role": clinician_role.upper()
     }
     return token
+
+
+def create_patient_token(patient_id: str) -> str:
+    """
+    Issue a session token for a patient principal, scoped to one record.
+
+    The scope is carried on the session itself rather than passed by the caller,
+    so a patient cannot widen it by changing a request body.
+    """
+    token = f"ptok_{uuid.uuid4().hex}"
+    SESSION_REGISTRY[token] = {
+        "clinician_id": patient_id.upper(),
+        "clinician_role": "PATIENT",
+        "patient_scope": patient_id.upper(),
+    }
+    return token
+
+
+def get_current_principal(
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security_bearer)
+) -> Dict[str, str]:
+    """
+    Resolve any authenticated principal - clinician or patient - from the
+    server-side token. Use this where both may act; use get_current_clinician
+    where a patient must never be permitted.
+    """
+    return get_current_clinician(credentials)
+
+
+def require_clinician(principal: Dict[str, str]) -> Dict[str, str]:
+    """Reject a PATIENT principal from a clinician-only action."""
+    if principal.get("clinician_role", "").upper() == "PATIENT":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="This action requires a clinician account. Patient logins may report allergies only.",
+        )
+    return principal
+
+
+def require_patient_scope(principal: Dict[str, str], patient_id: str) -> None:
+    """
+    A patient principal may only act on their own record. Clinicians are not
+    scope-limited here; ward-level access control is out of scope for this
+    prototype and is documented as such.
+    """
+    if principal.get("clinician_role", "").upper() != "PATIENT":
+        return
+    scope = (principal.get("patient_scope") or "").upper()
+    if scope != (patient_id or "").upper():
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="A patient login may only submit information about their own record.",
+        )
 
 
 def get_current_clinician(

@@ -85,6 +85,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initPresets();
   setupTestLab();
   setupAskTheEvidence();
+  setupPatientManagement();
   wireInputInvalidation();
 });
 
@@ -154,29 +155,48 @@ function initTheme() {
 // ---------------------------------------------------------------------------
 // Patient Loading & Selection
 // ---------------------------------------------------------------------------
-async function loadPatients() {
+// Cache of the loaded roster, so the change handler always reads fresh data
+// without needing to be re-registered.
+let loadedPatients = [];
+let patientListenerBound = false;
+
+async function loadPatients(preferredId) {
   try {
     const res = await fetch(`${API_BASE}/api/patients`);
-    const patients = await res.json();
-    
+    loadedPatients = await res.json();
+
+    // Preserve whoever is on screen across a refresh. Re-selecting the first
+    // patient after an edit would silently move the clinician to a different
+    // record while they are still working - the same wrong-patient hazard as
+    // leaving stale warnings on screen.
+    const keep = preferredId
+      || (currentPatient && currentPatient.patient_id)
+      || patientSelect.value;
+
     patientSelect.innerHTML = "";
-    patients.forEach(p => {
+    loadedPatients.forEach(p => {
       const opt = document.createElement("option");
       opt.value = p.patient_id;
-      opt.textContent = `${p.patient_id} • Age ${p.age || 'Unk'} (${p.age_category}) • ${p.sex || 'Unk'}`;
+      opt.textContent = `${p.patient_id} \u2022 Age ${p.age || 'Unk'} (${p.age_category}) \u2022 ${p.sex || 'Unk'}`;
       patientSelect.appendChild(opt);
     });
 
-    patientSelect.addEventListener("change", (e) => {
-      const found = patients.find(p => p.patient_id === e.target.value);
-      if (!found) return;
-      // Clear any prior patient's prescription and results before switching.
-      resetPrescriptionWorkspace();
-      selectPatient(found);
-    });
+    // Bind once. Re-binding on every refresh stacked duplicate handlers.
+    if (!patientListenerBound) {
+      patientSelect.addEventListener("change", (e) => {
+        const found = loadedPatients.find(p => p.patient_id === e.target.value);
+        if (!found) return;
+        // Clear any prior patient's prescription and results before switching.
+        resetPrescriptionWorkspace();
+        selectPatient(found);
+      });
+      patientListenerBound = true;
+    }
 
-    if (patients.length > 0) {
-      selectPatient(patients[0]);
+    const target = loadedPatients.find(p => p.patient_id === keep) || loadedPatients[0];
+    if (target) {
+      patientSelect.value = target.patient_id;
+      selectPatient(target);
     }
   } catch (err) {
     showToast("Failed to load patient records", "danger");
@@ -1048,6 +1068,184 @@ function setupAskTheEvidence() {
       input.value = b.getAttribute("data-ask");
       run();
     });
+  });
+}
+
+
+// ---------------------------------------------------------------------------
+// Patient management: registration, medication reconciliation, allergy reports
+// ---------------------------------------------------------------------------
+function setupPatientManagement() {
+  const $ = (id) => document.getElementById(id);
+  const show = (el) => el && el.classList.remove("hidden");
+  const hide = (el) => el && el.classList.add("hidden");
+
+  // A patient token is issued per record. Reporting "as the patient" uses that
+  // token, so the server records the entry as self-reported rather than
+  // trusting a role sent in the request body.
+  const patientTokens = {};
+
+  async function patientTokenFor(pid) {
+    if (patientTokens[pid]) return patientTokens[pid];
+    const res = await fetch(`${API_BASE}/api/auth/patient-login`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ patient_id: pid }),
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    patientTokens[pid] = data.access_token;
+    return data.access_token;
+  }
+
+  function note(el, ok, msg) {
+    if (!el) return;
+    el.innerHTML = `<div class="recommendation-box" style="border-left-color: var(--${ok ? "success" : "critical"}-border); margin-top:0.6rem;">
+      <p style="margin:0; font-size:0.85rem;">${escapeHtml(msg)}</p></div>`;
+  }
+
+  // ---- register -----------------------------------------------------------
+  $("openRegisterPatient")?.addEventListener("click", () => {
+    ["regAge", "regWeight", "regEgfr", "regMeds", "regNotes"].forEach(id => { const e = $(id); if (e) e.value = ""; });
+    $("registerResult").innerHTML = "";
+    show($("registerModal"));
+  });
+  $("closeRegisterModal")?.addEventListener("click", () => hide($("registerModal")));
+  $("cancelRegister")?.addEventListener("click", () => hide($("registerModal")));
+
+  $("submitRegister")?.addEventListener("click", async () => {
+    const meds = ($("regMeds").value || "").split("\n").map(m => m.trim()).filter(Boolean);
+    const egfr = parseFloat($("regEgfr").value);
+    const age = parseInt($("regAge").value, 10);
+    const wt = parseFloat($("regWeight").value);
+    const cp = $("regChildPugh").value;
+
+    const body = {
+      age: Number.isFinite(age) ? age : null,
+      sex: $("regSex").value,
+      weight_kg: Number.isFinite(wt) ? wt : null,
+      egfr_ml_min: Number.isFinite(egfr) ? egfr : null,
+      renal_status_known: Number.isFinite(egfr),
+      child_pugh_class: cp || null,
+      hepatic_status_known: !!cp,
+      pregnancy_status: $("regPregnancy").value,
+      allergy_status_known: false,
+      active_medications: meds,
+      clinical_notes: $("regNotes").value || null,
+    };
+    if (Number.isFinite(age)) {
+      body.age_category = age < 18 ? "PEDIATRIC" : (age >= 65 ? "GERIATRIC" : "ADULT");
+    }
+
+    try {
+      const res = await fetch(`${API_BASE}/api/patients`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${activeAuthToken}` },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (!res.ok) { note($("registerResult"), false, data.detail || "Could not register patient."); return; }
+      patientTokens[data.patient_id] = data.patient_access_token;
+      const unknowns = (data.unknowns || []).length
+        ? ` Recorded as unknown: ${data.unknowns.join(", ")} — these will raise missing-information warnings.`
+        : "";
+      note($("registerResult"), true, `Created ${data.patient_id}.${unknowns}`);
+      showToast(`Registered ${data.patient_id}`, "success");
+      await loadPatients(data.patient_id);
+      setTimeout(() => hide($("registerModal")), 1600);
+    } catch (err) {
+      note($("registerResult"), false, "Error: " + err.message);
+    }
+  });
+
+  // ---- medications --------------------------------------------------------
+  $("openManageMeds")?.addEventListener("click", () => {
+    if (!currentPatient) { showToast("Select a patient first", "danger"); return; }
+    $("medsPatientLabel").textContent = `Patient ${currentPatient.patient_id}`;
+    $("medsList").value = (currentPatient.active_medications || []).join("\n");
+    $("medsReason").value = "";
+    $("medsResult").innerHTML = "";
+    show($("medsModal"));
+  });
+  $("closeMedsModal")?.addEventListener("click", () => hide($("medsModal")));
+  $("cancelMeds")?.addEventListener("click", () => hide($("medsModal")));
+
+  $("submitMeds")?.addEventListener("click", async () => {
+    if (!currentPatient) return;
+    const meds = ($("medsList").value || "").split("\n").map(m => m.trim()).filter(Boolean);
+    try {
+      const res = await fetch(`${API_BASE}/api/patients/${currentPatient.patient_id}/medications`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${activeAuthToken}` },
+        body: JSON.stringify({ active_medications: meds, reason: $("medsReason").value || null }),
+      });
+      const data = await res.json();
+      if (!res.ok) { note($("medsResult"), false, data.detail || "Could not update medications."); return; }
+      note($("medsResult"), true, `Updated: ${data.previous_count} → ${data.current_count}. Re-analyse to refresh interaction checks.`);
+      showToast("Medications updated", "success");
+      await loadPatients(currentPatient.patient_id);
+      setTimeout(() => hide($("medsModal")), 1500);
+    } catch (err) {
+      note($("medsResult"), false, "Error: " + err.message);
+    }
+  });
+
+  // ---- allergies ----------------------------------------------------------
+  function renderAllergyRecords(records) {
+    const box = $("allergyRecords");
+    if (!box) return;
+    if (!records || !records.length) { box.innerHTML = `<p class="sub-text">No allergies recorded.</p>`; return; }
+    box.innerHTML = `<strong style="font-size:0.82rem;">Recorded allergies</strong>` +
+      records.map(r => {
+        const verified = r.source === "CLINICIAN_VERIFIED";
+        const col = verified ? "success" : "high";
+        return `<div class="patient-summary-box" style="margin-top:0.4rem; padding:0.5rem 0.6rem;">
+          <span style="font-weight:600;">${escapeHtml(r.substance)}</span>
+          <span class="badge badge-${verified ? "mono" : "danger"}" style="margin-left:0.4rem; font-size:0.7rem;">
+            ${verified ? "Clinician-verified" : "Patient-reported, unverified"}</span>
+          ${r.reaction ? `<div class="sub-text" style="font-size:0.76rem; margin-top:0.2rem;">Reaction: ${escapeHtml(r.reaction)}</div>` : ""}
+        </div>`;
+      }).join("");
+  }
+
+  $("openReportAllergy")?.addEventListener("click", () => {
+    if (!currentPatient) { showToast("Select a patient first", "danger"); return; }
+    $("allergyPatientLabel").textContent = `Patient ${currentPatient.patient_id}`;
+    $("allergySubstance").value = "";
+    $("allergyReaction").value = "";
+    $("allergyResult").innerHTML = "";
+    renderAllergyRecords(currentPatient.allergy_records);
+    show($("allergyModal"));
+  });
+  $("closeAllergyModal")?.addEventListener("click", () => hide($("allergyModal")));
+  $("cancelAllergy")?.addEventListener("click", () => hide($("allergyModal")));
+
+  $("submitAllergy")?.addEventListener("click", async () => {
+    if (!currentPatient) return;
+    const substance = ($("allergySubstance").value || "").trim();
+    if (substance.length < 2) { note($("allergyResult"), false, "Enter the medication or substance."); return; }
+
+    const asPatient = $("allergyAs").value === "PATIENT";
+    let token = activeAuthToken;
+    if (asPatient) {
+      token = await patientTokenFor(currentPatient.patient_id);
+      if (!token) { note($("allergyResult"), false, "Could not obtain a patient session."); return; }
+    }
+
+    try {
+      const res = await fetch(`${API_BASE}/api/patients/${currentPatient.patient_id}/allergies`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify({ substance, reaction: $("allergyReaction").value || null }),
+      });
+      const data = await res.json();
+      if (!res.ok) { note($("allergyResult"), false, data.detail || "Could not record the allergy."); return; }
+      note($("allergyResult"), true, data.note || "Recorded.");
+      renderAllergyRecords(data.allergy_records);
+      showToast(`${substance} recorded (${data.source === "SELF_REPORTED" ? "unverified" : "verified"})`, "success");
+      await loadPatients(currentPatient.patient_id);
+    } catch (err) {
+      note($("allergyResult"), false, "Error: " + err.message);
+    }
   });
 }
 

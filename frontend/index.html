@@ -83,6 +83,11 @@
             <select id="patientSelect" class="form-select">
               <option value="">Loading synthetic profiles...</option>
             </select>
+            <div class="quick-presets" style="margin-top:0.5rem;">
+              <button class="btn btn-chip" id="openRegisterPatient">+ Register New Patient</button>
+              <button class="btn btn-chip" id="openManageMeds">Current Medications</button>
+              <button class="btn btn-chip" id="openReportAllergy">Report Allergy</button>
+            </div>
           </div>
 
           <!-- Patient Summary Card -->
@@ -463,6 +468,121 @@
   </main>
 
   <!-- Clinician Override Modal (Section 18, 18A) -->
+
+  <!-- Register a new patient (clinician) -->
+  <div id="registerModal" class="modal-backdrop hidden">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3><span class="icon">&#128203;</span> Register New Patient</h3>
+        <button class="modal-close" id="closeRegisterModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="sub-text" style="margin-bottom:0.75rem;">
+          Synthetic records only. This form deliberately has no name, phone or address field &mdash;
+          the patient identifier is issued by the server. Anything left blank is recorded as
+          <strong>unknown</strong>, not normal, and will raise a missing-information warning.
+        </p>
+        <div class="form-row">
+          <div class="form-group"><label for="regAge">Age (years)</label>
+            <input type="number" id="regAge" class="form-input" min="0" max="125" placeholder="e.g. 58"></div>
+          <div class="form-group"><label for="regSex">Sex</label>
+            <select id="regSex" class="form-select">
+              <option value="UNKNOWN">Unknown</option><option value="FEMALE">Female</option><option value="MALE">Male</option>
+            </select></div>
+          <div class="form-group"><label for="regWeight">Weight (kg)</label>
+            <input type="number" id="regWeight" class="form-input" step="0.1" placeholder="optional"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label for="regEgfr">eGFR (mL/min, CKD-EPI 2021)</label>
+            <input type="number" id="regEgfr" class="form-input" step="0.1" placeholder="leave blank if unknown"></div>
+          <div class="form-group"><label for="regChildPugh">Child-Pugh class</label>
+            <select id="regChildPugh" class="form-select">
+              <option value="">Unknown / not assessed</option><option value="A">A</option>
+              <option value="B">B</option><option value="C">C</option>
+            </select></div>
+          <div class="form-group"><label for="regPregnancy">Pregnancy status</label>
+            <select id="regPregnancy" class="form-select">
+              <option value="UNKNOWN">Unknown</option>
+              <option value="CONFIRMED_NOT_PREGNANT">Confirmed not pregnant</option>
+              <option value="PREGNANT_TRIMESTER_1">Pregnant &mdash; 1st trimester</option>
+              <option value="PREGNANT_TRIMESTER_2">Pregnant &mdash; 2nd trimester</option>
+              <option value="PREGNANT_TRIMESTER_3">Pregnant &mdash; 3rd trimester</option>
+            </select></div>
+        </div>
+        <div class="form-group"><label for="regMeds">Current medications (one per line)</label>
+          <textarea id="regMeds" class="form-textarea" rows="3" placeholder="Warfarin 5mg PO QD&#10;Atorvastatin 40mg PO QHS"></textarea></div>
+        <div class="form-group"><label for="regNotes">Clinical context</label>
+          <textarea id="regNotes" class="form-textarea" rows="2" placeholder="e.g. New admission, community-acquired pneumonia"></textarea></div>
+        <div id="registerResult"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="cancelRegister">Cancel</button>
+        <button class="btn btn-primary" id="submitRegister">Register Patient</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Manage current medications (clinician) -->
+  <div id="medsModal" class="modal-backdrop hidden">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3><span class="icon">&#128138;</span> Current Medications</h3>
+        <button class="modal-close" id="closeMedsModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="sub-text" id="medsPatientLabel" style="margin-bottom:0.6rem;"></p>
+        <p class="sub-text" style="margin-bottom:0.75rem;">
+          Drug-interaction checks read this list. Changing it changes which warnings fire,
+          so re-analyse afterwards.
+        </p>
+        <div class="form-group"><label for="medsList">One medication per line</label>
+          <textarea id="medsList" class="form-textarea" rows="6"></textarea></div>
+        <div class="form-group"><label for="medsReason">Reason for change</label>
+          <input type="text" id="medsReason" class="form-input" placeholder="e.g. reconciled with community pharmacy record"></div>
+        <div id="medsResult"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="cancelMeds">Cancel</button>
+        <button class="btn btn-primary" id="submitMeds">Save Medications</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Report an allergy (patient or clinician) -->
+  <div id="allergyModal" class="modal-backdrop hidden">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3><span class="icon">&#9888;</span> Report an Allergy</h3>
+        <button class="modal-close" id="closeAllergyModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="sub-text" id="allergyPatientLabel" style="margin-bottom:0.6rem;"></p>
+        <div class="form-group">
+          <label for="allergyAs">Reporting as</label>
+          <select id="allergyAs" class="form-select">
+            <option value="PATIENT">The patient (recorded as self-reported, pending verification)</option>
+            <option value="CLINICIAN">Clinician (recorded as verified)</option>
+          </select>
+        </div>
+        <div class="form-group"><label for="allergySubstance">Medication or substance</label>
+          <input type="text" id="allergySubstance" class="form-input" placeholder="e.g. Penicillin"></div>
+        <div class="form-group"><label for="allergyReaction">What happened? (optional)</label>
+          <input type="text" id="allergyReaction" class="form-input" placeholder="e.g. rash and swelling as a teenager"></div>
+        <p class="sub-text" style="font-size:0.78rem;">
+          A patient-reported allergy still triggers every allergy safety check. It is
+          labelled unverified so a clinician knows to confirm the reaction history &mdash;
+          the warning is never suppressed for being unverified.
+        </p>
+        <div id="allergyResult"></div>
+        <div id="allergyRecords" style="margin-top:0.75rem;"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="cancelAllergy">Close</button>
+        <button class="btn btn-primary" id="submitAllergy">Submit Allergy</button>
+      </div>
+    </div>
+  </div>
+
   <div id="overrideModal" class="modal-backdrop hidden">
     <div class="modal-dialog">
       <div class="modal-header">

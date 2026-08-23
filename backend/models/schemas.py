@@ -54,6 +54,7 @@ class ClinicianRole(str, Enum):
     INFECTIOUS_DISEASE_SPECIALIST = "INFECTIOUS_DISEASE_SPECIALIST"
     RESIDENT_PHYSICIAN = "RESIDENT_PHYSICIAN"
     STAFF_NURSE = "STAFF_NURSE"
+    PATIENT = "PATIENT"          # self-service principal; cannot prescribe or override
 
 
 class AWaReCategory(str, Enum):
@@ -67,6 +68,72 @@ class AWaReCategory(str, Enum):
 # Patient Models
 # ---------------------------------------------------------------------------
 
+class AllergySource(str, Enum):
+    """
+    Where an allergy record came from.
+
+    This distinction is clinically load-bearing. A patient saying "I think
+    penicillin gave me a rash as a child" and an allergist documenting an
+    IgE-mediated reaction are different facts, and the interface must not
+    render them identically. Both still trigger the allergy rules - suppressing
+    a warning because the report is unverified would be unsafe - but the
+    warning states which kind of report it is.
+    """
+    SELF_REPORTED = "SELF_REPORTED"
+    CLINICIAN_VERIFIED = "CLINICIAN_VERIFIED"
+
+
+class AllergyRecord(BaseModel):
+    substance: str = Field(..., min_length=2, max_length=120)
+    source: AllergySource = AllergySource.SELF_REPORTED
+    reaction: Optional[str] = Field(None, max_length=300, description="Free-text description of the reaction, if given")
+    reported_by: Optional[str] = Field(None, description="Principal id that submitted the record")
+    reported_at: Optional[str] = None
+    verified_by: Optional[str] = Field(None, description="Clinician id that confirmed it, if verified")
+    verified_at: Optional[str] = None
+
+    @property
+    def is_verified(self) -> bool:
+        return self.source == AllergySource.CLINICIAN_VERIFIED
+
+
+class AllergyReportRequest(BaseModel):
+    """Patient-submitted allergy. Always recorded as SELF_REPORTED."""
+    substance: str = Field(..., min_length=2, max_length=120)
+    reaction: Optional[str] = Field(None, max_length=300)
+
+
+class PatientRegistration(BaseModel):
+    """
+    Clinician-created patient record.
+
+    Deliberately carries NO direct identifiers - no name, phone, address or
+    government id. Spec 24/25 require synthetic, de-identified records, and the
+    safest way to honour that is to give the API nowhere to put real ones. The
+    patient_id is issued by the server.
+    """
+    age: Optional[int] = Field(None, ge=0, le=125)
+    age_category: AgeCategory = AgeCategory.UNKNOWN
+    sex: Optional[str] = Field(None, description="MALE, FEMALE, or UNKNOWN")
+    weight_kg: Optional[float] = Field(None, ge=0.5, le=300.0)
+    egfr_ml_min: Optional[float] = Field(None, ge=0.0, le=200.0)
+    serum_creatinine_mg_dl: Optional[float] = Field(None, ge=0.1, le=25.0)
+    renal_status_known: bool = Field(False, description="False when renal labs are unavailable")
+    child_pugh_class: Optional[str] = None
+    hepatic_status_known: bool = Field(False)
+    pregnancy_status: PregnancyStatus = PregnancyStatus.UNKNOWN
+    lactation_status: LactationStatus = LactationStatus.UNKNOWN
+    allergy_status_known: bool = Field(False, description="False until an allergy history is actually elicited")
+    active_medications: List[str] = Field(default_factory=list)
+    clinical_notes: Optional[str] = Field(None, max_length=2000)
+
+
+class MedicationUpdate(BaseModel):
+    """Replaces the patient's current medication list."""
+    active_medications: List[str] = Field(default_factory=list)
+    reason: Optional[str] = Field(None, max_length=300, description="Why the list changed")
+
+
 class PatientCreate(BaseModel):
     patient_id: str = Field(..., description="Synthetic patient identifier, e.g. PATIENT-001")
     age: Optional[int] = Field(None, ge=0, le=125, description="Patient age in years")
@@ -74,6 +141,10 @@ class PatientCreate(BaseModel):
     weight_kg: Optional[float] = Field(None, ge=0.5, le=300.0, description="Patient weight in kg")
     sex: Optional[str] = Field(None, description="Biological sex (MALE, FEMALE, UNKNOWN)")
     allergies: List[str] = Field(default_factory=list, description="List of documented medication allergies")
+    allergy_provenance: Dict[str, str] = Field(
+        default_factory=dict,
+        description="Lower-cased substance -> SELF_REPORTED | CLINICIAN_VERIFIED. Lets a warning state whether the allergy was patient-reported or clinician-verified without changing whether the rule fires.",
+    )
     allergy_status_known: bool = Field(True, description="False if allergy history has not been elicited")
     egfr_ml_min: Optional[float] = Field(None, ge=0.0, le=200.0, description="eGFR using CKD-EPI 2021 non-race formula")
     serum_creatinine_mg_dl: Optional[float] = Field(None, ge=0.1, le=25.0)

@@ -20,6 +20,7 @@ from backend.config import (
     PROMPT_TEMPLATE_HASH, GUIDELINE_PRECEDENCE_HIERARCHY,
     AUTHORIZED_OVERRIDE_ROLES, ALERT_FATIGUE_OVERRIDE_RATE_THRESHOLD
 )
+from backend.models import allergies as allergy_store
 from backend.models.database import (
     get_db, init_db, PatientDB, PrescriptionDB, PrescriptionItemDB,
     SafetyWarningDB, ClinicianOverrideDB, ClinicalRuleDB, RuleAuthorshipLogDB,
@@ -28,14 +29,19 @@ from backend.models.database import (
 from backend.models.schemas import (
     PatientCreate, PatientResponse, PrescriptionCreate, PrescriptionItem,
     ExtractedPrescription, SafetyWarning, PrescriptionAnalysisResponse,
-    OverrideRequest, OverrideResponse, ClinicianRole, SeverityLevel, RuleCategory
+    OverrideRequest, OverrideResponse, ClinicianRole, SeverityLevel, RuleCategory,
+    PatientRegistration, MedicationUpdate, AllergyReportRequest,
 )
 from backend.guidelines.knowledge_base import knowledge_base
 from backend.rules.engine import rule_engine
 from backend.rules.priority import compute_stewardship_priority
 from backend.extraction.parser import clinical_parser
 from backend.llm.explainer import clinical_explainer
-from backend.auth.security import authorizer, get_current_clinician, create_session_token
+from backend.auth.security import (
+    authorizer, get_current_clinician, create_session_token, create_patient_token,
+    get_current_principal, require_clinician, require_patient_scope,
+    PATIENT_MANAGEMENT_ROLES,
+)
 from backend.audit.logger import audit_logger
 
 
@@ -166,7 +172,9 @@ def list_patients(db: Session = Depends(get_db)):
             "age_category": p.age_category,
             "sex": p.sex,
             "weight_kg": p.weight_kg,
-            "allergies": json.loads(p.allergies_json) if p.allergies_json else [],
+            "allergies": allergy_store.substances(p.allergies_json),
+            "allergy_records": allergy_store.normalise(p.allergies_json),
+            "unverified_allergy_count": allergy_store.unverified_count(p.allergies_json),
             "allergy_status_known": p.allergy_status_known,
             "egfr_ml_min": p.egfr_ml_min,
             "serum_creatinine_mg_dl": p.serum_creatinine_mg_dl,
@@ -192,7 +200,9 @@ def get_patient(patient_id: str, db: Session = Depends(get_db)):
         "age_category": p.age_category,
         "sex": p.sex,
         "weight_kg": p.weight_kg,
-        "allergies": json.loads(p.allergies_json) if p.allergies_json else [],
+        "allergies": allergy_store.substances(p.allergies_json),
+        "allergy_records": allergy_store.normalise(p.allergies_json),
+        "unverified_allergy_count": allergy_store.unverified_count(p.allergies_json),
         "allergy_status_known": p.allergy_status_known,
         "egfr_ml_min": p.egfr_ml_min,
         "serum_creatinine_mg_dl": p.serum_creatinine_mg_dl,
@@ -203,6 +213,266 @@ def get_patient(patient_id: str, db: Session = Depends(get_db)):
         "lactation_status": p.lactation_status,
         "active_medications": json.loads(p.active_medications_json) if p.active_medications_json else [],
         "clinical_notes": p.clinical_notes
+    }
+
+
+# ---------------------------------------------------------------------------
+# Patient registration, medication reconciliation, allergy self-reporting
+# (Sections 3, 3B, 18A, 24, 25)
+# ---------------------------------------------------------------------------
+
+def _next_patient_id(db: Session) -> str:
+    """Server-issued synthetic identifier. Clients never choose it."""
+    existing = {p.patient_id for p in db.query(PatientDB).all()}
+    n = 1
+    while f"PATIENT-{n:03d}" in existing:
+        n += 1
+    return f"PATIENT-{n:03d}"
+
+
+@app.post("/api/patients", status_code=status.HTTP_201_CREATED)
+def register_patient(
+    payload: PatientRegistration,
+    db: Session = Depends(get_db),
+    principal: Dict[str, str] = Depends(get_current_principal),
+):
+    """
+    Create a patient record. Clinician roles only.
+
+    The request model carries no name, phone, address or government identifier,
+    and the patient_id is issued by the server - spec 24/25 require synthetic,
+    de-identified records, so the API is given nowhere to put a real one.
+
+    Note the defaults: allergy, renal and hepatic status all start UNKNOWN
+    rather than normal. A newly registered patient with nothing filled in
+    produces missing-information warnings, not a clean bill of health.
+    """
+    require_clinician(principal)
+    role = principal.get("clinician_role", "").upper()
+    if role not in PATIENT_MANAGEMENT_ROLES:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Role '{role}' is not permitted to register patients.",
+        )
+
+    patient_id = _next_patient_id(db)
+    p = PatientDB(
+        patient_id=patient_id,
+        age=payload.age,
+        age_category=payload.age_category.value if payload.age_category else "UNKNOWN",
+        sex=payload.sex or "UNKNOWN",
+        weight_kg=payload.weight_kg,
+        allergies_json=allergy_store.dumps([]),
+        allergy_status_known=payload.allergy_status_known,
+        egfr_ml_min=payload.egfr_ml_min,
+        serum_creatinine_mg_dl=payload.serum_creatinine_mg_dl,
+        renal_status_known=payload.renal_status_known,
+        child_pugh_class=payload.child_pugh_class,
+        hepatic_status_known=payload.hepatic_status_known,
+        pregnancy_status=payload.pregnancy_status.value if payload.pregnancy_status else "UNKNOWN",
+        lactation_status=payload.lactation_status.value if payload.lactation_status else "UNKNOWN",
+        active_medications_json=json.dumps(payload.active_medications or []),
+        clinical_notes=payload.clinical_notes,
+    )
+    db.add(p)
+    db.commit()
+
+    audit_logger.log_event(
+        db=db, event_type="PATIENT_REGISTERED", prescription_id="-",
+        patient_id=patient_id,
+        clinician_id=principal.get("clinician_id", "UNKNOWN"),
+        clinician_role=role,
+        action_summary=f"Patient record {patient_id} created.",
+        payload={
+            "age": payload.age,
+            "allergy_status_known": payload.allergy_status_known,
+            "renal_status_known": payload.renal_status_known,
+            "active_medication_count": len(payload.active_medications or []),
+        },
+        model_version=SYSTEM_VERSION, prompt_template_id=PROMPT_TEMPLATE_ID,
+    )
+
+    return {
+        "patient_id": patient_id,
+        "status": "CREATED",
+        "patient_access_token": create_patient_token(patient_id),
+        "token_note": (
+            "Give this to the patient so they can report their own allergies. It is "
+            "scoped to this record only and cannot prescribe, override, or read "
+            "another patient."
+        ),
+        "unknowns": [
+            k for k, v in [
+                ("allergy history", payload.allergy_status_known),
+                ("renal function", payload.renal_status_known),
+                ("hepatic function", payload.hepatic_status_known),
+            ] if not v
+        ],
+    }
+
+
+@app.put("/api/patients/{patient_id}/medications")
+def update_medications(
+    patient_id: str,
+    payload: MedicationUpdate,
+    db: Session = Depends(get_db),
+    principal: Dict[str, str] = Depends(get_current_principal),
+):
+    """
+    Replace a patient's current medication list. Clinician roles only -
+    medication reconciliation is a clinical act, not self-service.
+    """
+    require_clinician(principal)
+    role = principal.get("clinician_role", "").upper()
+    if role not in PATIENT_MANAGEMENT_ROLES:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Role '{role}' is not permitted to edit medications.")
+
+    p = db.query(PatientDB).filter(PatientDB.patient_id == patient_id).first()
+    if not p:
+        raise HTTPException(status_code=404, detail="Patient not found")
+
+    before = json.loads(p.active_medications_json) if p.active_medications_json else []
+    cleaned = [m.strip() for m in payload.active_medications if m and m.strip()]
+    p.active_medications_json = json.dumps(cleaned)
+    db.commit()
+
+    audit_logger.log_event(
+        db=db, event_type="MEDICATIONS_UPDATED", prescription_id="-",
+        patient_id=patient_id,
+        clinician_id=principal.get("clinician_id", "UNKNOWN"), clinician_role=role,
+        action_summary=f"Current medications updated for {patient_id} ({len(before)} -> {len(cleaned)}).",
+        payload={"before": before, "after": cleaned, "reason": payload.reason},
+        model_version=SYSTEM_VERSION, prompt_template_id=PROMPT_TEMPLATE_ID,
+    )
+    return {"patient_id": patient_id, "active_medications": cleaned,
+            "previous_count": len(before), "current_count": len(cleaned),
+            "note": "Re-analyse any active prescription - interaction checks read this list."}
+
+
+@app.post("/api/patients/{patient_id}/allergies", status_code=status.HTTP_201_CREATED)
+def report_allergy(
+    patient_id: str,
+    payload: AllergyReportRequest,
+    db: Session = Depends(get_db),
+    principal: Dict[str, str] = Depends(get_current_principal),
+):
+    """
+    Record an allergy. Patients may submit for their own record; clinicians for any.
+
+    A patient submission is stored as SELF_REPORTED. It still triggers the
+    allergy rules - suppressing a safety check because the report is unverified
+    would be the wrong trade - but every warning derived from it states that the
+    report has not been clinician-verified.
+    """
+    require_patient_scope(principal, patient_id)
+
+    p = db.query(PatientDB).filter(PatientDB.patient_id == patient_id).first()
+    if not p:
+        raise HTTPException(status_code=404, detail="Patient not found")
+
+    role = principal.get("clinician_role", "").upper()
+    is_patient = role == "PATIENT"
+    source = allergy_store.SELF_REPORTED if is_patient else allergy_store.CLINICIAN_VERIFIED
+
+    records, added = allergy_store.add_report(
+        p.allergies_json, payload.substance,
+        source=source, reported_by=principal.get("clinician_id", "UNKNOWN"),
+        reaction=payload.reaction,
+    )
+    p.allergies_json = allergy_store.dumps(records)
+    # Recording an allergy means a history now exists, clearing the
+    # missing-allergy-information guard.
+    p.allergy_status_known = True
+    db.commit()
+
+    audit_logger.log_event(
+        db=db, event_type="ALLERGY_REPORTED", prescription_id="-",
+        patient_id=patient_id,
+        clinician_id=principal.get("clinician_id", "UNKNOWN"), clinician_role=role,
+        action_summary=f"Allergy '{payload.substance}' recorded for {patient_id} ({source}).",
+        payload={"substance": payload.substance, "source": source,
+                 "reaction": payload.reaction, "newly_added": added},
+        model_version=SYSTEM_VERSION, prompt_template_id=PROMPT_TEMPLATE_ID,
+    )
+
+    return {
+        "patient_id": patient_id,
+        "substance": payload.substance,
+        "source": source,
+        "newly_added": added,
+        "allergy_records": allergy_store.normalise(p.allergies_json),
+        "note": (
+            "Recorded as patient-reported and awaiting clinician verification. It will "
+            "still trigger allergy safety checks."
+            if is_patient else
+            "Recorded as clinician-verified."
+        ),
+    }
+
+
+@app.post("/api/patients/{patient_id}/allergies/verify")
+def verify_allergy(
+    patient_id: str,
+    payload: Dict[str, Any],
+    db: Session = Depends(get_db),
+    principal: Dict[str, str] = Depends(get_current_principal),
+):
+    """Promote a self-reported allergy to clinician-verified."""
+    require_clinician(principal)
+    role = principal.get("clinician_role", "").upper()
+    if role not in PATIENT_MANAGEMENT_ROLES:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Role '{role}' is not permitted to verify allergies.")
+
+    substance = (payload or {}).get("substance", "")
+    if not substance:
+        raise HTTPException(status_code=422, detail="substance is required")
+
+    p = db.query(PatientDB).filter(PatientDB.patient_id == patient_id).first()
+    if not p:
+        raise HTTPException(status_code=404, detail="Patient not found")
+
+    records, changed = allergy_store.verify(p.allergies_json, substance,
+                                            principal.get("clinician_id", "UNKNOWN"))
+    if not changed:
+        raise HTTPException(status_code=404,
+                            detail=f"No unverified allergy '{substance}' found for {patient_id}.")
+    p.allergies_json = allergy_store.dumps(records)
+    db.commit()
+
+    audit_logger.log_event(
+        db=db, event_type="ALLERGY_VERIFIED", prescription_id="-",
+        patient_id=patient_id,
+        clinician_id=principal.get("clinician_id", "UNKNOWN"), clinician_role=role,
+        action_summary=f"Allergy '{substance}' verified for {patient_id}.",
+        payload={"substance": substance},
+        model_version=SYSTEM_VERSION, prompt_template_id=PROMPT_TEMPLATE_ID,
+    )
+    return {"patient_id": patient_id, "substance": substance,
+            "source": allergy_store.CLINICIAN_VERIFIED,
+            "allergy_records": allergy_store.normalise(p.allergies_json)}
+
+
+@app.post("/api/auth/patient-login")
+def patient_login(payload: Dict[str, Any], db: Session = Depends(get_db)):
+    """
+    Demo patient login. Issues a token scoped to one record.
+
+    A real deployment would authenticate the person; this prototype only
+    demonstrates the scoping, and says so.
+    """
+    patient_id = (payload or {}).get("patient_id", "").strip().upper()
+    p = db.query(PatientDB).filter(PatientDB.patient_id == patient_id).first()
+    if not p:
+        raise HTTPException(status_code=404, detail="Patient not found")
+    return {
+        "access_token": create_patient_token(patient_id),
+        "token_type": "bearer",
+        "patient_id": patient_id,
+        "role": "PATIENT",
+        "scope_note": "Scoped to this record. Cannot prescribe, override warnings, or read other patients.",
+        "prototype_note": "Demo login only - no credential is verified here.",
     }
 
 
@@ -299,7 +569,11 @@ def analyze_prescription(prescription_id: str, db: Session = Depends(get_db)):
         age_category=patient_db.age_category,
         weight_kg=patient_db.weight_kg,
         sex=patient_db.sex,
-        allergies=json.loads(patient_db.allergies_json) if patient_db.allergies_json else [],
+        allergies=allergy_store.substances(patient_db.allergies_json),
+        allergy_provenance={
+            r["substance"].strip().lower(): r.get("source", allergy_store.SELF_REPORTED)
+            for r in allergy_store.normalise(patient_db.allergies_json)
+        },
         allergy_status_known=patient_db.allergy_status_known,
         egfr_ml_min=patient_db.egfr_ml_min,
         serum_creatinine_mg_dl=patient_db.serum_creatinine_mg_dl,
