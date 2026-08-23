@@ -25,6 +25,17 @@ from backend.rag.embeddings import EmbeddingBackend, get_backend
 RAG_DIR = Path(__file__).parent.parent / "guidelines" / "data" / "rag"
 
 
+# How a chunk's `page` number should be described to a clinician.
+#
+# A page number is only a citation if it points into the official document. For a
+# transcription the number is a page of the TRANSCRIPT, and rendering it as "p. 4"
+# would invite a reader to look up page 4 of an edition where the passage may sit
+# somewhere else entirely. Each kind therefore renders differently.
+PAGE_OFFICIAL = "OFFICIAL_DOCUMENT_PAGE"
+PAGE_TRANSCRIPT = "TRANSCRIPT_PAGE_NOT_OFFICIAL"
+PAGE_NONE = "NO_PAGINATION"
+
+
 @dataclass
 class RetrievedChunk:
     document_id: str
@@ -34,16 +45,26 @@ class RetrievedChunk:
     version: str
     publication_date: str
     source_url: str
-    page: int
+    page: Optional[int]
     section: Optional[str]
     text: str
     score: float
     notes: str = ""
+    source_type: str = "OFFICIAL_PDF"
+    page_reference_kind: str = PAGE_OFFICIAL
+    provenance_basis: str = "HASH_VERIFIED_PDF"
+
+    def location_label(self) -> str:
+        """Render the location so it cannot be mistaken for an official page."""
+        if self.page_reference_kind == PAGE_OFFICIAL and self.page:
+            loc = f"p. {self.page}"
+        elif self.page_reference_kind == PAGE_TRANSCRIPT and self.page:
+            loc = f"transcript p. {self.page} (NOT an official page of this edition)"
+        else:
+            loc = "no pagination (plain-text transcription)"
+        return f"{self.section} ({loc})" if self.section else loc
 
     def to_citation(self) -> Dict[str, Any]:
-        loc = f"p. {self.page}"
-        if self.section:
-            loc = f"{self.section} ({loc})"
         return {
             "document_title": self.document_title,
             "issuing_org": self.issuing_org,
@@ -51,9 +72,13 @@ class RetrievedChunk:
             "guideline_version": self.version,
             "publication_date": self.publication_date,
             "source_url": self.source_url,
-            "section_page": loc,
+            "section_page": self.location_label(),
+            "page_reference_kind": self.page_reference_kind,
+            "source_type": self.source_type,
+            "provenance_basis": self.provenance_basis,
             "verbatim_passage": self.text,
             "retrieval_score": round(float(self.score), 4),
+            "provenance_note": self.notes or None,
         }
 
 
@@ -188,11 +213,16 @@ class GuidelineVectorStore:
                     version=doc.get("version", c.get("version", "unknown")),
                     publication_date=doc.get("publication_date", ""),
                     source_url=doc.get("source_url", ""),
-                    page=c["page"],
+                    page=c.get("page"),
                     section=c.get("section"),
                     text=c["text"],
                     score=float(sims[int(i)]),
                     notes=doc.get("notes", ""),
+                    # Documents ingested before these fields existed are official
+                    # hash-verified PDFs, which is what the defaults describe.
+                    source_type=doc.get("source_type", "OFFICIAL_PDF"),
+                    page_reference_kind=doc.get("page_reference_kind", PAGE_OFFICIAL),
+                    provenance_basis=doc.get("provenance_basis", "HASH_VERIFIED_PDF"),
                 )
             )
             if len(out) >= k:
