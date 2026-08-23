@@ -979,13 +979,13 @@ h1, h2, h3, h4, h5, h6 {
 body {
   background-image:
     linear-gradient(rgba(10, 14, 23, 0.92), rgba(10, 14, 23, 0.92)),
-    url('/static/textures/console-texture.png'),
+    url('/static/textures/console-texture.jpg'),
     radial-gradient(circle at 10% 20%, rgba(56, 189, 248, 0.05) 0%, transparent 40%);
   background-size: cover, cover, auto;
   background-attachment: fixed;
 }
 [data-theme="light"] body {
-  background-image: linear-gradient(rgba(248, 250, 252, 0.96), rgba(248, 250, 252, 0.96)), url('/static/textures/console-texture.png');
+  background-image: linear-gradient(rgba(248, 250, 252, 0.96), rgba(248, 250, 252, 0.96)), url('/static/textures/console-texture.jpg');
 }
 
 /* AntiBioTix requirements pass: premium clinical command center, solid teal system, no neon/glassmorphism-heavy treatment. */

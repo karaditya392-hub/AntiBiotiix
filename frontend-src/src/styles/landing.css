@@ -108,7 +108,7 @@
 .feature-arrow { position: absolute; right: 1.35rem; bottom: 1.35rem; color: #8ca8a2; transition: transform 180ms ease, color 180ms ease; }
 .feature-item:hover .feature-arrow { color: #0d6969; transform: translateX(3px); }
 .landing-final-cta { position: relative; max-width: 1270px; min-height: 17rem; margin: 0 auto 3rem; padding: 3.4rem 4rem; display: flex; align-items: center; justify-content: space-between; gap: 2rem; overflow: hidden; color: #f3fbf8; background: #0d4e50; border-radius: 10px; box-shadow: 0 20px 40px rgba(9,71,70,.16); }
-.landing-final-cta::after { content: ''; position: absolute; inset: 0; opacity: .12; background-image: url('/static/textures/evidence-pattern.png'); background-size: cover; mix-blend-mode: screen; pointer-events: none; }
+.landing-final-cta::after { content: ''; position: absolute; inset: 0; opacity: .12; background-image: url('/static/textures/evidence-pattern.jpg'); background-size: cover; mix-blend-mode: screen; pointer-events: none; }
 .landing-final-cta .eyebrow { position: relative; z-index: 1; color: #93d3c4; }
 .landing-final-cta h2 { position: relative; z-index: 1; color: #f3fbf8; font-size: clamp(2.2rem, 4vw, 3.7rem); line-height: .98; letter-spacing: -.06em; margin: .8rem 0 0; }
 .landing-final-cta h2 em { color: #8fd4c5; }
