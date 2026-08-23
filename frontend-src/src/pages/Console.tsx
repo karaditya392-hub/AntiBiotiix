@@ -6,6 +6,7 @@ import { useEffect, useRef } from "react";
 import consoleMarkup from "@/legacy/console.html?raw";
 import { installPregnancyDisplayRule } from "@/legacy/pregnancyDisplay";
 import { installClinicalReference } from "@/legacy/clinicalReference";
+import { installAlternativeComparison } from "@/legacy/alternativeComparison";
 import "@/styles/legacy.css";
 import "@/styles/reference.css";
 
@@ -44,6 +45,9 @@ export default function Console() {
       // Read-only browser over the ingested guideline corpus. Separate from
       // app.js so that file keeps its four-line diff against the original.
       installClinicalReference();
+      // Comparative what-if against an alternative agent. Reuses the original
+      // create+analyze endpoints; recommends nothing.
+      installAlternativeComparison();
     });
 
     return () => {

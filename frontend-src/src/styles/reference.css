@@ -174,3 +174,156 @@
     max-height: 16rem;
   }
 }
+
+/* ---------------------------------------------------------------------------
+ * Comparative alternative analysis
+ * Inherits the console tokens, so it follows both themes and the Manus palette.
+ * ------------------------------------------------------------------------- */
+
+.compare-panel {
+  margin-top: 1.5rem;
+  padding: 1.15rem 1.25rem;
+  border: 1px solid var(--border-color);
+  border-left: 3px solid var(--accent-primary);
+  border-radius: var(--radius-md);
+  background: var(--bg-tertiary);
+}
+
+.compare-panel .panel-header {
+  margin-bottom: 0.85rem;
+}
+
+.compare-panel h4 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+}
+
+.compare-results {
+  margin-top: 1rem;
+}
+
+.compare-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.compare-column {
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-secondary);
+}
+
+.compare-column.alternative {
+  border-color: var(--accent-primary);
+}
+
+.compare-column-head {
+  padding-bottom: 0.7rem;
+  margin-bottom: 0.7rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.compare-kind {
+  display: block;
+  color: var(--text-subtle);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  margin-bottom: 0.25rem;
+}
+
+.compare-column-head strong {
+  display: block;
+  font-size: 0.95rem;
+  line-height: 1.35;
+}
+
+.compare-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: 0.55rem;
+}
+
+.compare-count {
+  padding: 0.15rem 0.45rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+}
+
+.compare-count.critical { background: var(--critical-bg); border-color: var(--critical-border); color: var(--critical-text); }
+.compare-count.high     { background: var(--high-bg);     border-color: var(--high-border);     color: var(--high-text); }
+.compare-count.moderate { background: var(--moderate-bg); border-color: var(--moderate-border); color: var(--moderate-text); }
+.compare-count.tier,
+.compare-count.aware    { background: var(--low-bg);      border-color: var(--low-border);      color: var(--low-text); }
+
+.compare-findings {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.compare-findings li {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.42rem 0;
+  border-bottom: 1px dashed var(--border-color);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.compare-findings li:last-child {
+  border-bottom: 0;
+}
+
+.compare-mark {
+  flex-shrink: 0;
+  width: 1.05rem;
+  height: 1.05rem;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  font-size: 0.62rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.compare-ok .compare-mark {
+  background: var(--success-bg);
+  border: 1px solid var(--success-border);
+  color: var(--success-text);
+}
+
+.compare-ok { color: var(--text-muted); }
+
+.compare-flag.critical .compare-mark { background: var(--critical-bg); border: 1px solid var(--critical-border); color: var(--critical-text); }
+.compare-flag.high     .compare-mark { background: var(--high-bg);     border: 1px solid var(--high-border);     color: var(--high-text); }
+.compare-flag.moderate .compare-mark { background: var(--moderate-bg); border: 1px solid var(--moderate-border); color: var(--moderate-text); }
+
+.compare-rule {
+  color: var(--text-subtle);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-style: normal;
+}
+
+.compare-disclaimer {
+  margin: 1rem 0 0;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border-color);
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+@media (max-width: 900px) {
+  .compare-grid { grid-template-columns: 1fr; }
+}

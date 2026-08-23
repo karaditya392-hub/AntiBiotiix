@@ -270,6 +270,34 @@
               <div id="amrContent" class="amr-body"></div>
             </div>
 
+
+            <!-- Comparative alternative analysis -->
+            <div id="comparePanel" class="compare-panel hidden">
+              <div class="panel-header">
+                <div>
+                  <h4><span class="icon" aria-hidden="true">⇄</span> Compare with an alternative</h4>
+                  <p class="sub-text">
+                    Runs the same deterministic safety engine against an alternative agent for
+                    this patient, and shows the two side by side.
+                  </p>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="compareInput">Alternative agent</label>
+                <input type="text" id="compareInput" class="form-input"
+                       placeholder="e.g. Azithromycin 500mg PO OD x 3 days">
+              </div>
+              <div class="quick-presets" id="compareSuggestions"></div>
+              <button id="compareRunBtn" class="btn btn-secondary btn-sm">Run comparative analysis</button>
+
+              <div id="compareResults" class="compare-results"></div>
+
+              <p class="compare-disclaimer">
+                This is a comparative analysis. Final medication selection remains the
+                clinician's responsibility.
+              </p>
+            </div>
           </div>
         </div>
 
@@ -346,6 +374,15 @@
             <span class="badge badge-warning">Recalibration Threshold: > 60% Overrides</span>
           </div>
           <p class="sub-text">Monitors trigger frequency vs. override rates per Rule ID to identify over-alerting rules for clinical stewardship recalibration.</p>
+          <div class="catalog-unavailable" style="margin:0.75rem 0;">
+            <strong>Counts include comparative what-if runs</strong>
+            <p>
+              Comparative alternative analyses execute the same rules and therefore increment
+              <em>Total Triggered</em> without a clinician ever acting on the result. Override
+              rates below will read lower than clinical practice alone would produce. Records
+              created that way are marked as comparative in the audit trail.
+            </p>
+          </div>
           <div class="table-responsive">
             <table class="data-table" id="fatigueTable">
               <thead>

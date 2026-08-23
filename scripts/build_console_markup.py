@@ -235,3 +235,86 @@ _gone = [i for i in ("runAllTestsBtn", "testSuiteTableBody")
 print("  ids app.js still queries but markup no longer has:", _gone or "NONE")
 
 io.open(OUT, "w", encoding="utf-8").write(body + "\n")
+
+
+# ---------------------------------------------------------------------------
+# Comparative alternative-antibiotic analysis
+# ---------------------------------------------------------------------------
+# Lives in the prescription tab, directly beneath the safety results, because
+# "what changes if I select an alternative?" is asked while looking at the
+# warnings -- not on a separate screen.
+#
+# Rendering is handled by src/legacy/alternativeComparison.ts, NOT app.js.
+
+_COMPARE_PANEL = """
+            <!-- Comparative alternative analysis -->
+            <div id="comparePanel" class="compare-panel hidden">
+              <div class="panel-header">
+                <div>
+                  <h4><span class="icon" aria-hidden="true">\u21c4</span> Compare with an alternative</h4>
+                  <p class="sub-text">
+                    Runs the same deterministic safety engine against an alternative agent for
+                    this patient, and shows the two side by side.
+                  </p>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="compareInput">Alternative agent</label>
+                <input type="text" id="compareInput" class="form-input"
+                       placeholder="e.g. Azithromycin 500mg PO OD x 3 days">
+              </div>
+              <div class="quick-presets" id="compareSuggestions"></div>
+              <button id="compareRunBtn" class="btn btn-secondary btn-sm">Run comparative analysis</button>
+
+              <div id="compareResults" class="compare-results"></div>
+
+              <p class="compare-disclaimer">
+                This is a comparative analysis. Final medication selection remains the
+                clinician's responsibility.
+              </p>
+            </div>
+"""
+
+_ANCHOR = """          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- TAB 2: Guidelines & Rules Explorer -->"""
+
+if _ANCHOR not in body:
+    raise SystemExit("prescription-tab anchor for the compare panel not found")
+body = body.replace(_ANCHOR, _COMPARE_PANEL + _ANCHOR, 1)
+
+# Alert-fatigue caveat: comparative runs increment the same trigger counters, so
+# override rates read lower than clinical practice alone would produce.
+_FATIGUE_ANCHOR = ('<p class="sub-text">Monitors trigger frequency vs. override rates per Rule ID '
+                   'to identify over-alerting rules for clinical stewardship recalibration.</p>')
+_FATIGUE_NOTE = _FATIGUE_ANCHOR + """
+          <div class="catalog-unavailable" style="margin:0.75rem 0;">
+            <strong>Counts include comparative what-if runs</strong>
+            <p>
+              Comparative alternative analyses execute the same rules and therefore increment
+              <em>Total Triggered</em> without a clinician ever acting on the result. Override
+              rates below will read lower than clinical practice alone would produce. Records
+              created that way are marked as comparative in the audit trail.
+            </p>
+          </div>"""
+
+if _FATIGUE_ANCHOR not in body:
+    raise SystemExit("alert-fatigue anchor not found")
+body = body.replace(_FATIGUE_ANCHOR, _FATIGUE_NOTE, 1)
+
+print()
+print("Comparative analysis panel: added")
+print("  comparePanel present     :", 'id="comparePanel"' in body)
+print("  in prescription tab      :", body.find('id="comparePanel"') < body.find('id="tab-guidelines"'))
+print("  alert-fatigue caveat     :", "Counts include comparative what-if runs" in body)
+
+_still_missing = [i for i in sorted(set(re.findall(r'getElementById\(["\']([^"\']+)["\']\)', appjs)))
+                  if 'id="%s"' % i not in body]
+print("  ids app.js queries but markup lacks:", _still_missing or "NONE")
+
+io.open(OUT, "w", encoding="utf-8").write(body + "\n")
