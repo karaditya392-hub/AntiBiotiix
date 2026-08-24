@@ -1,203 +1,522 @@
 """
 Seed Database with Synthetic De-Identified Patients and Rules (Sections 24, 25)
 Zero real patient PII - 100% synthetic clinical simulation scenarios.
+
+Teaching roster lives in SEED_ROSTER. Each entry is one unique patient with a
+unique allergy set, diagnosis, initial prescription, and quick-scenario
+preset. To add a new demo patient, append one dict to SEED_ROSTER — patient
+row, seed visit, and console preset are derived from that single list.
 """
+import argparse
 import json
-from datetime import datetime, timezone
 from backend.models.database import (
-    SessionLocal, init_db, PatientDB, ClinicalRuleDB, 
-    GuidelineDocumentDB, AMRSurveillanceDB, AlertMetricsDB
+    SessionLocal, init_db, PatientDB, PrescriptionDB, PrescriptionItemDB,
+    SafetyWarningDB, ClinicianOverrideDB, AuditLogDB, ClinicalRuleDB,
+    GuidelineDocumentDB, AMRSurveillanceDB, AlertMetricsDB,
 )
 from backend.guidelines.knowledge_base import knowledge_base
 
 
-def seed_database():
+# Append new demo patients here. Each patient_id, allergy list, diagnosis, prescription medication, and
+# scenario key/label must be unique across the roster. Include a scenario
+# block so the console gets a matching quick-preset chip.
+SEED_ROSTER = [
+    {
+        "patient_id": "PATIENT-001",
+        "age": 45, "age_category": "ADULT", "weight_kg": 72.0, "sex": "MALE",
+        "allergies": ["Penicillin", "Amoxicillin"], "allergy_status_known": True,
+        "egfr_ml_min": 92.0, "serum_creatinine_mg_dl": 0.9, "renal_status_known": True,
+        "child_pugh_class": None, "hepatic_status_known": True,
+        "pregnancy_status": "CONFIRMED_NOT_PREGNANT", "lactation_status": "CONFIRMED_NOT_LACTATING",
+        "active_medications": ["Pantoprazole 40mg PO QD"],
+        "clinical_notes": "45yo male presenting with fever, cough, and right lower lobe consolidation consistent with CAP. Documented penicillin anaphylaxis 5 years ago.",
+        "diagnosis": "Community-acquired pneumonia",
+        "prescription": ("Azithromycin", 500, "mg", "PO", "QD", 3),
+        "scenario": {
+            "key": "cap-pen-allergy",
+            "label": "CAP: Amox in Penicillin Allergy",
+            "diagnosis": "Community-Acquired Pneumonia (CAP)",
+            "text": "Amoxicillin 500mg PO TID x 7 days for community acquired pneumonia",
+        },
+    },
+    {
+        "patient_id": "PATIENT-002",
+        "age": 68, "age_category": "GERIATRIC", "weight_kg": 64.0, "sex": "FEMALE",
+        "allergies": ["Sulfonamides"], "allergy_status_known": True,
+        "egfr_ml_min": 22.0, "serum_creatinine_mg_dl": 2.8, "renal_status_known": True,
+        "child_pugh_class": None, "hepatic_status_known": True,
+        "pregnancy_status": "CONFIRMED_NOT_PREGNANT", "lactation_status": "CONFIRMED_NOT_LACTATING",
+        "active_medications": ["Amlodipine 5mg PO QD", "Torsemide 10mg PO QD"],
+        "clinical_notes": "68yo female with CKD Stage 4 (eGFR 22 mL/min via CKD-EPI 2021 non-race formula) presenting with dysuria, frequency, and suspected cystitis.",
+        "diagnosis": "Acute uncomplicated cystitis",
+        "prescription": ("Nitrofurantoin", 100, "mg", "PO", "BID", 5),
+        "scenario": {
+            "key": "uti-ckd",
+            "label": "UTI: Nitrofurantoin in CKD-4",
+            "diagnosis": "Uncomplicated Urinary Tract Infection (Cystitis)",
+            "text": "Nitrofurantoin 100mg PO BID x 5 days for acute cystitis",
+        },
+    },
+    {
+        "patient_id": "PATIENT-003",
+        "age": 54, "age_category": "ADULT", "weight_kg": 78.0, "sex": "MALE",
+        "allergies": ["Meropenem"], "allergy_status_known": True,
+        "egfr_ml_min": 75.0, "serum_creatinine_mg_dl": 1.1, "renal_status_known": True,
+        "child_pugh_class": "Child-Pugh C", "hepatic_status_known": True,
+        "pregnancy_status": "CONFIRMED_NOT_PREGNANT", "lactation_status": "CONFIRMED_NOT_LACTATING",
+        "active_medications": ["Furosemide 40mg PO QD", "Spironolactone 100mg PO QD", "Lactulose 30mL PO TID"],
+        "clinical_notes": "54yo male with decompensated alcoholic cirrhosis (Child-Pugh C, ascites, jaundice) presenting with abdominal pain and suspected spontaneous bacterial peritonitis.",
+        "diagnosis": "Spontaneous bacterial peritonitis",
+        "prescription": ("Cefotaxime", 2, "g", "IV", "Q8H", 5),
+        "scenario": {
+            "key": "cirrhosis-flagyl",
+            "label": "Cirrhosis: Metronidazole Overdose",
+            "diagnosis": "Intra-abdominal Infection",
+            "text": "Metronidazole 500mg IV TID x 10 days",
+        },
+    },
+    {
+        "patient_id": "PATIENT-004",
+        "age": 28, "age_category": "ADULT", "weight_kg": 62.0, "sex": "FEMALE",
+        "allergies": ["Tetracycline"], "allergy_status_known": True,
+        "egfr_ml_min": 110.0, "serum_creatinine_mg_dl": 0.6, "renal_status_known": True,
+        "child_pugh_class": None, "hepatic_status_known": True,
+        "pregnancy_status": "PREGNANT_TRIMESTER_2", "lactation_status": "CONFIRMED_NOT_LACTATING",
+        "active_medications": ["Prenatal Multivitamin", "Iron Folic Acid"],
+        "clinical_notes": "28yo female G2P1 at 24 weeks gestation presenting with acute dysuria and flank discomfort.",
+        "diagnosis": "Pregnancy-associated urinary tract infection",
+        "prescription": ("Cephalexin", 500, "mg", "PO", "QID", 7),
+        "scenario": {
+            "key": "pregnancy-quinolone",
+            "label": "Pregnancy: Ciprofloxacin",
+            "diagnosis": "Acute Pyelonephritis",
+            "text": "Ciprofloxacin 500mg PO BID x 7 days",
+        },
+    },
+    {
+        "patient_id": "PATIENT-005",
+        "age": 62, "age_category": "ADULT", "weight_kg": 85.0, "sex": "MALE",
+        "allergies": ["Clarithromycin"], "allergy_status_known": True,
+        "egfr_ml_min": 82.0, "serum_creatinine_mg_dl": 1.0, "renal_status_known": True,
+        "child_pugh_class": None, "hepatic_status_known": True,
+        "pregnancy_status": "CONFIRMED_NOT_PREGNANT", "lactation_status": "CONFIRMED_NOT_LACTATING",
+        "active_medications": ["Warfarin 5mg PO QD", "Atorvastatin 40mg PO QHS", "Metoprolol 50mg PO BID"],
+        "clinical_notes": "62yo male with mechanical mitral valve on Warfarin (baseline INR 2.5) and hyperlipidemia on Atorvastatin presenting with acute cough and purulent sputum.",
+        "diagnosis": "Acute bacterial bronchitis",
+        "prescription": ("Doxycycline", 100, "mg", "PO", "BID", 5),
+        "scenario": {
+            "key": "ddi-warfarin-macrolide",
+            "label": "DDI: Clarithromycin + Warfarin/Statin",
+            "diagnosis": "Acute Bacterial Bronchitis",
+            "text": "Clarithromycin 500mg PO BID x 7 days",
+        },
+    },
+    {
+        "patient_id": "PATIENT-006",
+        "age": 4, "age_category": "PEDIATRIC", "weight_kg": 16.0, "sex": "MALE",
+        "allergies": ["Cefaclor"], "allergy_status_known": True,
+        "egfr_ml_min": 115.0, "serum_creatinine_mg_dl": 0.4, "renal_status_known": True,
+        "child_pugh_class": None, "hepatic_status_known": True,
+        "pregnancy_status": "CONFIRMED_NOT_PREGNANT", "lactation_status": "CONFIRMED_NOT_LACTATING",
+        "active_medications": ["Paracetamol 240mg PO QID PRN"],
+        "clinical_notes": "4yo pediatric male (weight 16kg) presenting with acute otitis media and high fever. Requires weight-based dosing review.",
+        "diagnosis": "Acute otitis media",
+        "prescription": ("Amoxicillin", 400, "mg", "PO", "BID", 7),
+        "scenario": {
+            "key": "peds-cefaclor-allergy",
+            "label": "Allergy: Cefaclor in Otitis Media",
+            "diagnosis": "Acute Otitis Media",
+            "text": "Cefaclor 250mg PO TID x 7 days",
+        },
+    },
+    {
+        "patient_id": "PATIENT-007",
+        "age": 72, "age_category": "GERIATRIC", "weight_kg": 58.0, "sex": "FEMALE",
+        "allergies": ["Ciprofloxacin"], "allergy_status_known": True,
+        "egfr_ml_min": 55.0, "serum_creatinine_mg_dl": 1.1, "renal_status_known": True,
+        "child_pugh_class": None, "hepatic_status_known": True,
+        "pregnancy_status": "CONFIRMED_NOT_PREGNANT", "lactation_status": "CONFIRMED_NOT_LACTATING",
+        "active_medications": ["Ondansetron 8mg PO TID", "Amiodarone 200mg PO QD"],
+        "clinical_notes": "72yo female receiving chemotherapy on Ondansetron and Amiodarone for atrial fibrillation. High cardiac QTc prolongation risk profile.",
+        "diagnosis": "Febrile neutropenia",
+        "prescription": ("Piperacillin-Tazobactam", 4.5, "g", "IV", "Q6H", 7),
+        "scenario": {
+            "key": "ddi-qt",
+            "label": "DDI: Azithro + Ondansetron (QT)",
+            "diagnosis": "Atypical Pneumonia",
+            "text": "Azithromycin 500mg PO QD x 5 days",
+        },
+    },
+    {
+        "patient_id": "PATIENT-008",
+        "age": 35, "age_category": "ADULT", "weight_kg": 70.0, "sex": "MALE",
+        "allergies": ["Trimethoprim"], "allergy_status_known": True,
+        "egfr_ml_min": 98.0, "serum_creatinine_mg_dl": 0.8, "renal_status_known": True,
+        "child_pugh_class": None, "hepatic_status_known": True,
+        "pregnancy_status": "CONFIRMED_NOT_PREGNANT", "lactation_status": "CONFIRMED_NOT_LACTATING",
+        "active_medications": ["Escitalopram 20mg PO QD", "Clonazepam 0.5mg PO PRN"],
+        "clinical_notes": "35yo male with severe depression on Escitalopram 20mg presenting with extensive MRSA skin and soft tissue abscess.",
+        "diagnosis": "MRSA skin abscess",
+        "prescription": ("Linezolid", 600, "mg", "PO", "BID", 7),
+        "scenario": {
+            "key": "ddi-linezolid-ssri",
+            "label": "DDI: Linezolid + Escitalopram",
+            "diagnosis": "MRSA Soft Tissue Infection",
+            "text": "Linezolid 600mg PO BID x 10 days",
+        },
+    },
+    {
+        "patient_id": "PATIENT-009",
+        "age": 50, "age_category": "ADULT", "weight_kg": 75.0, "sex": "MALE",
+        "allergies": ["Erythromycin"], "allergy_status_known": True,
+        "egfr_ml_min": 90.0, "serum_creatinine_mg_dl": 1.0, "renal_status_known": True,
+        "child_pugh_class": None, "hepatic_status_known": True,
+        "pregnancy_status": "CONFIRMED_NOT_PREGNANT", "lactation_status": "CONFIRMED_NOT_LACTATING",
+        "active_medications": ["Aspirin 75mg PO QD"],
+        "clinical_notes": "50yo male with fever, hypotension, and suspected sepsis requiring urgent empiric broad-spectrum cover.",
+        "diagnosis": "Suspected sepsis",
+        "prescription": ("Meropenem", 1, "g", "IV", "Q8H", 7),
+        "scenario": {
+            "key": "allergy-erythromycin-sepsis",
+            "label": "Allergy: Erythromycin in Sepsis",
+            "diagnosis": "Suspected Sepsis",
+            "text": "Erythromycin 500mg IV Q6H x 7 days",
+        },
+    },
+    {
+        "patient_id": "PATIENT-010",
+        "age": 29, "age_category": "ADULT", "weight_kg": 55.0, "sex": "FEMALE",
+        "allergies": ["Flucloxacillin"], "allergy_status_known": True,
+        "egfr_ml_min": 95.0, "serum_creatinine_mg_dl": 0.7, "renal_status_known": True,
+        "child_pugh_class": None, "hepatic_status_known": True,
+        "pregnancy_status": "UNKNOWN", "lactation_status": "UNKNOWN",
+        "active_medications": ["Cetirizine 10mg PO QD"],
+        "clinical_notes": "29yo female presenting with acute sinusitis. Pregnancy test not yet performed.",
+        "diagnosis": "Acute bacterial sinusitis",
+        "prescription": ("Amoxicillin-clavulanate", 875, "mg", "PO", "BID", 5),
+        "scenario": {
+            "key": "unknown-pregnancy-doxy",
+            "label": "Unknown Pregnancy: Doxycycline",
+            "diagnosis": "Acute Bacterial Sinusitis",
+            "text": "Doxycycline 100mg PO BID x 7 days",
+        },
+    },
+    {
+        "patient_id": "PATIENT-011",
+        "age": 39, "age_category": "ADULT", "weight_kg": 68.0, "sex": "FEMALE",
+        "allergies": ["Vancomycin"], "allergy_status_known": True,
+        "egfr_ml_min": 96.0, "serum_creatinine_mg_dl": 0.8, "renal_status_known": True,
+        "child_pugh_class": None, "hepatic_status_known": True,
+        "pregnancy_status": "CONFIRMED_NOT_PREGNANT", "lactation_status": "CONFIRMED_NOT_LACTATING",
+        "active_medications": ["Metformin 500mg PO BID"],
+        "clinical_notes": "39yo female with diabetes and non-purulent lower-limb cellulitis.",
+        "diagnosis": "Non-purulent cellulitis",
+        "prescription": ("Clindamycin", 300, "mg", "PO", "QID", 5),
+        "scenario": {
+            "key": "allergy-vanc-cellulitis",
+            "label": "Allergy: Vancomycin in Cellulitis",
+            "diagnosis": "Non-purulent Cellulitis",
+            "text": "Vancomycin 1g IV Q12H x 7 days",
+        },
+    },
+    {
+        "patient_id": "PATIENT-012",
+        "age": 57, "age_category": "ADULT", "weight_kg": 76.0, "sex": "MALE",
+        "allergies": ["Ceftriaxone"], "allergy_status_known": True,
+        "egfr_ml_min": 71.0, "serum_creatinine_mg_dl": 1.1, "renal_status_known": True,
+        "child_pugh_class": None, "hepatic_status_known": True,
+        "pregnancy_status": "CONFIRMED_NOT_PREGNANT", "lactation_status": "CONFIRMED_NOT_LACTATING",
+        "active_medications": ["Tamsulosin 0.4mg PO QD"],
+        "clinical_notes": "57yo male with fever and flank pain consistent with acute pyelonephritis.",
+        "diagnosis": "Acute pyelonephritis",
+        "prescription": ("Ciprofloxacin", 500, "mg", "PO", "BID", 7),
+        "scenario": {
+            "key": "allergy-ceftriaxone-pyelo",
+            "label": "Allergy: Ceftriaxone in Pyelonephritis",
+            "diagnosis": "Acute Pyelonephritis",
+            "text": "Ceftriaxone 2g IV QD x 7 days",
+        },
+    },
+    {
+        "patient_id": "PATIENT-013",
+        "age": 66, "age_category": "GERIATRIC", "weight_kg": 59.0, "sex": "FEMALE",
+        "allergies": ["Doxycycline"], "allergy_status_known": True,
+        "egfr_ml_min": 48.0, "serum_creatinine_mg_dl": 1.3, "renal_status_known": True,
+        "child_pugh_class": None, "hepatic_status_known": True,
+        "pregnancy_status": "CONFIRMED_NOT_PREGNANT", "lactation_status": "CONFIRMED_NOT_LACTATING",
+        "active_medications": ["Insulin glargine 18 units SC QHS"],
+        "clinical_notes": "66yo female with diabetes and hospital-acquired pneumonia.",
+        "diagnosis": "Hospital-acquired pneumonia",
+        "prescription": ("Vancomycin", 1, "g", "IV", "Q12H", 7),
+        "scenario": {
+            "key": "allergy-doxy-hap",
+            "label": "Allergy: Doxycycline in HAP",
+            "diagnosis": "Hospital-Acquired Pneumonia",
+            "text": "Doxycycline 100mg PO BID x 7 days",
+        },
+    },
+    {
+        "patient_id": "PATIENT-014",
+        "age": 31, "age_category": "ADULT", "weight_kg": 64.0, "sex": "MALE",
+        "allergies": ["Nitrofurantoin"], "allergy_status_known": True,
+        "egfr_ml_min": 108.0, "serum_creatinine_mg_dl": 0.7, "renal_status_known": True,
+        "child_pugh_class": None, "hepatic_status_known": True,
+        "pregnancy_status": "CONFIRMED_NOT_PREGNANT", "lactation_status": "CONFIRMED_NOT_LACTATING",
+        "active_medications": ["ORS sachets PRN"],
+        "clinical_notes": "31yo male with acute infectious diarrhoea and dehydration.",
+        "diagnosis": "Acute infectious diarrhoea",
+        "prescription": ("Metronidazole", 400, "mg", "PO", "TID", 5),
+        "scenario": {
+            "key": "allergy-nitro-diarrhoea",
+            "label": "Allergy: Nitrofurantoin",
+            "diagnosis": "Acute Infectious Diarrhoea",
+            "text": "Nitrofurantoin 100mg PO BID x 5 days",
+        },
+    },
+    {
+        "patient_id": "PATIENT-015",
+        "age": 19, "age_category": "ADULT", "weight_kg": 61.0, "sex": "FEMALE",
+        "allergies": ["Azithromycin"], "allergy_status_known": True,
+        "egfr_ml_min": 112.0, "serum_creatinine_mg_dl": 0.6, "renal_status_known": True,
+        "child_pugh_class": None, "hepatic_status_known": True,
+        "pregnancy_status": "CONFIRMED_NOT_PREGNANT", "lactation_status": "CONFIRMED_NOT_LACTATING",
+        "active_medications": ["Ibuprofen 200mg PO PRN"],
+        "clinical_notes": "19yo female with fever, headache, and suspected bacterial meningitis.",
+        "diagnosis": "Suspected bacterial meningitis",
+        "prescription": ("Ceftriaxone", 2, "g", "IV", "Q12H", 10),
+        "scenario": {
+            "key": "allergy-azithro-meningitis",
+            "label": "Allergy: Azithromycin in Meningitis",
+            "diagnosis": "Suspected Bacterial Meningitis",
+            "text": "Azithromycin 500mg IV QD x 10 days",
+        },
+    },
+    {
+        "patient_id": "PATIENT-016",
+        "age": 73, "age_category": "GERIATRIC", "weight_kg": 70.0, "sex": "MALE",
+        "allergies": ["Gentamicin"], "allergy_status_known": True,
+        "egfr_ml_min": 58.0, "serum_creatinine_mg_dl": 1.2, "renal_status_known": True,
+        "child_pugh_class": None, "hepatic_status_known": True,
+        "pregnancy_status": "CONFIRMED_NOT_PREGNANT", "lactation_status": "CONFIRMED_NOT_LACTATING",
+        "active_medications": ["Apixaban 5mg PO BID"],
+        "clinical_notes": "73yo male with prosthetic-valve endocarditis under specialist review.",
+        "diagnosis": "Prosthetic-valve endocarditis",
+        "prescription": ("Rifampicin", 600, "mg", "PO", "QD", 14),
+        "scenario": {
+            "key": "allergy-gent-endocarditis",
+            "label": "Allergy: Gentamicin in Endocarditis",
+            "diagnosis": "Prosthetic-Valve Endocarditis",
+            "text": "Gentamicin 70mg IV Q8H x 14 days",
+        },
+    },
+    {
+        "patient_id": "PATIENT-017",
+        "age": 11, "age_category": "PEDIATRIC", "weight_kg": 37.0, "sex": "FEMALE",
+        "allergies": ["Clindamycin"], "allergy_status_known": True,
+        "egfr_ml_min": 120.0, "serum_creatinine_mg_dl": 0.5, "renal_status_known": True,
+        "child_pugh_class": None, "hepatic_status_known": True,
+        "pregnancy_status": "UNKNOWN", "lactation_status": "UNKNOWN",
+        "active_medications": ["Multivitamin syrup 5mL PO QD"],
+        "clinical_notes": "11yo female with confirmed group-A streptococcal pharyngitis.",
+        "diagnosis": "Group-A streptococcal pharyngitis",
+        "prescription": ("Penicillin V", 250, "mg", "PO", "BID", 10),
+        "scenario": {
+            "key": "allergy-clinda-pharyngitis",
+            "label": "Allergy: Clindamycin in Pharyngitis",
+            "diagnosis": "Group-A Streptococcal Pharyngitis",
+            "text": "Clindamycin 300mg PO TID x 10 days",
+        },
+    },
+    {
+        "patient_id": "PATIENT-018",
+        "age": 47, "age_category": "ADULT", "weight_kg": 82.0, "sex": "MALE",
+        "allergies": ["Colistin"], "allergy_status_known": True,
+        "egfr_ml_min": 88.0, "serum_creatinine_mg_dl": 0.9, "renal_status_known": True,
+        "child_pugh_class": None, "hepatic_status_known": True,
+        "pregnancy_status": "CONFIRMED_NOT_PREGNANT", "lactation_status": "CONFIRMED_NOT_LACTATING",
+        "active_medications": ["Ibuprofen 400mg PO PRN"],
+        "clinical_notes": "47yo male with facial swelling from an acute odontogenic infection.",
+        "diagnosis": "Acute odontogenic infection",
+        "prescription": ("Ampicillin", 500, "mg", "PO", "TID", 5),
+        "scenario": {
+            "key": "allergy-colistin-odontogenic",
+            "label": "Allergy: Colistin in Odontogenic Infection",
+            "diagnosis": "Acute Odontogenic Infection",
+            "text": "Colistin 150mg IV BID x 5 days",
+        },
+    },
+    {
+        "patient_id": "PATIENT-019",
+        "age": 58, "age_category": "ADULT", "weight_kg": 74.0, "sex": "FEMALE",
+        "allergies": ["Levofloxacin"], "allergy_status_known": True,
+        "egfr_ml_min": 67.0, "serum_creatinine_mg_dl": 1.0, "renal_status_known": True,
+        "child_pugh_class": None, "hepatic_status_known": True,
+        "pregnancy_status": "CONFIRMED_NOT_PREGNANT", "lactation_status": "CONFIRMED_NOT_LACTATING",
+        "active_medications": ["Tiotropium inhaler QD"],
+        "clinical_notes": "58yo female with COPD, increased sputum purulence, and suspected bacterial exacerbation.",
+        "diagnosis": "Bacterial COPD exacerbation",
+        "prescription": ("Cefuroxime", 500, "mg", "PO", "BID", 5),
+        "scenario": {
+            "key": "allergy-levo-copd",
+            "label": "Allergy: Levofloxacin in COPD",
+            "diagnosis": "Bacterial COPD Exacerbation",
+            "text": "Levofloxacin 500mg PO QD x 5 days",
+        },
+    },
+    {
+        "patient_id": "PATIENT-020",
+        "age": 24, "age_category": "ADULT", "weight_kg": 66.0, "sex": "MALE",
+        "allergies": ["Cefixime"], "allergy_status_known": True,
+        "egfr_ml_min": 102.0, "serum_creatinine_mg_dl": 0.8, "renal_status_known": True,
+        "child_pugh_class": None, "hepatic_status_known": True,
+        "pregnancy_status": "CONFIRMED_NOT_PREGNANT", "lactation_status": "CONFIRMED_NOT_LACTATING",
+        "active_medications": ["Zinc sulfate 20mg PO QD"],
+        "clinical_notes": "24yo male with culture-supported enteric fever and no complications.",
+        "diagnosis": "Uncomplicated enteric fever",
+        "prescription": ("Aztreonam", 1, "g", "IV", "Q8H", 10),
+        "scenario": {
+            "key": "allergy-cefixime-enteric",
+            "label": "Allergy: Cefixime in Enteric Fever",
+            "diagnosis": "Uncomplicated Enteric Fever",
+            "text": "Cefixime 200mg PO BID x 10 days",
+        },
+    },
+]
+
+
+def _patient_row(entry: dict) -> dict:
+    return {
+        "patient_id": entry["patient_id"],
+        "age": entry["age"],
+        "age_category": entry["age_category"],
+        "weight_kg": entry["weight_kg"],
+        "sex": entry["sex"],
+        "allergies_json": json.dumps(entry["allergies"]),
+        "allergy_status_known": entry["allergy_status_known"],
+        "egfr_ml_min": entry["egfr_ml_min"],
+        "serum_creatinine_mg_dl": entry["serum_creatinine_mg_dl"],
+        "renal_status_known": entry["renal_status_known"],
+        "child_pugh_class": entry["child_pugh_class"],
+        "hepatic_status_known": entry["hepatic_status_known"],
+        "pregnancy_status": entry["pregnancy_status"],
+        "lactation_status": entry["lactation_status"],
+        "active_medications_json": json.dumps(entry["active_medications"]),
+        "clinical_notes": entry["clinical_notes"],
+    }
+
+
+def seed_roster_ids() -> set:
+    return {entry["patient_id"] for entry in SEED_ROSTER}
+
+
+def seed_scenario_presets() -> list:
+    """Fixed teaching chips — one unique preset per seeded patient."""
+    return [
+        {
+            "key": entry["scenario"]["key"],
+            "label": entry["scenario"]["label"],
+            "patient_id": entry["patient_id"],
+            "diagnosis": entry["scenario"]["diagnosis"],
+            "text": entry["scenario"]["text"],
+            "source": "seed",
+        }
+        for entry in SEED_ROSTER
+    ]
+
+
+def _format_item_text(item: PrescriptionItemDB) -> str:
+    parts = [item.medication_name or "Antimicrobial"]
+    if item.dose is not None:
+        parts.append(f"{item.dose}{item.unit or ''}".strip())
+    if item.route:
+        parts.append(item.route)
+    if item.frequency:
+        parts.append(item.frequency)
+    if item.duration_days:
+        parts.append(f"x {item.duration_days} days")
+    return " ".join(parts)
+
+
+def registered_scenario_presets(db) -> list:
+    """
+    Quick-scenario chips for clinician-registered patients (not in SEED_ROSTER).
+
+    Built from the latest visit so a newly registered patient appears in the
+    console preset strip as soon as they have a diagnosis / prescription.
+    """
+    seed_ids = seed_roster_ids()
+    presets = []
+    patients = (
+        db.query(PatientDB)
+        .order_by(PatientDB.patient_id.asc())
+        .all()
+    )
+    for patient in patients:
+        if patient.patient_id in seed_ids:
+            continue
+        latest = (
+            db.query(PrescriptionDB)
+            .filter(PrescriptionDB.patient_id == patient.patient_id)
+            .order_by(PrescriptionDB.created_at.desc())
+            .first()
+        )
+        diagnosis = (latest.diagnosis if latest and latest.diagnosis else None) or (
+            (patient.clinical_notes or "").strip()[:80] or "Clinical review"
+        )
+        text = ""
+        if latest:
+            if latest.raw_text and latest.raw_text.strip():
+                text = latest.raw_text.strip()
+            else:
+                items = (
+                    db.query(PrescriptionItemDB)
+                    .filter(PrescriptionItemDB.prescription_id == latest.prescription_id)
+                    .all()
+                )
+                if items:
+                    text = " and ".join(_format_item_text(i) for i in items)
+        if not text:
+            text = (
+                f"Antimicrobial therapy for {diagnosis} — "
+                "enter agent, dose, route, and duration for safety review"
+            )
+        short = diagnosis if len(diagnosis) <= 42 else diagnosis[:39].rstrip() + "…"
+        presets.append({
+            "key": f"registered-{patient.patient_id.lower()}",
+            "label": f"{patient.patient_id}: {short}",
+            "patient_id": patient.patient_id,
+            "diagnosis": diagnosis,
+            "text": text,
+            "source": "registered",
+        })
+    return presets
+
+
+def list_scenario_presets(db) -> list:
+    """Seed teaching presets first, then any clinician-registered patient chips."""
+    return seed_scenario_presets() + registered_scenario_presets(db)
+
+
+def seed_database(reset_patients: bool = False):
     init_db()
     db = SessionLocal()
-    
-    # 1. Seed Synthetic Patients
-    patients_data = [
-        {
-            "patient_id": "PATIENT-001",
-            "age": 45,
-            "age_category": "ADULT",
-            "weight_kg": 72.0,
-            "sex": "MALE",
-            "allergies_json": json.dumps(["Penicillin", "Amoxicillin"]),
-            "allergy_status_known": True,
-            "egfr_ml_min": 92.0,
-            "serum_creatinine_mg_dl": 0.9,
-            "renal_status_known": True,
-            "child_pugh_class": None,
-            "hepatic_status_known": True,
-            "pregnancy_status": "CONFIRMED_NOT_PREGNANT",
-            "lactation_status": "CONFIRMED_NOT_LACTATING",
-            "active_medications_json": json.dumps(["Pantoprazole 40mg PO QD"]),
-            "clinical_notes": "45yo male presenting with fever, cough, and right lower lobe consolidation consistent with CAP. Documented penicillin anaphylaxis 5 years ago."
-        },
-        {
-            "patient_id": "PATIENT-002",
-            "age": 68,
-            "age_category": "GERIATRIC",
-            "weight_kg": 64.0,
-            "sex": "FEMALE",
-            "allergies_json": json.dumps([]),
-            "allergy_status_known": True,
-            "egfr_ml_min": 22.0,
-            "serum_creatinine_mg_dl": 2.8,
-            "renal_status_known": True,
-            "child_pugh_class": None,
-            "hepatic_status_known": True,
-            "pregnancy_status": "CONFIRMED_NOT_PREGNANT",
-            "lactation_status": "CONFIRMED_NOT_LACTATING",
-            "active_medications_json": json.dumps(["Amlodipine 5mg PO QD", "Torsemide 10mg PO QD"]),
-            "clinical_notes": "68yo female with CKD Stage 4 (eGFR 22 mL/min via CKD-EPI 2021 non-race formula) presenting with dysuria, frequency, and suspected cystitis."
-        },
-        {
-            "patient_id": "PATIENT-003",
-            "age": 54,
-            "age_category": "ADULT",
-            "weight_kg": 78.0,
-            "sex": "MALE",
-            "allergies_json": json.dumps([]),
-            "allergy_status_known": True,
-            "egfr_ml_min": 75.0,
-            "serum_creatinine_mg_dl": 1.1,
-            "renal_status_known": True,
-            "child_pugh_class": "Child-Pugh C",
-            "hepatic_status_known": True,
-            "pregnancy_status": "CONFIRMED_NOT_PREGNANT",
-            "lactation_status": "CONFIRMED_NOT_LACTATING",
-            "active_medications_json": json.dumps(["Furosemide 40mg PO QD", "Spironolactone 100mg PO QD", "Lactulose 30mL PO TID"]),
-            "clinical_notes": "54yo male with decompensated alcoholic cirrhosis (Child-Pugh C, ascites, jaundice) presenting with abdominal pain and suspected spontaneous bacterial peritonitis."
-        },
-        {
-            "patient_id": "PATIENT-004",
-            "age": 28,
-            "age_category": "ADULT",
-            "weight_kg": 62.0,
-            "sex": "FEMALE",
-            "allergies_json": json.dumps([]),
-            "allergy_status_known": True,
-            "egfr_ml_min": 110.0,
-            "serum_creatinine_mg_dl": 0.6,
-            "renal_status_known": True,
-            "child_pugh_class": None,
-            "hepatic_status_known": True,
-            "pregnancy_status": "PREGNANT_TRIMESTER_2",
-            "lactation_status": "CONFIRMED_NOT_LACTATING",
-            "active_medications_json": json.dumps(["Prenatal Multivitamin", "Iron Folic Acid"]),
-            "clinical_notes": "28yo female G2P1 at 24 weeks gestation presenting with acute dysuria and flank discomfort."
-        },
-        {
-            "patient_id": "PATIENT-005",
-            "age": 62,
-            "age_category": "ADULT",
-            "weight_kg": 85.0,
-            "sex": "MALE",
-            "allergies_json": json.dumps([]),
-            "allergy_status_known": True,
-            "egfr_ml_min": 82.0,
-            "serum_creatinine_mg_dl": 1.0,
-            "renal_status_known": True,
-            "child_pugh_class": None,
-            "hepatic_status_known": True,
-            "pregnancy_status": "CONFIRMED_NOT_PREGNANT",
-            "lactation_status": "CONFIRMED_NOT_LACTATING",
-            "active_medications_json": json.dumps(["Warfarin 5mg PO QD", "Atorvastatin 40mg PO QHS", "Metoprolol 50mg PO BID"]),
-            "clinical_notes": "62yo male with mechanical mitral valve on Warfarin (baseline INR 2.5) and hyperlipidemia on Atorvastatin presenting with acute cough and purulent sputum."
-        },
-        {
-            "patient_id": "PATIENT-006",
-            "age": 4,
-            "age_category": "PEDIATRIC",
-            "weight_kg": 16.0,
-            "sex": "MALE",
-            "allergies_json": json.dumps([]),
-            "allergy_status_known": True,
-            "egfr_ml_min": 115.0,
-            "serum_creatinine_mg_dl": 0.4,
-            "renal_status_known": True,
-            "child_pugh_class": None,
-            "hepatic_status_known": True,
-            "pregnancy_status": "CONFIRMED_NOT_PREGNANT",
-            "lactation_status": "CONFIRMED_NOT_LACTATING",
-            "active_medications_json": json.dumps([]),
-            "clinical_notes": "4yo pediatric male (weight 16kg) presenting with acute otitis media and high fever. Requires weight-based dosing review."
-        },
-        {
-            "patient_id": "PATIENT-007",
-            "age": 72,
-            "age_category": "GERIATRIC",
-            "weight_kg": 58.0,
-            "sex": "FEMALE",
-            "allergies_json": json.dumps([]),
-            "allergy_status_known": True,
-            "egfr_ml_min": 55.0,
-            "serum_creatinine_mg_dl": 1.1,
-            "renal_status_known": True,
-            "child_pugh_class": None,
-            "hepatic_status_known": True,
-            "pregnancy_status": "CONFIRMED_NOT_PREGNANT",
-            "lactation_status": "CONFIRMED_NOT_LACTATING",
-            "active_medications_json": json.dumps(["Ondansetron 8mg PO TID", "Amiodarone 200mg PO QD"]),
-            "clinical_notes": "72yo female receiving chemotherapy on Ondansetron and Amiodarone for atrial fibrillation. High cardiac QTc prolongation risk profile."
-        },
-        {
-            "patient_id": "PATIENT-008",
-            "age": 35,
-            "age_category": "ADULT",
-            "weight_kg": 70.0,
-            "sex": "MALE",
-            "allergies_json": json.dumps([]),
-            "allergy_status_known": True,
-            "egfr_ml_min": 98.0,
-            "serum_creatinine_mg_dl": 0.8,
-            "renal_status_known": True,
-            "child_pugh_class": None,
-            "hepatic_status_known": True,
-            "pregnancy_status": "CONFIRMED_NOT_PREGNANT",
-            "lactation_status": "CONFIRMED_NOT_LACTATING",
-            "active_medications_json": json.dumps(["Escitalopram 20mg PO QD", "Clonazepam 0.5mg PO PRN"]),
-            "clinical_notes": "35yo male with severe depression on Escitalopram 20mg presenting with extensive MRSA skin and soft tissue abscess."
-        },
-        {
-            "patient_id": "PATIENT-009",
-            "age": 50,
-            "age_category": "ADULT",
-            "weight_kg": 75.0,
-            "sex": "MALE",
-            "allergies_json": json.dumps([]),
-            "allergy_status_known": False,  # Missing allergy info
-            "egfr_ml_min": None,           # Missing renal info
-            "serum_creatinine_mg_dl": None,
-            "renal_status_known": False,
-            "child_pugh_class": None,
-            "hepatic_status_known": False,
-            "pregnancy_status": "CONFIRMED_NOT_PREGNANT",
-            "lactation_status": "CONFIRMED_NOT_LACTATING",
-            "active_medications_json": json.dumps([]),
-            "clinical_notes": "50yo male newly admitted emergency patient. Allergy and renal lab records unavailable."
-        },
-        {
-            "patient_id": "PATIENT-010",
-            "age": 29,
-            "age_category": "ADULT",
-            "weight_kg": 55.0,
-            "sex": "FEMALE",
-            "allergies_json": json.dumps([]),
-            "allergy_status_known": True,
-            "egfr_ml_min": 95.0,
-            "serum_creatinine_mg_dl": 0.7,
-            "renal_status_known": True,
-            "child_pugh_class": None,
-            "hepatic_status_known": True,
-            "pregnancy_status": "UNKNOWN",  # Unknown pregnancy status in female of childbearing age
-            "lactation_status": "UNKNOWN",
-            "active_medications_json": json.dumps([]),
-            "clinical_notes": "29yo female presenting with acute sinusitis. Pregnancy test not yet performed."
-        }
-    ]
+
+    # 1. Seed Synthetic Patients. These are the fixed, deliberately varied
+    # teaching roster shown to clinicians on first use. No real identifiers are
+    # stored anywhere in this dataset.
+    patients_data = [_patient_row(entry) for entry in SEED_ROSTER]
+
+    if reset_patients:
+        # The reset is intentionally opt-in. It is for restoring the small
+        # synthetic teaching roster, not a normal startup action: clinician
+        # registrations must remain available after they are created.
+        db.query(ClinicianOverrideDB).delete(synchronize_session=False)
+        db.query(SafetyWarningDB).delete(synchronize_session=False)
+        db.query(PrescriptionItemDB).delete(synchronize_session=False)
+        db.query(PrescriptionDB).delete(synchronize_session=False)
+        db.query(AuditLogDB).delete(synchronize_session=False)
+        db.query(PatientDB).delete(synchronize_session=False)
+        db.commit()
 
     # Seeded patients are FIXTURES, so seeding converges them to the intended
     # state rather than skipping any that already exist.
@@ -227,6 +546,27 @@ def seed_database():
             for field, value in p_data.items():
                 setattr(existing, field, value)
             repaired.append(f"{p_data['patient_id']} ({', '.join(drifted)})")
+
+    # Each roster patient has one initial, intentionally distinct clinical
+    # scenario. This makes the dashboard timeline useful immediately while
+    # keeping the clinician free to add further visits and prescriptions.
+    for index, entry in enumerate(SEED_ROSTER, 1):
+        prescription_id = f"SEED-RX-{index:03d}"
+        if db.query(PrescriptionDB).filter(PrescriptionDB.prescription_id == prescription_id).first():
+            continue
+        medication, dose, unit, route, frequency, duration = entry["prescription"]
+        diagnosis = entry["diagnosis"]
+        db.add(PrescriptionDB(
+            prescription_id=prescription_id, patient_id=entry["patient_id"], diagnosis=diagnosis,
+            raw_text=f"{medication} {dose}{unit} {route} {frequency} for {duration} days",
+            clinician_id="SYSTEM-SEED", clinician_role="ATTENDING_PHYSICIAN", status="RECORDED",
+        ))
+        db.add(PrescriptionItemDB(
+            prescription_id=prescription_id, medication_name=medication, dose=dose, unit=unit,
+            route=route, frequency=frequency, duration_days=duration, indication=diagnosis,
+            antimicrobial_class="SEED_SCENARIO", aware_category="NOT_APPLICABLE",
+            extraction_confidence_json=json.dumps({"seed": 1.0}),
+        ))
 
     # 2. Seed Clinical Rules
     for r in knowledge_base.rules_catalog:
@@ -284,7 +624,7 @@ def seed_database():
 
     db.commit()
     db.close()
-    print("Database successfully seeded with 10 synthetic patients, clinical rules, and AMR data.")
+    print(f"Database successfully seeded with {len(SEED_ROSTER)} synthetic patients, clinical rules, and AMR data.")
     if repaired:
         # Say so out loud: a silent repair hides that something had already
         # written over a fixture, which is worth knowing about.
@@ -294,4 +634,10 @@ def seed_database():
 
 
 if __name__ == "__main__":
-    seed_database()
+    parser = argparse.ArgumentParser(description="Seed the synthetic AntiBioTix teaching dataset.")
+    parser.add_argument(
+        "--reset-patients", action="store_true",
+        help=f"Remove existing synthetic patient visits/audits and restore only the {len(SEED_ROSTER)} fixed demo records.",
+    )
+    args = parser.parse_args()
+    seed_database(reset_patients=args.reset_patients)

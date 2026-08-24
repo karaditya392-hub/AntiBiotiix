@@ -45,6 +45,7 @@ from backend.auth.security import (
     PATIENT_MANAGEMENT_ROLES,
 )
 from backend.audit.logger import audit_logger
+from backend.seed_data import list_scenario_presets
 
 
 # Lifespan event handler for clean startup / database initialization
@@ -191,6 +192,18 @@ def list_patients(db: Session = Depends(get_db)):
     return results
 
 
+@app.get("/api/scenario-presets")
+def get_scenario_presets(db: Session = Depends(get_db)):
+    """
+    Quick-scenario chips for the console.
+
+    Returns one unique teaching preset per seeded patient, then one preset per
+    clinician-registered patient (built from their latest visit). Registering a
+    new patient therefore adds a chip automatically on the next refresh.
+    """
+    return list_scenario_presets(db)
+
+
 @app.get("/api/patients/{patient_id}")
 def get_patient(patient_id: str, db: Session = Depends(get_db)):
     p = db.query(PatientDB).filter(PatientDB.patient_id == patient_id).first()
@@ -215,6 +228,91 @@ def get_patient(patient_id: str, db: Session = Depends(get_db)):
         "lactation_status": p.lactation_status,
         "active_medications": json.loads(p.active_medications_json) if p.active_medications_json else [],
         "clinical_notes": p.clinical_notes
+    }
+
+
+@app.get("/api/patients/{patient_id}/history")
+def get_patient_history(patient_id: str, db: Session = Depends(get_db)):
+    """Return the selected patient's longitudinal clinical review history."""
+    patient = db.query(PatientDB).filter(PatientDB.patient_id == patient_id).first()
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient not found")
+
+    prescriptions = (
+        db.query(PrescriptionDB)
+        .filter(PrescriptionDB.patient_id == patient_id)
+        .order_by(PrescriptionDB.created_at.desc())
+        .all()
+    )
+    visits = []
+    for prescription in prescriptions:
+        warnings = (
+            db.query(SafetyWarningDB)
+            .filter(SafetyWarningDB.prescription_id == prescription.prescription_id)
+            .all()
+        )
+        overrides = []
+        for warning in warnings:
+            override = (
+                db.query(ClinicianOverrideDB)
+                .filter(ClinicianOverrideDB.warning_id == warning.warning_id)
+                .first()
+            )
+            if override:
+                overrides.append({
+                    "warning_id": warning.warning_id,
+                    "rule_id": warning.rule_id,
+                    "reason": override.override_reason,
+                    "clinician_id": override.clinician_id,
+                    "clinician_role": override.clinician_role,
+                    "timestamp": override.timestamp,
+                })
+        visits.append({
+            "prescription_id": prescription.prescription_id,
+            "visit_date": prescription.created_at,
+            "diagnosis": prescription.diagnosis,
+            "clinical_notes": prescription.raw_text,
+            "clinician_id": prescription.clinician_id,
+            "clinician_role": prescription.clinician_role,
+            "status": prescription.status,
+            "medications": [{
+                "name": item.medication_name,
+                "dose": item.dose,
+                "unit": item.unit,
+                "route": item.route,
+                "frequency": item.frequency,
+                "duration_days": item.duration_days,
+                "indication": item.indication,
+            } for item in prescription.items],
+            "findings": [{
+                "warning_id": warning.warning_id,
+                "rule_id": warning.rule_id,
+                "severity": warning.severity,
+                "title": warning.title,
+                "clinical_concern": warning.clinical_concern,
+                "recommendation": warning.recommendation,
+                "status": warning.status,
+            } for warning in warnings],
+            "overrides": overrides,
+        })
+
+    audit_rows = (
+        db.query(AuditLogDB)
+        .filter(AuditLogDB.patient_id == patient_id)
+        .order_by(AuditLogDB.timestamp.desc())
+        .all()
+    )
+    return {
+        "patient": get_patient(patient_id, db),
+        "visits": visits,
+        "audit": [{
+            "timestamp": row.timestamp,
+            "event_type": row.event_type,
+            "prescription_id": row.prescription_id,
+            "clinician_id": row.clinician_id,
+            "clinician_role": row.clinician_role,
+            "action_summary": row.action_summary,
+        } for row in audit_rows],
     }
 
 
