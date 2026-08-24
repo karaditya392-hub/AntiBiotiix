@@ -25,6 +25,16 @@ from backend.rag.embeddings import EmbeddingBackend, get_backend
 RAG_DIR = Path(__file__).parent.parent / "guidelines" / "data" / "rag"
 
 
+class RetrievalBackendMismatch(RuntimeError):
+    """
+    The index cannot be queried with the embedding backend available here.
+
+    Raised rather than returning no results, because "I cannot read my index" and
+    "the corpus contains nothing relevant" are different statements and only one
+    of them is about the guidelines.
+    """
+
+
 # How a chunk's `page` number should be described to a clinician.
 #
 # A page number is only a citation if it points into the official document. For a
@@ -92,12 +102,22 @@ class GuidelineVectorStore:
         self.matrix: Optional[np.ndarray] = None
         self.embedding_model: Optional[str] = None
         self.is_semantic: bool = False
+        # Set when this machine could not load the model the committed index was
+        # built with and the index was re-embedded in memory with a weaker one.
+        self.degraded_from: Optional[str] = None
         self._lock = threading.Lock()
 
     # -- build -------------------------------------------------------------
 
-    def build(self, backend: Optional[EmbeddingBackend] = None) -> int:
-        """Embed every ingested chunk and persist the vectors."""
+    def build(self, backend: Optional[EmbeddingBackend] = None, persist: bool = True) -> int:
+        """
+        Embed every ingested chunk.
+
+        `persist=False` rebuilds in memory only. That is what recovery from a
+        backend mismatch uses: a machine that cannot load the semantic model must
+        not overwrite the committed index with a lexical one, because the next
+        machine that CAN load the model would then silently get lexical results.
+        """
         self._load_chunks()
         if not self.chunks:
             return 0
@@ -109,13 +129,53 @@ class GuidelineVectorStore:
         self.matrix = vecs
         self.embedding_model = be.name
         self.is_semantic = be.is_semantic
-        np.savez_compressed(
-            self.dir / "_vectors.npz",
-            matrix=vecs,
-            model=np.array([be.name]),
-            semantic=np.array([be.is_semantic]),
-        )
+        if persist:
+            np.savez_compressed(
+                self.dir / "_vectors.npz",
+                matrix=vecs,
+                model=np.array([be.name]),
+                semantic=np.array([be.is_semantic]),
+            )
         return len(self.chunks)
+
+    def ensure_queryable(self, backend: Optional[EmbeddingBackend] = None) -> Dict[str, Any]:
+        """
+        Guarantee the loaded index can actually answer a query on THIS machine.
+
+        The committed index is built with the semantic model. A machine that
+        cannot load that model -- not installed, or the weights are not cached and
+        there is no network -- falls back to the lexical backend, and a store built
+        with one model cannot be queried with another.
+
+        Previously that mismatch made search() return nothing, which retrieval then
+        reported as "no sufficiently relevant evidence". That is a false statement
+        about the corpus: the evidence is present and the system simply could not
+        read its own index. Silence caused by a broken tool must never be dressed
+        up as a finding about the guidelines.
+
+        So the index is rebuilt in memory with whatever backend is available, and
+        the degradation is recorded so every answer can say it came from lexical
+        rather than semantic retrieval.
+        """
+        be = backend or get_backend()
+        with self._lock:
+            if self.matrix is None or not self.chunks:
+                return {"queryable": False, "reason": "No index or no chunks loaded."}
+
+            if be.name == self.embedding_model:
+                self.degraded_from = None
+                return {"queryable": True, "rebuilt": False, "backend": be.name}
+
+            built_with = self.embedding_model
+            count = self.build(backend=be, persist=False)
+            self.degraded_from = built_with
+            return {
+                "queryable": count > 0,
+                "rebuilt": True,
+                "backend": be.name,
+                "index_built_with": built_with,
+                "semantic": be.is_semantic,
+            }
 
     def _load_chunks(self) -> None:
         self.docs, self.chunks = {}, []
@@ -169,7 +229,11 @@ class GuidelineVectorStore:
         return self.matrix is not None and len(self.chunks) > 0
 
     def backend_description(self) -> Dict[str, Any]:
-        return {
+        # Reports the backend actually in use on THIS machine, not the one the
+        # committed index was built with. Those differ whenever the semantic model
+        # cannot be loaded here, and reporting the recorded model in that case
+        # told the caller retrieval was semantic while it was returning nothing.
+        desc: Dict[str, Any] = {
             "available": self.available,
             "chunks": len(self.chunks),
             "documents": len(self.docs),
@@ -178,6 +242,18 @@ class GuidelineVectorStore:
             "vector_backend": "in-process numpy cosine",
             "pgvector_status": "PENDING_POSTGRES_MIGRATION",
         }
+        if self.degraded_from:
+            desc["degraded"] = True
+            desc["index_built_with"] = self.degraded_from
+            desc["degradation_note"] = (
+                f"The semantic model this index was built with ({self.degraded_from}) could "
+                f"not be loaded on this machine, so the corpus was re-embedded in memory with "
+                f"{self.embedding_model}. Retrieval is LEXICAL, not semantic: it matches wording "
+                f"rather than meaning, so a passage phrased differently from the question may be "
+                f"missed. Citations remain verbatim and correctly attributed. Install "
+                f"sentence-transformers and cache the model to restore semantic retrieval."
+            )
+        return desc
 
     # -- query -------------------------------------------------------------
 
@@ -192,8 +268,15 @@ class GuidelineVectorStore:
             return []
         be = backend or get_backend()
         if be.name != self.embedding_model:
-            # A store built with one model is not queryable with another.
-            return []
+            # A store built with one model is not queryable with another. Returning
+            # [] here is what made a broken index look like an empty corpus, so
+            # recover first and only give up if that fails.
+            state = self.ensure_queryable(be)
+            if not state.get("queryable"):
+                raise RetrievalBackendMismatch(
+                    f"The guideline index was built with {self.embedding_model!r} but this "
+                    f"machine loaded {be.name!r}, and it could not be re-embedded."
+                )
         qv = be.encode([query])[0]
         sims = self.matrix @ qv
 
@@ -232,3 +315,18 @@ class GuidelineVectorStore:
 
 vector_store = GuidelineVectorStore()
 vector_store.load()
+
+# Resolve a backend mismatch once, at import, rather than on the first query.
+#
+# The committed index is built with the semantic model. A machine that cannot load
+# it -- not installed, or the weights are not cached and there is no network --
+# would otherwise have every search return nothing, which retrieval used to report
+# as "no sufficiently relevant evidence": a false claim about the corpus caused by
+# a tool failure. Re-embedding here means the feature works on any machine, and
+# backend_description() reports the degradation so no answer is passed off as
+# semantic when it is lexical.
+if vector_store.available:
+    try:
+        vector_store.ensure_queryable()
+    except Exception:  # pragma: no cover - never block startup on retrieval
+        pass

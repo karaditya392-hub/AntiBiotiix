@@ -15,7 +15,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
-from backend.rag.store import RetrievedChunk, vector_store
+from backend.rag.store import RetrievalBackendMismatch, RetrievedChunk, vector_store
 
 NO_EVIDENCE = "No sufficiently relevant evidence was retrieved."
 
@@ -32,6 +32,35 @@ NO_EVIDENCE = "No sufficiently relevant evidence was retrieved."
 # paired with the lexical grounding check below, which catches queries naming
 # entities the corpus has never heard of. Neither check alone is sufficient.
 RELEVANCE_FLOOR = 0.35
+
+# Floor for the LEXICAL fallback, used when this machine could not load the
+# semantic model and the corpus was re-embedded with TF-IDF.
+#
+# It needs its own number because the two backends score on different scales:
+# applying 0.35 to TF-IDF rejected every genuine question, which is how a working
+# corpus came to answer "no sufficiently relevant evidence" on a machine without
+# the model cached.
+#
+# Calibrated the same way as the semantic floor, on this corpus:
+#   lowest legitimate query  0.167  ("empirical treatment for typhoid fever")
+#   highest nonsense query   0.162  ("zzzzmycin 500mg indications")
+# Those two barely separate, exactly as they fail to separate for the semantic
+# backend. The floor is therefore NOT asked to carry the load alone: invented
+# drug names such as zzzzmycin are already rejected by unknown_entities() before
+# scoring, leaving genuinely off-domain English as what the floor must catch, and
+# that tops out at 0.131 ("how do I change a bicycle tyre"). 0.15 sits between
+# that and the lowest real question.
+LEXICAL_RELEVANCE_FLOOR = 0.15
+
+
+def active_floor() -> float:
+    """
+    The floor appropriate to the backend actually answering queries here.
+
+    Passed explicitly rather than read inside retrieve() so a caller can still
+    override it, and so the chosen value appears in the response.
+    """
+    return RELEVANCE_FLOOR if vector_store.is_semantic else LEXICAL_RELEVANCE_FLOOR
 
 # Query tokens at least this long are treated as specific entity names
 # (drug names, organisms, syndromes) rather than ordinary English.
@@ -105,8 +134,12 @@ def retrieve(
     query: str,
     k: int = 5,
     document_ids: Optional[List[str]] = None,
-    floor: float = RELEVANCE_FLOOR,
+    floor: Optional[float] = None,
 ) -> RetrievalResult:
+    # None means "whichever floor suits the backend actually in use", so a machine
+    # running the lexical fallback is not judged against a semantic threshold.
+    if floor is None:
+        floor = active_floor()
     q = (query or "").strip()
     if not q:
         return RetrievalResult(q, [], True, NO_EVIDENCE, floor, None)
@@ -129,7 +162,19 @@ def retrieve(
             floor, None,
         )
 
-    hits = vector_store.search(q, k=k, document_ids=document_ids)
+    try:
+        hits = vector_store.search(q, k=k, document_ids=document_ids)
+    except RetrievalBackendMismatch as exc:
+        # A tool failure, not a finding about the corpus. Saying NO_EVIDENCE here
+        # would tell a clinician the guidelines are silent on their question when
+        # in fact the system could not read its own index.
+        return RetrievalResult(
+            q, [], True,
+            f"Retrieval is unavailable on this machine, so the guideline corpus could not "
+            f"be searched. This is a system fault, not a statement about the guidelines. {exc}",
+            floor, None,
+        )
+
     if not hits:
         return RetrievalResult(q, [], True, NO_EVIDENCE, floor, None)
 

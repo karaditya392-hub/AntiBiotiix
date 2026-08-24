@@ -167,15 +167,68 @@ def test_store_reports_pgvector_status_honestly():
     assert d["embedding_model"]
 
 
-def test_query_with_mismatched_embedding_model_returns_nothing():
-    """A store built with one model must not be queried with another."""
+def test_mismatched_embedding_model_never_masquerades_as_no_evidence():
+    """
+    A store built with one model must not be queried with another -- but the way
+    it declines matters.
+
+    This test previously asserted that search() returned []. That looked safe and
+    was not: retrieval turned the empty list into "No sufficiently relevant
+    evidence was retrieved", which is a claim about the GUIDELINES. On a machine
+    that could not load the semantic model, every question about a fully ingested
+    corpus was answered that way, and nothing anywhere said the index had not been
+    read. A tool failure was being reported as a clinical finding.
+
+    The contract now is: recover if possible, and if not, raise something the
+    caller must handle. Silently empty is the one outcome that is not allowed.
+    """
+    import numpy as np
+    import pytest as _pytest
+
+    from backend.rag.store import RetrievalBackendMismatch
+
     class Fake:
+        """A backend whose vectors cannot answer anything: orthogonal to everything."""
         name = "some-other-model"
         dim = 8
         is_semantic = True
 
         def encode(self, texts):
-            import numpy as np
             return np.zeros((len(texts), 8), dtype="float32")
 
-    assert vector_store.search("cystitis", k=3, backend=Fake()) == []
+    built_with = vector_store.embedding_model
+    matrix = vector_store.matrix
+    semantic = vector_store.is_semantic
+    degraded = vector_store.degraded_from
+    try:
+        try:
+            hits = vector_store.search("cystitis", k=3, backend=Fake())
+        except RetrievalBackendMismatch:
+            return  # refused loudly, which is the point
+
+        # If it recovered instead, it must have re-embedded with the backend
+        # actually supplied rather than silently answering from the wrong index.
+        assert vector_store.embedding_model == "some-other-model"
+        assert vector_store.degraded_from == built_with
+        # Zero vectors cannot rank anything, so any hits must score at zero and
+        # would be rejected by the relevance floor before reaching a clinician.
+        assert all(h.score == _pytest.approx(0.0, abs=1e-6) for h in hits)
+    finally:
+        vector_store.embedding_model = built_with
+        vector_store.matrix = matrix
+        vector_store.is_semantic = semantic
+        vector_store.degraded_from = degraded
+
+
+def test_backend_description_reports_the_backend_actually_in_use():
+    """
+    Degradation must be visible. Reporting the model the index was BUILT with,
+    while a weaker one is answering queries, is what let the failure stay hidden.
+    """
+    d = vector_store.backend_description()
+    if d.get("degraded"):
+        assert d["semantic"] is False
+        assert d["index_built_with"]
+        assert "LEXICAL" in d["degradation_note"] or "lexical" in d["degradation_note"]
+    else:
+        assert d["embedding_model"]
