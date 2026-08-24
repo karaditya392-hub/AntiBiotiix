@@ -244,7 +244,7 @@ function clearAnalysisResults() {
   if (list) {
     list.innerHTML = `
       <div class="empty-state">
-        <span class="empty-icon">&#128221;</span>
+        <span class="empty-icon" aria-hidden="true">□</span>
         <p>No prescription analyzed yet. Select a patient and enter a prescription on the left to run safety checks.</p>
       </div>`;
   }
@@ -1039,7 +1039,7 @@ function setupAskTheEvidence() {
         ${data.passages.map(p => `
           <div class="patient-summary-box" style="margin-bottom:0.75rem;">
             <div class="evidence-meta" style="margin-bottom:0.4rem;">
-              <span>&#128218; ${escapeHtml(p.document_title || "")}</span>
+              <span aria-hidden="true">≣</span> <span>${escapeHtml(p.document_title || "")}</span>
               <span class="badge badge-subtle">${escapeHtml(p.section_page || "")}</span>
               <span class="val-mono" style="font-size:0.72rem;">score ${p.retrieval_score}</span>
             </div>
