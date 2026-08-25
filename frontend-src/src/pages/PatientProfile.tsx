@@ -117,7 +117,7 @@ export default function PatientProfile() {
       <div className="dashboard-header" style={{ marginBottom: "16px" }}>
         <div>
           <p className="dashboard-kicker">PATIENT PROFILE & LONGITUDINAL RECORD</p>
-          <h1>{patient.display_name || patient.patient_id} ({patient.patient_id})</h1>
+          <h1>{patient.display_name || patient.patient_id}</h1>
           <p className="dashboard-subtitle">
             {patient.age ?? "Unknown"} years · {patient.sex || "Sex unrecorded"} · {patient.weight_kg ?? "Unrecorded"} kg · eGFR {patient.egfr_ml_min ?? "Not assessed"} mL/min
           </p>

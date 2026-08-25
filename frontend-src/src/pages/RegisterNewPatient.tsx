@@ -9,6 +9,7 @@ export default function RegisterNewPatient() {
   const [activeTab, setActiveTab] = useState<"demographics" | "history" | "notes">("demographics");
 
   const [form, setForm] = useState({
+    name: "",
     age: "",
     sex: "MALE",
     weight: "",
@@ -43,6 +44,7 @@ export default function RegisterNewPatient() {
       const auth = await login.json();
 
       const payload = {
+        display_name: form.name.trim() || undefined,
         age: Number(form.age),
         age_category: Number(form.age) >= 18 ? "ADULT" : "CHILD",
         sex: form.sex,
@@ -142,6 +144,17 @@ export default function RegisterNewPatient() {
           {/* TAB 1: DEMOGRAPHICS & ORGAN FUNCTION */}
           {activeTab === "demographics" && (
             <div style={{ display: "grid", gap: "20px" }}>
+              <div>
+                <label className="field-label">Patient Full Name (e.g. Rajesh Sharma, Sunita Devi) *</label>
+                <input
+                  type="text"
+                  placeholder="Enter full Indian patient name..."
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  style={{ width: "100%" }}
+                />
+              </div>
+
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "16px" }}>
                 <div>
                   <label className="field-label">Age (years) *</label>

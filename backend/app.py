@@ -1070,8 +1070,18 @@ def register_patient(
         )
 
     patient_id = _next_patient_id(db)
+    raw_name = (payload.display_name or "").strip()
+    if raw_name:
+        if raw_name.startswith("PATIENT-"):
+            disp_name = raw_name
+        else:
+            disp_name = f"{patient_id} ({raw_name})"
+    else:
+        disp_name = f"{patient_id} (Patient Record)"
+
     p = PatientDB(
         patient_id=patient_id,
+        display_name=disp_name,
         age=payload.age,
         age_category=payload.age_category.value if payload.age_category else "UNKNOWN",
         sex=payload.sex or "UNKNOWN",

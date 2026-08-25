@@ -88,6 +88,7 @@ type DashboardStats = {
 };
 
 const emptyForm = {
+  name: "",
   age: "",
   sex: "UNKNOWN",
   weight: "",
@@ -265,6 +266,7 @@ export default function PatientDashboard() {
     });
     const auth = await login.json();
     const payload = {
+      display_name: regForm.name.trim() || undefined,
       age: Number(regForm.age),
       age_category: Number(regForm.age) >= 18 ? "ADULT" : "CHILD",
       sex: regForm.sex,
@@ -617,6 +619,9 @@ export default function PatientDashboard() {
             </>
           ) : (
             <form className="registration-form" onSubmit={registerPatient}>
+              <label className="field-label">Patient Full Name (e.g. Rajesh Sharma)</label>
+              <input type="text" placeholder="Enter patient name..." value={regForm.name} onChange={(e) => setRegForm({ ...regForm, name: e.target.value })} />
+
               <label className="field-label">Age *</label>
               <input type="number" min="0" max="125" value={regForm.age} onChange={(e) => setRegForm({ ...regForm, age: e.target.value })} />
 

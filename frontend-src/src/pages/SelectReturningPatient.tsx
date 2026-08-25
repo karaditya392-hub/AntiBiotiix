@@ -95,7 +95,7 @@ export default function SelectReturningPatient() {
               >
                 <div>
                   <h3 style={{ margin: "0 0 4px", color: "#173c3d", fontSize: "1.1rem" }}>
-                    {p.patient_id} <span style={{ fontWeight: 400, color: "#607371", fontSize: "0.9rem" }}>({p.display_name || `Patient ${p.patient_id}`})</span>
+                    {p.display_name && p.display_name.includes("(") ? p.display_name : `${p.patient_id} (${p.display_name || "Patient Record"})`}
                   </h3>
                   <p style={{ margin: "2px 0", fontSize: "0.82rem", color: "#405453" }}>
                     <strong>{p.age ?? "Unknown"} years</strong> · {p.sex || "Sex not specified"} · Allergies: {p.allergies?.join(", ") || "None documented"}

@@ -24,6 +24,7 @@ from backend.guidelines.knowledge_base import knowledge_base
 SEED_ROSTER = [
     {
         "patient_id": "PATIENT-001",
+        "display_name": "PATIENT-001 (Rajesh Sharma)",
         "age": 45, "age_category": "ADULT", "weight_kg": 72.0, "sex": "MALE",
         "allergies": ["Penicillin", "Amoxicillin"], "allergy_status_known": True,
         "egfr_ml_min": 92.0, "serum_creatinine_mg_dl": 0.9, "renal_status_known": True,
@@ -35,13 +36,14 @@ SEED_ROSTER = [
         "prescription": ("Azithromycin", 500, "mg", "PO", "QD", 3),
         "scenario": {
             "key": "cap-amox-pen-allergy",
-            "label": "CAP: Amox in Penicillin Allergy",
+            "label": "Rajesh Sharma (PATIENT-001) - CAP: Amox in Penicillin Allergy",
             "diagnosis": "Community-Acquired Pneumonia (CAP)",
             "text": "Amoxicillin 500mg PO TID x 7 days for community acquired pneumonia",
         },
     },
     {
         "patient_id": "PATIENT-002",
+        "display_name": "PATIENT-002 (Sunita Devi)",
         "age": 68, "age_category": "GERIATRIC", "weight_kg": 64.0, "sex": "FEMALE",
         "allergies": ["Sulfonamides"], "allergy_status_known": True,
         "egfr_ml_min": 22.0, "serum_creatinine_mg_dl": 2.8, "renal_status_known": True,
@@ -53,13 +55,14 @@ SEED_ROSTER = [
         "prescription": ("Nitrofurantoin", 100, "mg", "PO", "BID", 5),
         "scenario": {
             "key": "uti-nitro-ckd",
-            "label": "UTI: Nitrofurantoin in CKD-4",
+            "label": "Sunita Devi (PATIENT-002) - UTI: Nitrofurantoin in CKD-4",
             "diagnosis": "Uncomplicated Urinary Tract Infection (Cystitis)",
             "text": "Nitrofurantoin 100mg PO BID x 5 days for acute cystitis",
         },
     },
     {
         "patient_id": "PATIENT-003",
+        "display_name": "PATIENT-003 (Amitabh Verma)",
         "age": 54, "age_category": "ADULT", "weight_kg": 78.0, "sex": "MALE",
         "allergies": ["Meropenem"], "allergy_status_known": True,
         "egfr_ml_min": 75.0, "serum_creatinine_mg_dl": 1.1, "renal_status_known": True,
@@ -71,13 +74,14 @@ SEED_ROSTER = [
         "prescription": ("Cefotaxime", 2, "g", "IV", "Q8H", 5),
         "scenario": {
             "key": "cirrhosis-metronidazole",
-            "label": "Cirrhosis: Metronidazole Overdose",
+            "label": "Amitabh Verma (PATIENT-003) - Cirrhosis: Metronidazole Overdose",
             "diagnosis": "Intra-abdominal Infection",
             "text": "Metronidazole 500mg IV TID x 10 days",
         },
     },
     {
         "patient_id": "PATIENT-004",
+        "display_name": "PATIENT-004 (Priya Patel)",
         "age": 28, "age_category": "ADULT", "weight_kg": 62.0, "sex": "FEMALE",
         "allergies": ["Tetracycline"], "allergy_status_known": True,
         "egfr_ml_min": 110.0, "serum_creatinine_mg_dl": 0.6, "renal_status_known": True,
@@ -89,13 +93,14 @@ SEED_ROSTER = [
         "prescription": ("Cephalexin", 500, "mg", "PO", "QID", 7),
         "scenario": {
             "key": "pregnancy-ciprofloxacin",
-            "label": "Pregnancy: Ciprofloxacin",
+            "label": "Priya Patel (PATIENT-004) - Pregnancy: Ciprofloxacin",
             "diagnosis": "Acute Pyelonephritis",
             "text": "Ciprofloxacin 500mg PO BID x 7 days",
         },
     },
     {
         "patient_id": "PATIENT-005",
+        "display_name": "PATIENT-005 (Suresh Kumar)",
         "age": 62, "age_category": "ADULT", "weight_kg": 85.0, "sex": "MALE",
         "allergies": ["Clarithromycin"], "allergy_status_known": True,
         "egfr_ml_min": 82.0, "serum_creatinine_mg_dl": 1.0, "renal_status_known": True,
@@ -107,13 +112,14 @@ SEED_ROSTER = [
         "prescription": ("Doxycycline", 100, "mg", "PO", "BID", 5),
         "scenario": {
             "key": "ddi-clarithro-warfarin",
-            "label": "DDI: Clarithromycin + Warfarin/Statin",
+            "label": "Suresh Kumar (PATIENT-005) - DDI: Clarithromycin + Warfarin/Statin",
             "diagnosis": "Acute Bacterial Bronchitis",
             "text": "Clarithromycin 500mg PO BID x 7 days",
         },
     },
     {
         "patient_id": "PATIENT-006",
+        "display_name": "PATIENT-006 (Aarav Gupta)",
         "age": 4, "age_category": "PEDIATRIC", "weight_kg": 16.0, "sex": "MALE",
         "allergies": ["Cefaclor"], "allergy_status_known": True,
         "egfr_ml_min": 115.0, "serum_creatinine_mg_dl": 0.4, "renal_status_known": True,
@@ -125,13 +131,14 @@ SEED_ROSTER = [
         "prescription": ("Amoxicillin", 400, "mg", "PO", "BID", 7),
         "scenario": {
             "key": "peds-cefaclor-otitis",
-            "label": "Peds Otitis: Cefaclor in Cephalosporin Allergy",
+            "label": "Aarav Gupta (PATIENT-006) - Peds Otitis: Cefaclor in Cephalosporin Allergy",
             "diagnosis": "Acute Otitis Media (Pediatric)",
             "text": "Cefaclor 250mg PO TID x 7 days for acute otitis media",
         },
     },
     {
         "patient_id": "PATIENT-007",
+        "display_name": "PATIENT-007 (Kamla Rao)",
         "age": 72, "age_category": "GERIATRIC", "weight_kg": 58.0, "sex": "FEMALE",
         "allergies": ["Ciprofloxacin"], "allergy_status_known": True,
         "egfr_ml_min": 55.0, "serum_creatinine_mg_dl": 1.1, "renal_status_known": True,
@@ -143,13 +150,14 @@ SEED_ROSTER = [
         "prescription": ("Piperacillin-Tazobactam", 4.5, "g", "IV", "Q6H", 7),
         "scenario": {
             "key": "ddi-qt-azithro",
-            "label": "DDI: Azithro + Ondansetron (QT)",
+            "label": "Kamla Rao (PATIENT-007) - DDI: Azithro + Ondansetron (QT)",
             "diagnosis": "Atypical Pneumonia",
             "text": "Azithromycin 500mg PO QD x 5 days",
         },
     },
     {
         "patient_id": "PATIENT-008",
+        "display_name": "PATIENT-008 (Vikram Singh)",
         "age": 35, "age_category": "ADULT", "weight_kg": 70.0, "sex": "MALE",
         "allergies": ["Trimethoprim"], "allergy_status_known": True,
         "egfr_ml_min": 98.0, "serum_creatinine_mg_dl": 0.8, "renal_status_known": True,
@@ -161,13 +169,14 @@ SEED_ROSTER = [
         "prescription": ("Linezolid", 600, "mg", "PO", "BID", 7),
         "scenario": {
             "key": "ddi-linezolid-ssri",
-            "label": "DDI: Linezolid + Escitalopram",
+            "label": "Vikram Singh (PATIENT-008) - DDI: Linezolid + Escitalopram",
             "diagnosis": "MRSA Soft Tissue Infection",
             "text": "Linezolid 600mg PO BID x 10 days",
         },
     },
     {
         "patient_id": "PATIENT-009",
+        "display_name": "PATIENT-009 (Ramesh Iyer)",
         "age": 50, "age_category": "ADULT", "weight_kg": 75.0, "sex": "MALE",
         "allergies": ["Erythromycin"], "allergy_status_known": True,
         "egfr_ml_min": 90.0, "serum_creatinine_mg_dl": 1.0, "renal_status_known": True,
@@ -179,13 +188,14 @@ SEED_ROSTER = [
         "prescription": ("Meropenem", 1, "g", "IV", "Q8H", 7),
         "scenario": {
             "key": "sepsis-erythromycin",
-            "label": "Sepsis: Erythromycin in Macrolide Allergy",
+            "label": "Ramesh Iyer (PATIENT-009) - Sepsis: Erythromycin in Macrolide Allergy",
             "diagnosis": "Suspected Sepsis",
             "text": "Erythromycin 500mg IV Q6H x 7 days",
         },
     },
     {
         "patient_id": "PATIENT-010",
+        "display_name": "PATIENT-010 (Ananya Reddy)",
         "age": 29, "age_category": "ADULT", "weight_kg": 55.0, "sex": "FEMALE",
         "allergies": ["Flucloxacillin"], "allergy_status_known": True,
         "egfr_ml_min": 95.0, "serum_creatinine_mg_dl": 0.7, "renal_status_known": True,
@@ -197,13 +207,14 @@ SEED_ROSTER = [
         "prescription": ("Amoxicillin-clavulanate", 875, "mg", "PO", "BID", 5),
         "scenario": {
             "key": "sinusitis-doxy-pregnancy",
-            "label": "Sinusitis: Doxycycline in Unconfirmed Pregnancy",
+            "label": "Ananya Reddy (PATIENT-010) - Sinusitis: Doxycycline in Unconfirmed Pregnancy",
             "diagnosis": "Acute Bacterial Sinusitis",
             "text": "Doxycycline 100mg PO BID x 7 days",
         },
     },
     {
         "patient_id": "PATIENT-011",
+        "display_name": "PATIENT-011 (Meena Joshi)",
         "age": 39, "age_category": "ADULT", "weight_kg": 68.0, "sex": "FEMALE",
         "allergies": ["Vancomycin"], "allergy_status_known": True,
         "egfr_ml_min": 96.0, "serum_creatinine_mg_dl": 0.8, "renal_status_known": True,
@@ -215,13 +226,14 @@ SEED_ROSTER = [
         "prescription": ("Clindamycin", 300, "mg", "PO", "QID", 5),
         "scenario": {
             "key": "cellulitis-vancomycin",
-            "label": "Cellulitis: Vancomycin in Glycopeptide Allergy",
+            "label": "Meena Joshi (PATIENT-011) - Cellulitis: Vancomycin in Glycopeptide Allergy",
             "diagnosis": "Non-purulent Cellulitis",
             "text": "Vancomycin 1g IV Q12H x 7 days",
         },
     },
     {
         "patient_id": "PATIENT-012",
+        "display_name": "PATIENT-012 (Dinesh Deshmukh)",
         "age": 57, "age_category": "ADULT", "weight_kg": 76.0, "sex": "MALE",
         "allergies": ["Ceftriaxone"], "allergy_status_known": True,
         "egfr_ml_min": 71.0, "serum_creatinine_mg_dl": 1.1, "renal_status_known": True,
@@ -233,13 +245,14 @@ SEED_ROSTER = [
         "prescription": ("Ciprofloxacin", 500, "mg", "PO", "BID", 7),
         "scenario": {
             "key": "pyelo-ceftriaxone",
-            "label": "Pyelonephritis: Ceftriaxone in Beta-Lactam Allergy",
+            "label": "Dinesh Deshmukh (PATIENT-012) - Pyelonephritis: Ceftriaxone in Beta-Lactam Allergy",
             "diagnosis": "Acute Pyelonephritis",
             "text": "Ceftriaxone 2g IV QD x 7 days",
         },
     },
     {
         "patient_id": "PATIENT-013",
+        "display_name": "PATIENT-013 (Lakshmi Nair)",
         "age": 66, "age_category": "GERIATRIC", "weight_kg": 59.0, "sex": "FEMALE",
         "allergies": ["Doxycycline"], "allergy_status_known": True,
         "egfr_ml_min": 48.0, "serum_creatinine_mg_dl": 1.3, "renal_status_known": True,
@@ -251,13 +264,14 @@ SEED_ROSTER = [
         "prescription": ("Vancomycin", 1, "g", "IV", "Q12H", 7),
         "scenario": {
             "key": "hap-doxycycline",
-            "label": "HAP: Doxycycline in Tetracycline Allergy",
+            "label": "Lakshmi Nair (PATIENT-013) - HAP: Doxycycline in Tetracycline Allergy",
             "diagnosis": "Hospital-Acquired Pneumonia",
             "text": "Doxycycline 100mg PO BID x 7 days",
         },
     },
     {
         "patient_id": "PATIENT-014",
+        "display_name": "PATIENT-014 (Rohan Banerjee)",
         "age": 31, "age_category": "ADULT", "weight_kg": 64.0, "sex": "MALE",
         "allergies": ["Nitrofurantoin"], "allergy_status_known": True,
         "egfr_ml_min": 108.0, "serum_creatinine_mg_dl": 0.7, "renal_status_known": True,
@@ -269,13 +283,14 @@ SEED_ROSTER = [
         "prescription": ("Metronidazole", 400, "mg", "PO", "TID", 5),
         "scenario": {
             "key": "diarrhoea-nitrofurantoin",
-            "label": "Enteritis: Nitrofurantoin in Nitro Allergy",
+            "label": "Rohan Banerjee (PATIENT-014) - Enteritis: Nitrofurantoin in Nitro Allergy",
             "diagnosis": "Acute Infectious Diarrhoea",
             "text": "Nitrofurantoin 100mg PO BID x 5 days",
         },
     },
     {
         "patient_id": "PATIENT-015",
+        "display_name": "PATIENT-015 (Kavya Kulkarni)",
         "age": 19, "age_category": "ADULT", "weight_kg": 61.0, "sex": "FEMALE",
         "allergies": ["Azithromycin"], "allergy_status_known": True,
         "egfr_ml_min": 112.0, "serum_creatinine_mg_dl": 0.6, "renal_status_known": True,
@@ -287,13 +302,14 @@ SEED_ROSTER = [
         "prescription": ("Ceftriaxone", 2, "g", "IV", "Q12H", 10),
         "scenario": {
             "key": "meningitis-azithromycin",
-            "label": "Meningitis: Azithromycin in Macrolide Allergy",
+            "label": "Kavya Kulkarni (PATIENT-015) - Meningitis: Azithromycin in Macrolide Allergy",
             "diagnosis": "Suspected Bacterial Meningitis",
             "text": "Azithromycin 500mg IV QD x 10 days",
         },
     },
     {
         "patient_id": "PATIENT-016",
+        "display_name": "PATIENT-016 (Harishchandra Prasad)",
         "age": 73, "age_category": "GERIATRIC", "weight_kg": 70.0, "sex": "MALE",
         "allergies": ["Gentamicin"], "allergy_status_known": True,
         "egfr_ml_min": 58.0, "serum_creatinine_mg_dl": 1.2, "renal_status_known": True,
@@ -305,13 +321,14 @@ SEED_ROSTER = [
         "prescription": ("Rifampicin", 600, "mg", "PO", "QD", 14),
         "scenario": {
             "key": "endocarditis-gentamicin",
-            "label": "Endocarditis: Gentamicin in Aminoglycoside Allergy",
+            "label": "Harishchandra Prasad (PATIENT-016) - Endocarditis: Gentamicin in Aminoglycoside Allergy",
             "diagnosis": "Prosthetic-Valve Endocarditis",
             "text": "Gentamicin 70mg IV Q8H x 14 days",
         },
     },
     {
         "patient_id": "PATIENT-017",
+        "display_name": "PATIENT-017 (Diya Bhatt)",
         "age": 11, "age_category": "PEDIATRIC", "weight_kg": 37.0, "sex": "FEMALE",
         "allergies": ["Clindamycin"], "allergy_status_known": True,
         "egfr_ml_min": 120.0, "serum_creatinine_mg_dl": 0.5, "renal_status_known": True,
@@ -323,13 +340,14 @@ SEED_ROSTER = [
         "prescription": ("Penicillin V", 250, "mg", "PO", "BID", 10),
         "scenario": {
             "key": "peds-pharyngitis-clinda",
-            "label": "Peds Pharyngitis: Clindamycin in Lincosamide Allergy",
+            "label": "Diya Bhatt (PATIENT-017) - Peds Pharyngitis: Clindamycin in Lincosamide Allergy",
             "diagnosis": "Group-A Streptococcal Pharyngitis",
             "text": "Clindamycin 300mg PO TID x 10 days",
         },
     },
     {
         "patient_id": "PATIENT-018",
+        "display_name": "PATIENT-018 (Manoj Chatterjee)",
         "age": 47, "age_category": "ADULT", "weight_kg": 82.0, "sex": "MALE",
         "allergies": ["Colistin"], "allergy_status_known": True,
         "egfr_ml_min": 88.0, "serum_creatinine_mg_dl": 0.9, "renal_status_known": True,
@@ -341,13 +359,14 @@ SEED_ROSTER = [
         "prescription": ("Ampicillin", 500, "mg", "PO", "TID", 5),
         "scenario": {
             "key": "dental-colistin",
-            "label": "Dental: Colistin in Polymyxin Allergy",
+            "label": "Manoj Chatterjee (PATIENT-018) - Dental: Colistin in Polymyxin Allergy",
             "diagnosis": "Acute Odontogenic Infection",
             "text": "Colistin 150mg IV BID x 5 days",
         },
     },
     {
         "patient_id": "PATIENT-019",
+        "display_name": "PATIENT-019 (Shalini Agarwal)",
         "age": 58, "age_category": "ADULT", "weight_kg": 74.0, "sex": "FEMALE",
         "allergies": ["Levofloxacin"], "allergy_status_known": True,
         "egfr_ml_min": 67.0, "serum_creatinine_mg_dl": 1.0, "renal_status_known": True,
@@ -359,13 +378,14 @@ SEED_ROSTER = [
         "prescription": ("Cefuroxime", 500, "mg", "PO", "BID", 5),
         "scenario": {
             "key": "copd-levofloxacin",
-            "label": "COPD Exacerbation: Levofloxacin in Quinolone Allergy",
+            "label": "Shalini Agarwal (PATIENT-019) - COPD Exacerbation: Levofloxacin in Quinolone Allergy",
             "diagnosis": "Bacterial COPD Exacerbation",
             "text": "Levofloxacin 500mg PO QD x 5 days",
         },
     },
     {
         "patient_id": "PATIENT-020",
+        "display_name": "PATIENT-020 (Aditya Menon)",
         "age": 24, "age_category": "ADULT", "weight_kg": 66.0, "sex": "MALE",
         "allergies": ["Cefixime"], "allergy_status_known": True,
         "egfr_ml_min": 102.0, "serum_creatinine_mg_dl": 0.8, "renal_status_known": True,
@@ -377,7 +397,7 @@ SEED_ROSTER = [
         "prescription": ("Aztreonam", 1, "g", "IV", "Q8H", 10),
         "scenario": {
             "key": "enteric-cefixime",
-            "label": "Enteric Fever: Cefixime in Cephalosporin Allergy",
+            "label": "Aditya Menon (PATIENT-020) - Enteric Fever: Cefixime in Cephalosporin Allergy",
             "diagnosis": "Uncomplicated Enteric Fever",
             "text": "Cefixime 200mg PO BID x 10 days",
         },
@@ -388,6 +408,7 @@ SEED_ROSTER = [
 def _patient_row(entry: dict) -> dict:
     return {
         "patient_id": entry["patient_id"],
+        "display_name": entry.get("display_name", f"{entry['patient_id']} (Synthetic Patient)"),
         "age": entry["age"],
         "age_category": entry["age_category"],
         "weight_kg": entry["weight_kg"],
