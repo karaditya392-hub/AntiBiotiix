@@ -109,7 +109,7 @@ export default function RegisterNewPatient() {
           <h1>Register New Patient</h1>
           <p className="dashboard-subtitle">Create a patient record and begin their first visit.</p>
         </div>
-        <Link href="/" className="dashboard-button secondary">
+        <Link href="/patient-type" className="dashboard-button secondary">
           <ArrowLeft size={15} /> Back to Selection
         </Link>
       </div>

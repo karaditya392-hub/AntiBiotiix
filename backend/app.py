@@ -52,6 +52,7 @@ from backend.seed_data import list_scenario_presets
 from backend.notifications import (
     scan_and_trigger_same_day_notifications,
     format_ist_datetime,
+    get_ist_bounds_for_date,
     IN_APP_NOTIFICATIONS_STORE,
 )
 
@@ -972,16 +973,28 @@ def get_next_patient_appointment(patient_id: str, db: Session = Depends(get_db))
     if not p:
         raise HTTPException(status_code=404, detail="Patient not found")
 
-    start_today, _ = format_ist_datetime(now_ist()), now_ist()
+    start_bound, _ = get_ist_bounds_for_date(now_ist())
     appt = (
         db.query(AppointmentDB)
         .filter(
             AppointmentDB.patient_id == patient_id,
-            AppointmentDB.status == "SCHEDULED"
+            AppointmentDB.status == "SCHEDULED",
+            AppointmentDB.appointment_date >= start_bound
         )
-        .order_by(AppointmentDB.appointment_date.asc())
+        .order_by(AppointmentDB.id.desc())
         .first()
     )
+
+    if not appt:
+        appt = (
+            db.query(AppointmentDB)
+            .filter(
+                AppointmentDB.patient_id == patient_id,
+                AppointmentDB.status == "SCHEDULED"
+            )
+            .order_by(AppointmentDB.id.desc())
+            .first()
+        )
 
     if not appt:
         return {"has_appointment": False, "message": "No upcoming check-up scheduled."}

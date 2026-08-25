@@ -48,7 +48,7 @@ export default function SelectReturningPatient() {
           <h1>Select Returning Patient</h1>
           <p className="dashboard-subtitle">Search for an existing patient to continue their care.</p>
         </div>
-        <Link href="/" className="dashboard-button secondary">
+        <Link href="/patient-type" className="dashboard-button secondary">
           <ArrowLeft size={15} /> Back to Selection
         </Link>
       </div>
