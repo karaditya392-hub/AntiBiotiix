@@ -3,6 +3,8 @@ Clinician Role Authorization & Security Layer (Sections 18, 18A)
 Enforces server-side token generation, session verification, and role resolution.
 """
 import uuid
+import hashlib
+import hmac
 from typing import Optional, Dict, Any
 from fastapi import HTTPException, Security, Depends, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -20,33 +22,141 @@ PATIENT_MANAGEMENT_ROLES = [
     "STAFF_NURSE",
 ]
 
-# Server-side token registry mapping access_token -> {"clinician_id": ..., "clinician_role": ...}
-# In production, this would be backed by Redis / JWT secret / OAuth2 / SAML
+# Password Hashing Helpers
+def hash_password(password: str, salt: str = "microbe_oauth_salt_2026") -> str:
+    """Generate PBKDF2 SHA-256 hash of password."""
+    return hashlib.pbkdf2_hmac(
+        'sha256',
+        password.encode('utf-8'),
+        salt.encode('utf-8'),
+        100000
+    ).hex()
+
+
+def verify_password(plain_password: str, hashed_password: str, salt: str = "microbe_oauth_salt_2026") -> bool:
+    """Verify plain text password against stored hash using constant-time comparison."""
+    if not plain_password or not hashed_password:
+        return False
+    computed_hash = hash_password(plain_password, salt)
+    return hmac.compare_digest(computed_hash, hashed_password)
+
+
+# Doctor Credential Registry
+DOCTOR_CREDENTIALS: Dict[str, Dict[str, Any]] = {}
+
+_DEFAULT_DOCTORS = [
+    {
+        "doctor_id": "DOC-ATTENDING-01",
+        "display_name": "Dr. Rajesh Verma",
+        "role": "ATTENDING_PHYSICIAN",
+        "password": "doctorpassword123",
+    },
+    {
+        "doctor_id": "DOC-DEMO-01",
+        "display_name": "Dr. Suresh Kumar",
+        "role": "ATTENDING_PHYSICIAN",
+        "password": "doctorpassword123",
+    },
+    {
+        "doctor_id": "DOC-ID-LEAD-01",
+        "display_name": "Dr. Ananya Roy",
+        "role": "INFECTIOUS_DISEASE_SPECIALIST",
+        "password": "doctorpassword123",
+    },
+    {
+        "doctor_id": "DOC-PHARM-01",
+        "display_name": "Dr. Priya Sharma",
+        "role": "CLINICAL_PHARMACIST",
+        "password": "doctorpassword123",
+    },
+    {
+        "doctor_id": "NURSE-STAFF-01",
+        "display_name": "Staff Nurse Priya",
+        "role": "STAFF_NURSE",
+        "password": "nursepassword123",
+    },
+]
+
+for d in _DEFAULT_DOCTORS:
+    DOCTOR_CREDENTIALS[d["doctor_id"].upper()] = {
+        "doctor_id": d["doctor_id"].upper(),
+        "display_name": d["display_name"],
+        "role": d["role"].upper(),
+        "password_hash": hash_password(d["password"]),
+    }
+
+
+def verify_doctor_credentials(
+    doctor_id: str,
+    password: str,
+    db: Optional[Any] = None
+) -> Optional[Dict[str, Any]]:
+    """
+    Verify doctor ID and password credentials against Database or Registry.
+    Returns doctor metadata dict if valid, or None if invalid.
+    """
+    if not doctor_id or not password:
+        return None
+
+    normalized_id = doctor_id.strip().upper()
+
+    # 1. Check in Database if session available
+    if db is not None:
+        try:
+            from backend.models.database import DoctorDB
+            doc_db = db.query(DoctorDB).filter(DoctorDB.doctor_id == normalized_id).first()
+            if doc_db and doc_db.password_hash:
+                if verify_password(password, doc_db.password_hash):
+                    return {
+                        "doctor_id": doc_db.doctor_id,
+                        "display_name": doc_db.display_name,
+                        "role": doc_db.role,
+                    }
+        except Exception:
+            pass
+
+    # 2. Check in In-Memory DOCTOR_CREDENTIALS Registry
+    doc_reg = DOCTOR_CREDENTIALS.get(normalized_id)
+    if doc_reg and verify_password(password, doc_reg["password_hash"]):
+        return {
+            "doctor_id": doc_reg["doctor_id"],
+            "display_name": doc_reg["display_name"],
+            "role": doc_reg["role"],
+        }
+
+    return None
+
+
+# Server-side token registry mapping access_token -> {"clinician_id": ..., "clinician_role": ..., "display_name": ...}
 SESSION_REGISTRY: Dict[str, Dict[str, Any]] = {
     # Seed default tokens for automated testing / initial administrative demo access
     "mock_attending_token": {
         "clinician_id": "DOC-ATTENDING-01",
-        "clinician_role": "ATTENDING_PHYSICIAN"
+        "clinician_role": "ATTENDING_PHYSICIAN",
+        "display_name": "Dr. Rajesh Verma",
     },
     "mock_nurse_token": {
         "clinician_id": "NURSE-STAFF-01",
-        "clinician_role": "STAFF_NURSE"
+        "clinician_role": "STAFF_NURSE",
+        "display_name": "Staff Nurse Priya",
     },
     "mock_id_specialist_token": {
         "clinician_id": "DOC-ID-LEAD-01",
-        "clinician_role": "INFECTIOUS_DISEASE_SPECIALIST"
+        "clinician_role": "INFECTIOUS_DISEASE_SPECIALIST",
+        "display_name": "Dr. Ananya Roy",
     }
 }
 
 security_bearer = HTTPBearer(auto_error=False)
 
 
-def create_session_token(clinician_id: str, clinician_role: str) -> str:
+def create_session_token(clinician_id: str, clinician_role: str, display_name: Optional[str] = None) -> str:
     """Create a server-side session token encoding clinician identity and role."""
     token = f"tok_{uuid.uuid4().hex}"
     SESSION_REGISTRY[token] = {
         "clinician_id": clinician_id.upper(),
-        "clinician_role": clinician_role.upper()
+        "clinician_role": clinician_role.upper(),
+        "display_name": display_name or clinician_id.upper(),
     }
     return token
 

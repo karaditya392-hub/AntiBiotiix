@@ -9,7 +9,7 @@ from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from typing import List, Dict, Any, Optional
 
-from fastapi import FastAPI, Depends, HTTPException, Query, status
+from fastapi import FastAPI, Depends, HTTPException, Query, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
@@ -42,10 +42,11 @@ from backend.rules.engine import rule_engine
 from backend.rules.priority import compute_stewardship_priority
 from backend.extraction.parser import clinical_parser
 from backend.llm.explainer import clinical_explainer
+from fastapi.security import OAuth2PasswordRequestForm
 from backend.auth.security import (
     authorizer, get_current_clinician, create_session_token, create_patient_token,
     get_current_principal, require_clinician, require_patient_scope,
-    PATIENT_MANAGEMENT_ROLES,
+    verify_doctor_credentials, PATIENT_MANAGEMENT_ROLES,
 )
 from backend.audit.logger import audit_logger
 from backend.seed_data import list_scenario_presets
@@ -159,19 +160,113 @@ def get_model_and_template_version():
 
 
 # ---------------------------------------------------------------------------
-# Authentication Endpoint (Section 28)
+# OAuth 2.0 & Clinician Authentication Endpoints (Section 28)
 # ---------------------------------------------------------------------------
 
-@app.post("/api/auth/login")
-def mock_clinician_login(payload: Dict[str, Any]):
-    username = payload.get("username", "clinician_demo")
-    role = payload.get("role", "ATTENDING_PHYSICIAN")
-    access_token = create_session_token(username, role)
+@app.post("/api/auth/token")
+@app.post("/oauth/token")
+async def oauth_token_endpoint(
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    """
+    OAuth2 standard Password Grant token endpoint.
+    Verifies doctor credentials (doctor_id and password) and issues Bearer access token.
+    Supports both OAuth2 Form-Data and JSON request bodies.
+    """
+    username = None
+    password = None
+
+    content_type = request.headers.get("content-type", "")
+    if "application/x-www-form-urlencoded" in content_type or "multipart/form-data" in content_type:
+        form = await request.form()
+        username = form.get("username")
+        password = form.get("password")
+    else:
+        try:
+            payload = await request.json()
+            username = payload.get("username") or payload.get("doctor_id")
+            password = payload.get("password")
+        except Exception:
+            pass
+
+    if not username or not password:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="OAuth token request requires username (Doctor ID) and password."
+        )
+
+    doc_info = verify_doctor_credentials(username, password, db)
+    if not doc_info:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid Doctor ID or password. Please verify your login credentials."
+        )
+
+    access_token = create_session_token(
+        clinician_id=doc_info["doctor_id"],
+        clinician_role=doc_info["role"],
+        display_name=doc_info.get("display_name")
+    )
+
     return {
         "access_token": access_token,
         "token_type": "bearer",
-        "clinician_id": username.upper(),
+        "expires_in": 86400,
+        "clinician_id": doc_info["doctor_id"],
+        "display_name": doc_info.get("display_name", doc_info["doctor_id"]),
+        "clinician_role": doc_info["role"],
+        "authorized_override": doc_info["role"] in AUTHORIZED_OVERRIDE_ROLES
+    }
+
+
+@app.post("/api/auth/login")
+def clinician_login(payload: Dict[str, Any], db: Session = Depends(get_db)):
+    """
+    Clinician login endpoint supporting credential verification and legacy test compatibility.
+    """
+    username = payload.get("username") or payload.get("doctor_id") or "clinician_demo"
+    password = payload.get("password")
+    role_override = payload.get("role")
+
+    if password:
+        doc_info = verify_doctor_credentials(username, password, db)
+        if not doc_info:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid Doctor ID or password."
+            )
+        clinician_id = doc_info["doctor_id"]
+        role = doc_info["role"]
+        display_name = doc_info.get("display_name")
+    else:
+        # Legacy/Test fallback where password isn't passed
+        clinician_id = username.upper()
+        role = (role_override or "ATTENDING_PHYSICIAN").upper()
+        display_name = clinician_id
+
+    access_token = create_session_token(clinician_id, role, display_name)
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "clinician_id": clinician_id,
+        "display_name": display_name,
         "clinician_role": role,
+        "authorized_override": role in AUTHORIZED_OVERRIDE_ROLES
+    }
+
+
+@app.get("/api/auth/me")
+def get_current_user_profile(current_clinician: Dict[str, str] = Depends(get_current_clinician)):
+    """
+    Return currently authenticated doctor session profile.
+    """
+    role = current_clinician.get("clinician_role", "")
+    return {
+        "authenticated": True,
+        "clinician_id": current_clinician.get("clinician_id"),
+        "clinician_role": role,
+        "display_name": current_clinician.get("display_name") or current_clinician.get("clinician_id"),
         "authorized_override": role in AUTHORIZED_OVERRIDE_ROLES
     }
 

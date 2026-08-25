@@ -10,12 +10,13 @@ row, seed visit, and console preset are derived from that single list.
 import argparse
 import json
 from backend.models.database import (
-    SessionLocal, init_db, PatientDB, PrescriptionDB, PrescriptionItemDB,
+    SessionLocal, init_db, PatientDB, DoctorDB, PrescriptionDB, PrescriptionItemDB,
     SafetyWarningDB, ClinicianOverrideDB, AuditLogDB, ClinicalRuleDB,
     GuidelineDocumentDB, AMRSurveillanceDB, AlertMetricsDB,
     VisitDB, SymptomDB, DiagnosisDB, PatientRAGDocumentDB
 )
 from backend.guidelines.knowledge_base import knowledge_base
+from backend.auth.security import hash_password, DOCTOR_CREDENTIALS
 
 
 # Append new demo patients here. Each patient_id, allergy list, diagnosis, prescription medication, and
@@ -557,6 +558,19 @@ def seed_database(reset_patients: bool = False):
     #
     # Only the seeded ids are touched. Patients created by a clinician through the
     # UI are never overwritten, because their ids are not in this list.
+    # Seed default doctor accounts for authentication
+    for doc_id, doc_info in DOCTOR_CREDENTIALS.items():
+        existing_doc = db.query(DoctorDB).filter(DoctorDB.doctor_id == doc_id).first()
+        if not existing_doc:
+            db.add(DoctorDB(
+                doctor_id=doc_id,
+                display_name=doc_info["display_name"],
+                role=doc_info["role"],
+                password_hash=doc_info["password_hash"],
+            ))
+        elif not existing_doc.password_hash:
+            existing_doc.password_hash = doc_info["password_hash"]
+
     repaired = []
     for p_data in patients_data:
         existing = db.query(PatientDB).filter(PatientDB.patient_id == p_data["patient_id"]).first()

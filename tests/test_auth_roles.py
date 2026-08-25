@@ -112,3 +112,40 @@ def test_rule_authoring_endpoint_authorization():
     res_id = client.post("/api/rules", json=rule_payload, headers={"Authorization": f"Bearer {id_token}"})
     assert res_id.status_code == 200
     assert res_id.json()["status"] == "RULE_AUTHORSHIP_RECORDED"
+
+
+def test_oauth_token_endpoint_success():
+    res = client.post("/api/auth/token", json={
+        "username": "DOC-ATTENDING-01",
+        "password": "doctorpassword123"
+    })
+    assert res.status_code == 200
+    data = res.json()
+    assert "access_token" in data
+    assert data["token_type"] == "bearer"
+    assert data["clinician_id"] == "DOC-ATTENDING-01"
+    assert data["clinician_role"] == "ATTENDING_PHYSICIAN"
+
+
+def test_oauth_token_endpoint_invalid_credentials():
+    res = client.post("/api/auth/token", json={
+        "username": "DOC-ATTENDING-01",
+        "password": "wrongpassword"
+    })
+    assert res.status_code == 401
+    assert "Invalid Doctor ID or password" in res.json()["detail"]
+
+
+def test_oauth_me_endpoint():
+    login_res = client.post("/api/auth/token", json={
+        "username": "DOC-ID-LEAD-01",
+        "password": "doctorpassword123"
+    })
+    token = login_res.json()["access_token"]
+
+    me_res = client.get("/api/auth/me", headers={"Authorization": f"Bearer {token}"})
+    assert me_res.status_code == 200
+    me_data = me_res.json()
+    assert me_data["authenticated"] is True
+    assert me_data["clinician_id"] == "DOC-ID-LEAD-01"
+    assert me_data["clinician_role"] == "INFECTIOUS_DISEASE_SPECIALIST"

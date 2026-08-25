@@ -10,7 +10,9 @@
     "typecheck": "tsc -b --noEmit"
   },
   "dependencies": {
+    "@tabler/icons-react": "^3.46.0",
     "lucide-react": "^0.544.0",
+    "motion": "^13.1.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "wouter": "^3.7.1"

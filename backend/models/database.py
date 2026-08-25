@@ -93,6 +93,7 @@ class DoctorDB(Base):
     doctor_id = Column(String(64), unique=True, index=True, nullable=False)
     display_name = Column(String(128), nullable=False)
     role = Column(String(64), default="ATTENDING_PHYSICIAN")
+    password_hash = Column(String(256), nullable=True)
     created_at = Column(DateTime, default=now_ist)
 
 
@@ -368,6 +369,7 @@ def init_db():
             "ALTER TABLE patients ADD COLUMN medical_history_json TEXT DEFAULT '[]'",
             "ALTER TABLE patients ADD COLUMN updated_at DATETIME",
             "ALTER TABLE prescriptions ADD COLUMN visit_id VARCHAR(64)",
+            "ALTER TABLE doctors ADD COLUMN password_hash VARCHAR(256)",
             "ALTER TABLE appointments ADD COLUMN patient_phone VARCHAR(32)",
             "ALTER TABLE appointments ADD COLUMN advance_notice_sent BOOLEAN DEFAULT 0",
             "ALTER TABLE appointments ADD COLUMN same_day_alert_sent BOOLEAN DEFAULT 0",

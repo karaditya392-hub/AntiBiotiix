@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import { Route, Router, Switch, useLocation } from "wouter";
 import { useHashLocation } from "wouter/use-hash-location";
 
+import { AuthProvider } from "@/context/AuthContext";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
+import Login from "@/pages/Login";
 import Landing from "@/pages/Landing";
 import PatientTypeSelection from "@/pages/PatientTypeSelection";
 import SelectReturningPatient from "@/pages/SelectReturningPatient";
@@ -27,8 +30,8 @@ import Console from "@/pages/Console";
  * Initial Landing Page: / -> Landing
  * Patient Workflow:
  *   Page 1: /patient-type -> PatientTypeSelection (RETURNING PATIENT vs NEW PATIENT)
- *   Page 2A: /patients/returning -> SelectReturningPatient
- *   Page 2B: /patients/new -> RegisterNewPatient
+ *   Page 2A: /patients/returning -> SelectReturningPatient (Protected by OAuth Login)
+ *   Page 2B: /patients/new -> RegisterNewPatient (Protected by OAuth Login)
  *   Page 3: /patients/:patient_id -> PatientProfile
  *   Page 4: /patients/:patient_id/visit/new -> NewVisitEntry
  *   Page 5: /patients/:patient_id/visits/:visit_id/prescription -> PrescriptionEntry
@@ -36,6 +39,7 @@ import Console from "@/pages/Console";
  *   Page 7: /patients/:patient_id/visits/:visit_id/summary -> VisitSummary
  *
  * Additional Views:
+ *   /login -> Login (OAuth Doctor Credential Verification)
  *   /patients/:patient_id/medications -> PatientMedicationHistory
  *   /patients/:patient_id/history-assistant -> PatientHistoryAssistant
  *   /dashboard -> PatientDashboard
@@ -61,14 +65,19 @@ function Shell() {
         <Switch>
           <Route path="/" component={Landing} />
           <Route path="/landing" component={Landing} />
+          <Route path="/login" component={Login} />
           <Route path="/patient-type" component={PatientTypeSelection} />
           <Route path="/clinical-tools" component={ClinicalToolsLanding} />
           <Route path="/clinical-tools/guidelines" component={GuidelinesPage} />
           <Route path="/clinical-tools/evidence" component={EvidencePage} />
           <Route path="/clinical-tools/safety" component={SafetyEnginePage} />
           <Route path="/clinical-tools/reference" component={ReferencePage} />
-          <Route path="/patients/returning" component={SelectReturningPatient} />
-          <Route path="/patients/new" component={RegisterNewPatient} />
+          <Route path="/patients/returning">
+            {() => <ProtectedRoute component={SelectReturningPatient} path="/patients/returning" />}
+          </Route>
+          <Route path="/patients/new">
+            {() => <ProtectedRoute component={RegisterNewPatient} path="/patients/new" />}
+          </Route>
           <Route path="/patients/:patient_id/visit/new" component={NewVisitEntry} />
           <Route path="/patients/:patient_id/visits/:visit_id/prescription" component={PrescriptionEntry} />
           <Route path="/patients/:patient_id/visits/:visit_id/analysis" component={ClinicalSafetyAnalysis} />
@@ -95,8 +104,10 @@ function Shell() {
 
 export default function App() {
   return (
-    <Router hook={useHashLocation}>
-      <Shell />
-    </Router>
+    <AuthProvider>
+      <Router hook={useHashLocation}>
+        <Shell />
+      </Router>
+    </AuthProvider>
   );
 }
