@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { Link, useLocation } from "wouter";
-import { BookOpenCheck, ShieldCheck, Search, Activity, FileText } from "lucide-react";
+import { BookOpenCheck, ShieldCheck, Search, FileText } from "lucide-react";
 import UnifiedHeader from "@/components/UnifiedHeader";
 import "@/styles/patient-dashboard.css";
 
@@ -14,7 +14,6 @@ export default function ClinicalToolsLayout({ children }: Props) {
   const isGuidelines = location === "/clinical-tools/guidelines";
   const isEvidence = location === "/clinical-tools/evidence";
   const isSafety = location === "/clinical-tools/safety" || location === "/review/safety";
-  const isAudit = location === "/clinical-tools/audit";
   const isReference = location === "/clinical-tools/reference";
 
   return (
@@ -29,13 +28,13 @@ export default function ClinicalToolsLayout({ children }: Props) {
           Clinical Tools
         </h1>
         <p className="dashboard-subtitle" style={{ fontSize: "0.92rem" }}>
-          Standalone clinical decision support utilities for guideline lookup, evidence search, prescription safety analysis, audit verification, and clinical reference.
+          Standalone clinical decision support utilities for guideline lookup, evidence search, prescription safety analysis, and clinical reference.
         </p>
       </div>
 
-      {/* SUB-NAVIGATION TAB BAR FOR THE 5 TOOLS */}
+      {/* SUB-NAVIGATION TAB BAR FOR THE 4 TOOLS */}
       <section className="info-section" style={{ marginBottom: "20px", padding: "14px" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "8px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "10px" }}>
           <Link
             href="/clinical-tools/guidelines"
             className={`dashboard-button ${isGuidelines ? "primary" : "secondary"}`}
@@ -58,14 +57,6 @@ export default function ClinicalToolsLayout({ children }: Props) {
             style={{ justifyContent: "center", padding: "10px 12px" }}
           >
             <ShieldCheck size={16} /> Prescription Safety Engine
-          </Link>
-
-          <Link
-            href="/clinical-tools/audit"
-            className={`dashboard-button ${isAudit ? "primary" : "secondary"}`}
-            style={{ justifyContent: "center", padding: "10px 12px" }}
-          >
-            <Activity size={16} /> Audit Trail & Alert Fatigue
           </Link>
 
           <Link

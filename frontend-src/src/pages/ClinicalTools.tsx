@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { BookOpenCheck, ShieldCheck, Search, Activity, FileText } from "lucide-react";
+import { BookOpenCheck, ShieldCheck, Search, FileText } from "lucide-react";
 import UnifiedHeader from "@/components/UnifiedHeader";
 import Console from "@/pages/Console";
 import "@/styles/patient-dashboard.css";
 
-type ToolModule = "tab-guidelines" | "tab-ask" | "tab-prescription" | "tab-audit" | "tab-reference";
+type ToolModule = "tab-guidelines" | "tab-ask" | "tab-prescription" | "tab-reference";
 
 export default function ClinicalTools() {
   const [activeModule, setActiveModule] = useState<ToolModule>("tab-guidelines");
@@ -40,11 +40,11 @@ export default function ClinicalTools() {
           Clinical Tools
         </h1>
         <p className="dashboard-subtitle" style={{ fontSize: "0.92rem" }}>
-          Standalone clinical decision support utilities for guideline lookup, evidence search, prescription safety analysis, audit verification, and clinical reference.
+          Standalone clinical decision support utilities for guideline lookup, evidence search, prescription safety analysis, and clinical reference.
         </p>
       </div>
 
-      {/* 5 MODULE SELECTION GRID */}
+      {/* 4 MODULE SELECTION GRID */}
       <section className="info-section" style={{ marginBottom: "20px" }}>
         <div className="section-title-row" style={{ marginBottom: "12px" }}>
           <div>
@@ -76,14 +76,6 @@ export default function ClinicalTools() {
             style={{ justifyContent: "center", padding: "12px 14px" }}
           >
             <ShieldCheck size={16} /> Prescription Safety Engine
-          </button>
-
-          <button
-            className={`dashboard-button ${activeModule === "tab-audit" ? "primary" : "secondary"}`}
-            onClick={() => switchModule("tab-audit")}
-            style={{ justifyContent: "center", padding: "12px 14px" }}
-          >
-            <Activity size={16} /> Audit Trail & Alert Fatigue
           </button>
 
           <button

@@ -1,4 +1,4 @@
-import { BookOpenCheck, ShieldCheck, Search, Activity, FileText, ArrowRight } from "lucide-react";
+import { BookOpenCheck, ShieldCheck, Search, FileText, ArrowRight } from "lucide-react";
 import { Link } from "wouter";
 import ClinicalToolsLayout from "@/components/ClinicalToolsLayout";
 import "@/styles/patient-dashboard.css";
@@ -28,14 +28,6 @@ export default function ClinicalToolsLanding() {
       icon: ShieldCheck,
       color: "#a65e38",
       description: "Execute the 24 deterministic clinical safety rules for allergy cross-reactivity, renal/hepatic dosing, DDIs, and stewardship.",
-    },
-    {
-      id: "audit",
-      title: "Audit Trail & Alert Fatigue",
-      path: "/clinical-tools/audit",
-      icon: Activity,
-      color: "#2d7064",
-      description: "Verify SHA-256 hash-chained audit logs, cryptographic integrity checks, clinician overrides, and alert fatigue recalibration metrics.",
     },
     {
       id: "reference",

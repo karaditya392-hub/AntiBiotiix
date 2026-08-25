@@ -18,7 +18,6 @@ import ClinicalToolsLanding from "@/pages/ClinicalToolsLanding";
 import GuidelinesPage from "@/pages/GuidelinesPage";
 import EvidencePage from "@/pages/EvidencePage";
 import SafetyEnginePage from "@/pages/SafetyEnginePage";
-import AuditPage from "@/pages/AuditPage";
 import ReferencePage from "@/pages/ReferencePage";
 import Console from "@/pages/Console";
 
@@ -67,7 +66,6 @@ function Shell() {
           <Route path="/clinical-tools/guidelines" component={GuidelinesPage} />
           <Route path="/clinical-tools/evidence" component={EvidencePage} />
           <Route path="/clinical-tools/safety" component={SafetyEnginePage} />
-          <Route path="/clinical-tools/audit" component={AuditPage} />
           <Route path="/clinical-tools/reference" component={ReferencePage} />
           <Route path="/patients/returning" component={SelectReturningPatient} />
           <Route path="/patients/new" component={RegisterNewPatient} />
