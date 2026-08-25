@@ -9,11 +9,9 @@ export default function SafetyEnginePage() {
   const [selectedPatientId, setSelectedPatientId] = useState("");
   const [selectedPatient, setSelectedPatient] = useState<any>(null);
 
-  const [diagnosis, setDiagnosis] = useState("Community-acquired pneumonia");
-  const [rawText, setRawText] = useState("Amoxicillin 500mg PO TID for 7 days");
-  const [items, setItems] = useState<any[]>([
-    { medication_name: "Amoxicillin", dose: 500, unit: "mg", route: "PO", frequency: "TID", duration_days: 7 },
-  ]);
+  const [diagnosis, setDiagnosis] = useState("");
+  const [rawText, setRawText] = useState("");
+  const [items, setItems] = useState<any[]>([]);
 
   const [medName, setMedName] = useState("");
   const [medDose, setMedDose] = useState("");
@@ -24,6 +22,7 @@ export default function SafetyEnginePage() {
 
   const [analysis, setAnalysis] = useState<any>(null);
   const [analyzing, setAnalyzing] = useState(false);
+  const [extracting, setExtracting] = useState(false);
   const [error, setError] = useState("");
 
   // Override Modal state
@@ -33,20 +32,68 @@ export default function SafetyEnginePage() {
   const [overrideSubmitting, setOverrideSubmitting] = useState(false);
   const [overriddenMap, setOverriddenMap] = useState<Record<string, string>>({});
 
+  async function extractItemsForText(text: string) {
+    if (!text || !text.trim()) {
+      setItems([]);
+      return;
+    }
+    setExtracting(true);
+    try {
+      const res = await fetch("/api/prescriptions/extract", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ raw_text: text.trim() }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.items && data.items.length > 0) {
+          setItems(data.items);
+        } else {
+          setItems([]);
+        }
+      } else {
+        setItems([]);
+      }
+    } catch {
+      setItems([]);
+    } finally {
+      setExtracting(false);
+    }
+  }
+
   async function loadInitialData() {
     try {
       const [pRes, patRes] = await Promise.all([
         fetch("/api/scenario-presets"),
         fetch("/api/patients"),
       ]);
-      if (pRes.ok) setPresets(await pRes.json());
+      let loadedPresets: any[] = [];
+      let loadedPatients: any[] = [];
+
+      if (pRes.ok) {
+        loadedPresets = await pRes.json();
+        setPresets(loadedPresets);
+      }
       if (patRes.ok) {
-        const patList = await patRes.json();
-        setPatients(patList);
-        if (patList.length > 0) {
-          setSelectedPatientId(patList[0].patient_id);
-          setSelectedPatient(patList[0]);
-        }
+        loadedPatients = await patRes.json();
+        setPatients(loadedPatients);
+      }
+
+      if (loadedPresets.length > 0) {
+        const firstPreset = loadedPresets[0];
+        setSelectedPatientId(firstPreset.patient_id);
+        const p = loadedPatients.find((pat) => pat.patient_id === firstPreset.patient_id);
+        setSelectedPatient(p || null);
+        setDiagnosis(firstPreset.diagnosis || "");
+        setRawText(firstPreset.text || "");
+        await extractItemsForText(firstPreset.text || "");
+      } else if (loadedPatients.length > 0) {
+        const firstPat = loadedPatients[0];
+        setSelectedPatientId(firstPat.patient_id);
+        setSelectedPatient(firstPat);
+        setDiagnosis("Clinical Safety Review");
+        setRawText("");
+        setItems([]);
       }
     } catch {
       // Keep silent
@@ -57,39 +104,71 @@ export default function SafetyEnginePage() {
     void loadInitialData();
   }, []);
 
-  function handleSelectPatient(pid: string) {
+  async function handleSelectPatient(pid: string) {
     setSelectedPatientId(pid);
     const p = patients.find((pat) => pat.patient_id === pid);
     setSelectedPatient(p || null);
+    setAnalysis(null);
+    setError("");
+
+    // Look for a matching scenario preset for this patient
+    const preset = presets.find((pr) => pr.patient_id === pid);
+    if (preset) {
+      setDiagnosis(preset.diagnosis || "");
+      setRawText(preset.text || "");
+      await extractItemsForText(preset.text || "");
+    } else {
+      setDiagnosis("Clinical Safety Review");
+      setRawText("");
+      setItems([]);
+    }
   }
 
-  function handleSelectPreset(preset: any) {
+  async function handleSelectPreset(preset: any) {
     setSelectedPatientId(preset.patient_id);
     const p = patients.find((pat) => pat.patient_id === preset.patient_id);
     setSelectedPatient(p || null);
     setDiagnosis(preset.diagnosis || "");
     setRawText(preset.text || "");
+    setAnalysis(null);
+    setError("");
+    await extractItemsForText(preset.text || "");
   }
 
   function addMedication() {
     if (!medName.trim()) return;
-    setItems([
-      ...items,
-      {
-        medication_name: medName.trim(),
-        dose: medDose ? Number(medDose) : undefined,
-        unit: medUnit,
-        route: medRoute,
-        frequency: medFreq,
-        duration_days: medDur ? Number(medDur) : undefined,
-      },
-    ]);
+    const newItem = {
+      medication_name: medName.trim(),
+      dose: medDose ? Number(medDose) : undefined,
+      unit: medUnit,
+      route: medRoute,
+      frequency: medFreq,
+      duration_days: medDur ? Number(medDur) : undefined,
+    };
+    const updated = [...items, newItem];
+    setItems(updated);
+
+    // Format description and synchronize rawText
+    const dosePart = newItem.dose ? `${newItem.dose}${newItem.unit || 'mg'}` : '';
+    const durPart = newItem.duration_days ? `for ${newItem.duration_days} days` : '';
+    const itemSummary = [newItem.medication_name, dosePart, newItem.route, newItem.frequency, durPart]
+      .filter(Boolean)
+      .join(" ");
+
+    if (rawText.trim()) {
+      setRawText(`${rawText.trim()}; ${itemSummary}`);
+    } else {
+      setRawText(itemSummary);
+    }
+
     setMedName("");
     setMedDose("");
+    setAnalysis(null);
   }
 
   function removeItem(index: number) {
     setItems(items.filter((_, i) => i !== index));
+    setAnalysis(null);
   }
 
   async function runSafetyAnalysis() {
@@ -250,11 +329,23 @@ export default function SafetyEnginePage() {
           </div>
 
           <div>
-            <label className="field-label">Free-Text Order Note</label>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <label className="field-label">Free-Text Order Note</label>
+              {rawText && (
+                <button
+                  type="button"
+                  style={{ fontSize: "0.75rem", background: "transparent", border: "none", color: "#0f7774", cursor: "pointer", fontWeight: 600 }}
+                  onClick={() => extractItemsForText(rawText)}
+                >
+                  {extracting ? "Extracting..." : "⚡ Parse & Extract Order Items"}
+                </button>
+              )}
+            </div>
             <input
               type="text"
               value={rawText}
               onChange={(e) => setRawText(e.target.value)}
+              onBlur={() => extractItemsForText(rawText)}
               className="dashboard-select"
             />
           </div>
