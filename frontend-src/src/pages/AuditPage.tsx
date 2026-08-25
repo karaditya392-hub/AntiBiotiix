@@ -177,7 +177,18 @@ export default function AuditPage() {
                     {logs.map((log: any, idx: number) => (
                       <tr key={idx}>
                         <td style={{ fontSize: "0.78rem" }}>
-                          {log.timestamp ? new Date(log.timestamp).toLocaleString() : "N/A"}
+                          {log.timestamp
+                            ? `${new Date(log.timestamp).toLocaleString("en-IN", {
+                                timeZone: "Asia/Kolkata",
+                                year: "numeric",
+                                month: "short",
+                                day: "numeric",
+                                hour: "numeric",
+                                minute: "2-digit",
+                                second: "2-digit",
+                                hour12: true,
+                              })} IST`
+                            : "N/A"}
                         </td>
                         <td>
                           <span className="preset-chip-id">{log.event_type}</span>

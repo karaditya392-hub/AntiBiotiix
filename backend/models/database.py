@@ -5,8 +5,13 @@ import os
 import json
 import hashlib
 from pathlib import Path
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from typing import Optional, List, Dict, Any
+
+IST = timezone(timedelta(hours=5, minutes=30), name="IST")
+
+def now_ist() -> datetime:
+    return datetime.now(IST)
 
 from sqlalchemy import (
     create_engine, Column, Integer, String, Float, Boolean, 
@@ -74,8 +79,8 @@ class PatientDB(Base):
     lactation_status = Column(String(32), default="UNKNOWN")
     active_medications_json = Column(Text, default="[]")  # JSON list
     clinical_notes = Column(Text, nullable=True)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
-    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=now_ist)
+    updated_at = Column(DateTime, default=now_ist, onupdate=now_ist)
 
     prescriptions = relationship("PrescriptionDB", back_populates="patient")
     visits = relationship("VisitDB", back_populates="patient", cascade="all, delete-orphan")
@@ -88,7 +93,7 @@ class DoctorDB(Base):
     doctor_id = Column(String(64), unique=True, index=True, nullable=False)
     display_name = Column(String(128), nullable=False)
     role = Column(String(64), default="ATTENDING_PHYSICIAN")
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=now_ist)
 
 
 class VisitDB(Base):
@@ -98,12 +103,12 @@ class VisitDB(Base):
     visit_id = Column(String(64), unique=True, index=True, nullable=False)
     patient_id = Column(String(64), ForeignKey("patients.patient_id"), nullable=False)
     doctor_id = Column(String(64), default="DOC-DEFAULT")
-    visit_date = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    visit_date = Column(DateTime, default=now_ist)
     diagnosis = Column(String(256), nullable=True)
     clinical_notes = Column(Text, nullable=True)
     prescription_id = Column(String(64), nullable=True)
     status = Column(String(32), default="COMPLETED")
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=now_ist)
 
     patient = relationship("PatientDB", back_populates="visits")
     symptoms = relationship("SymptomDB", back_populates="visit", cascade="all, delete-orphan")
@@ -121,7 +126,7 @@ class SymptomDB(Base):
     duration = Column(String(64), nullable=True)
     onset = Column(String(64), nullable=True)
     notes = Column(Text, nullable=True)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=now_ist)
 
     visit = relationship("VisitDB", back_populates="symptoms")
 
@@ -135,7 +140,7 @@ class DiagnosisDB(Base):
     diagnosis_name = Column(String(256), nullable=False)
     icd_code = Column(String(32), nullable=True)
     notes = Column(Text, nullable=True)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=now_ist)
 
     visit = relationship("VisitDB", back_populates="diagnoses")
 
@@ -151,7 +156,7 @@ class PatientRAGDocumentDB(Base):
     record_type = Column(String(32), default="visit")
     content = Column(Text, nullable=False)
     embedding_json = Column(Text, nullable=True)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=now_ist)
 
 
 class PrescriptionDB(Base):
@@ -166,7 +171,7 @@ class PrescriptionDB(Base):
     clinician_id = Column(String(64), default="DOC-DEFAULT")
     clinician_role = Column(String(64), default="ATTENDING_PHYSICIAN")
     status = Column(String(32), default="ANALYZED")
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=now_ist)
 
     patient = relationship("PatientDB", back_populates="prescriptions")
     items = relationship("PrescriptionItemDB", back_populates="prescription", cascade="all, delete-orphan")
@@ -226,7 +231,7 @@ class RuleAuthorshipLogDB(Base):
     author_role = Column(String(64), nullable=False)
     approved_by = Column(String(64), nullable=True)
     change_summary = Column(Text, nullable=False)
-    timestamp = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    timestamp = Column(DateTime, default=now_ist)
 
 
 class AppointmentDB(Base):
@@ -243,7 +248,7 @@ class AppointmentDB(Base):
     patient_email = Column(String(128), nullable=True)
     notification_sent = Column(Boolean, default=False)
     status = Column(String(32), default="SCHEDULED")
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=now_ist)
 
 
 class GuidelineDocumentDB(Base):
@@ -297,7 +302,7 @@ class SafetyWarningDB(Base):
     rule_approval_status = Column(String(128), default="PENDING_CLINICAL_REVIEW")
     rule_effective_date = Column(String(32), nullable=True)
     status = Column(String(32), default="ACTIVE")  # ACTIVE, OVERRIDDEN, REVIEWED
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=now_ist)
 
     prescription = relationship("PrescriptionDB", back_populates="warnings")
     override = relationship("ClinicianOverrideDB", back_populates="warning", uselist=False)
@@ -313,7 +318,7 @@ class ClinicianOverrideDB(Base):
     clinician_id = Column(String(64), nullable=False)
     clinician_role = Column(String(64), nullable=False)
     override_reason = Column(Text, nullable=False)
-    timestamp = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    timestamp = Column(DateTime, default=now_ist)
 
     warning = relationship("SafetyWarningDB", back_populates="override")
 
@@ -323,7 +328,7 @@ class AuditLogDB(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     log_id = Column(String(64), unique=True, index=True, nullable=False)
-    timestamp = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    timestamp = Column(DateTime, default=now_ist)
     event_type = Column(String(64), nullable=False)
     prescription_id = Column(String(64), nullable=False)
     patient_id = Column(String(64), nullable=False)

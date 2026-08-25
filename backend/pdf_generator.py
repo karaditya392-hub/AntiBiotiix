@@ -111,9 +111,9 @@ def generate_prescription_pdf(
     # Metadata Grid (Clinician, Date, Patient)
     v_date = visit.get("visit_date")
     if isinstance(v_date, datetime):
-        v_date_str = v_date.strftime("%d %B %Y %H:%M UTC")
+        v_date_str = v_date.strftime("%d %B %Y %H:%M IST")
     else:
-        v_date_str = str(v_date or datetime.now(timezone.utc).strftime("%d %B %Y"))
+        v_date_str = str(v_date or datetime.now(timezone(timedelta(hours=5, minutes=30), name="IST")).strftime("%d %B %Y %H:%M IST"))
 
     meta_data = [
         [

@@ -22,7 +22,7 @@ from backend.config import (
 )
 from backend.models import allergies as allergy_store
 from backend.models.database import (
-    get_db, init_db, SessionLocal, PatientDB, PrescriptionDB, PrescriptionItemDB,
+    get_db, init_db, SessionLocal, IST, now_ist, PatientDB, PrescriptionDB, PrescriptionItemDB,
     SafetyWarningDB, ClinicianOverrideDB, ClinicalRuleDB, RuleAuthorshipLogDB,
     GuidelineDocumentDB, AMRSurveillanceDB, AlertMetricsDB, AuditLogDB,
     DoctorDB, VisitDB, SymptomDB, DiagnosisDB, PatientRAGDocumentDB, AppointmentDB
@@ -129,7 +129,7 @@ def get_system_health():
         "version": SYSTEM_VERSION,
         "clinical_role": "CLINICAL_DECISION_SUPPORT_ONLY",
         "guideline_editions_held": _ingested_editions(),
-        "timestamp": datetime.now(timezone.utc).isoformat()
+        "timestamp": now_ist().isoformat()
     }
 
 
@@ -592,7 +592,7 @@ def create_patient_visit(
         db.commit()
 
     # 2. Create Visit Record
-    v_date = datetime.now(timezone.utc)
+    v_date = now_ist()
     if payload.visit_date:
         try:
             v_date = datetime.fromisoformat(payload.visit_date.replace("Z", "+00:00"))
@@ -860,7 +860,7 @@ def schedule_appointment(
     try:
         app_dt = datetime.fromisoformat(payload.appointment_date)
     except Exception:
-        app_dt = datetime.now(timezone.utc)
+        app_dt = now_ist()
 
     appt_id = f"APT-{uuid.uuid4().hex[:6].upper()}"
     appt = AppointmentDB(

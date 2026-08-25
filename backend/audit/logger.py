@@ -6,11 +6,11 @@ import uuid
 import json
 import hashlib
 import threading
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from typing import Dict, Any, List, Optional
 from sqlalchemy.orm import Session
 
-from backend.models.database import AuditLogDB, AlertMetricsDB, ClinicianOverrideDB, SafetyWarningDB
+from backend.models.database import AuditLogDB, AlertMetricsDB, ClinicianOverrideDB, SafetyWarningDB, IST, now_ist
 from backend.config import (
     SYSTEM_VERSION, PROMPT_TEMPLATE_ID,
     ALERT_FATIGUE_OVERRIDE_RATE_THRESHOLD, ALERT_FATIGUE_MIN_TRIGGERS
@@ -43,7 +43,7 @@ class ClinicalAuditLogger:
             except Exception:
                 pass
             log_id = f"LOG-{uuid.uuid4().hex[:12].upper()}"
-            timestamp = datetime.now(timezone.utc)
+            timestamp = now_ist()
             ts_str = timestamp.strftime("%Y-%m-%dT%H:%M:%S.%f")
             payload_str = json.dumps(payload, sort_keys=True, default=str)
             
@@ -93,7 +93,7 @@ class ClinicalAuditLogger:
                 total_triggered=1,
                 total_overridden=0,
                 total_accepted=0,
-                last_triggered_at=datetime.now(timezone.utc)
+                last_triggered_at=now_ist()
             )
             db.add(metric)
         else:
@@ -114,7 +114,7 @@ class ClinicalAuditLogger:
         Record a clinician override in database, update warning status, and increment alert metrics.
         """
         override_id = f"OVR-{uuid.uuid4().hex[:8].upper()}"
-        timestamp = datetime.now(timezone.utc)
+        timestamp = now_ist()
 
         # 1. Update warning status
         warning = db.query(SafetyWarningDB).filter(SafetyWarningDB.warning_id == warning_id).first()
