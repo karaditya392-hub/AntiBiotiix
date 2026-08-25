@@ -22,7 +22,7 @@ from backend.config import (
 )
 from backend.models import allergies as allergy_store
 from backend.models.database import (
-    get_db, init_db, PatientDB, PrescriptionDB, PrescriptionItemDB,
+    get_db, init_db, SessionLocal, PatientDB, PrescriptionDB, PrescriptionItemDB,
     SafetyWarningDB, ClinicianOverrideDB, ClinicalRuleDB, RuleAuthorshipLogDB,
     GuidelineDocumentDB, AMRSurveillanceDB, AlertMetricsDB, AuditLogDB,
     DoctorDB, VisitDB, SymptomDB, DiagnosisDB, PatientRAGDocumentDB, AppointmentDB
