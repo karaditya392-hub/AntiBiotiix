@@ -148,7 +148,18 @@ export default function VisitSummary() {
           </div>
           <div>
             <span>Visit Date</span>
-            <strong>{new Date(visit?.visit_date || Date.now()).toLocaleString()}</strong>
+            <strong>
+              {visit?.formatted_date ||
+                new Date(visit?.visit_date || Date.now()).toLocaleString("en-US", {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                  hour: "numeric",
+                  minute: "2-digit",
+                  hour12: true,
+                })}
+            </strong>
           </div>
           <div>
             <span>Diagnosis</span>

@@ -117,7 +117,20 @@ export default function NewVisitEntry() {
       {/* PREVIOUS VISIT SUMMARY (ONLY FOR RETURNING PATIENTS) */}
       {previousVisit ? (
         <section className="previous-visit-panel" style={{ maxWidth: "900px", margin: "0 auto 20px" }}>
-          <h4>PREVIOUS VISIT SUMMARY (Last visit: {new Date(previousVisit.visit_date).toLocaleDateString()})</h4>
+          <h4>
+            PREVIOUS VISIT SUMMARY (Last visit:{" "}
+            {previousVisit.formatted_date ||
+              new Date(previousVisit.visit_date).toLocaleString("en-US", {
+                weekday: "long",
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+                hour: "numeric",
+                minute: "2-digit",
+                hour12: true,
+              })}
+            )
+          </h4>
           <p style={{ margin: "4px 0", fontSize: "0.85rem" }}>
             <b>Previous Diagnosis:</b> {previousVisit.diagnosis || "Not recorded"}
           </p>

@@ -109,7 +109,17 @@ function display(value: unknown): string {
 function formatDate(value?: string): string {
   if (!value) return "Not recorded";
   try {
-    return new Date(value).toLocaleString();
+    const d = new Date(value);
+    if (isNaN(d.getTime())) return String(value);
+    return d.toLocaleString("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
   } catch {
     return String(value);
   }

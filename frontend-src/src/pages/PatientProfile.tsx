@@ -40,6 +40,26 @@ type HistoryData = {
   visits: Visit[];
 };
 
+function formatVisitDate(v: any): string {
+  if (v?.formatted_date) return v.formatted_date;
+  if (!v?.visit_date) return "Not recorded";
+  try {
+    const d = new Date(v.visit_date);
+    if (isNaN(d.getTime())) return String(v.visit_date);
+    return d.toLocaleString("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+  } catch {
+    return String(v.visit_date);
+  }
+}
+
 export default function PatientProfile() {
   const { patient_id } = useParams<{ patient_id: string }>();
   const [, setLocation] = useLocation();
@@ -179,7 +199,7 @@ export default function PatientProfile() {
               <article className="timeline-item" key={v.visit_id}>
                 <span className="timeline-dot" />
                 <div>
-                  <time>{new Date(v.visit_date).toLocaleString()} · <strong>Visit {v.visit_id}</strong></time>
+                  <time>{formatVisitDate(v)} · <strong>Visit {v.visit_id}</strong></time>
                   <h3>{v.diagnosis || "No diagnosis recorded"}</h3>
 
                   {v.symptoms && v.symptoms.length > 0 && (

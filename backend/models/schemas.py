@@ -189,6 +189,7 @@ class SymptomItem(BaseModel):
 class VisitCreate(BaseModel):
     patient_id: str
     doctor_id: str = Field("DOC-DEMO-01")
+    visit_date: Optional[str] = Field(None, description="Optional ISO visit timestamp or date string")
     diagnosis: Optional[str] = Field(None, description="Current visit diagnosis")
     symptoms: List[SymptomItem] = Field(default_factory=list)
     symptoms_text: Optional[str] = Field(None, description="Free-text symptoms summary")

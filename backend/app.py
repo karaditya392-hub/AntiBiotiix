@@ -321,10 +321,20 @@ def get_patient_history(patient_id: str, db: Session = Depends(get_db)):
             "notes": s.notes
         } for s in v.symptoms]
 
+        v_dt = v.visit_date if isinstance(v.visit_date, datetime) else None
+        day_of_week = v_dt.strftime("%A") if v_dt else ""
+        time_str = v_dt.strftime("%I:%M %p") if v_dt else ""
+        date_str = v_dt.strftime("%d %B %Y") if v_dt else ""
+        fmt_date = f"{day_of_week}, {date_str} at {time_str}" if v_dt else str(v.visit_date)
+
         visits.append({
             "visit_id": v.visit_id,
             "prescription_id": v.prescription_id or (p_rec.prescription_id if p_rec else None),
-            "visit_date": v.visit_date,
+            "visit_date": v.visit_date.isoformat() if isinstance(v.visit_date, datetime) else str(v.visit_date),
+            "day_of_week": day_of_week,
+            "time": time_str,
+            "date": date_str,
+            "formatted_date": fmt_date,
             "diagnosis": v.diagnosis,
             "clinical_notes": v.clinical_notes,
             "clinician_id": v.doctor_id or "DOC-DEFAULT",
@@ -374,10 +384,20 @@ def get_patient_history(patient_id: str, db: Session = Depends(get_db)):
                         "clinician_role": override.clinician_role,
                         "timestamp": override.timestamp,
                     })
+            v_dt = prescription.created_at if isinstance(prescription.created_at, datetime) else None
+            day_of_week = v_dt.strftime("%A") if v_dt else ""
+            time_str = v_dt.strftime("%I:%M %p") if v_dt else ""
+            date_str = v_dt.strftime("%d %B %Y") if v_dt else ""
+            fmt_date = f"{day_of_week}, {date_str} at {time_str}" if v_dt else str(prescription.created_at)
+
             visits.append({
                 "visit_id": f"VIS-{prescription.prescription_id[-6:]}",
                 "prescription_id": prescription.prescription_id,
-                "visit_date": prescription.created_at,
+                "visit_date": prescription.created_at.isoformat() if isinstance(prescription.created_at, datetime) else str(prescription.created_at),
+                "day_of_week": day_of_week,
+                "time": time_str,
+                "date": date_str,
+                "formatted_date": fmt_date,
                 "diagnosis": prescription.diagnosis,
                 "clinical_notes": prescription.raw_text,
                 "clinician_id": prescription.clinician_id,
@@ -572,11 +592,18 @@ def create_patient_visit(
         db.commit()
 
     # 2. Create Visit Record
+    v_date = datetime.now(timezone.utc)
+    if payload.visit_date:
+        try:
+            v_date = datetime.fromisoformat(payload.visit_date.replace("Z", "+00:00"))
+        except Exception:
+            pass
+
     visit_obj = VisitDB(
         visit_id=visit_id,
         patient_id=patient_id,
         doctor_id=principal.get("clinician_id", payload.doctor_id),
-        visit_date=datetime.now(timezone.utc),
+        visit_date=v_date,
         diagnosis=payload.diagnosis,
         clinical_notes=payload.clinical_notes or payload.symptoms_text,
         prescription_id=presc_id,
@@ -625,13 +652,22 @@ def create_patient_visit(
         }
     )
 
+    day_of_week = visit_obj.visit_date.strftime("%A") if isinstance(visit_obj.visit_date, datetime) else ""
+    time_str = visit_obj.visit_date.strftime("%I:%M %p") if isinstance(visit_obj.visit_date, datetime) else ""
+    date_str = visit_obj.visit_date.strftime("%d %B %Y") if isinstance(visit_obj.visit_date, datetime) else ""
+    fmt_date = f"{day_of_week}, {date_str} at {time_str}" if day_of_week else str(visit_obj.visit_date)
+
     return {
         "status": "SAVED",
         "message": "Visit saved successfully.",
         "visit_id": visit_id,
         "prescription_id": presc_id,
         "patient_id": patient_id,
-        "visit_date": visit_obj.visit_date.isoformat(),
+        "visit_date": visit_obj.visit_date.isoformat() if isinstance(visit_obj.visit_date, datetime) else str(visit_obj.visit_date),
+        "day_of_week": day_of_week,
+        "time": time_str,
+        "date": date_str,
+        "formatted_date": fmt_date,
         "warnings_count": len(warnings),
         "indexed_in_rag": True
     }
