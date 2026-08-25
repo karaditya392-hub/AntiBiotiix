@@ -49,6 +49,11 @@ from backend.auth.security import (
 )
 from backend.audit.logger import audit_logger
 from backend.seed_data import list_scenario_presets
+from backend.notifications import (
+    scan_and_trigger_same_day_notifications,
+    format_ist_datetime,
+    IN_APP_NOTIFICATIONS_STORE,
+)
 
 
 # Lifespan event handler for clean startup / database initialization
@@ -849,8 +854,8 @@ def schedule_appointment(
     principal: Dict[str, str] = Depends(get_current_principal),
 ):
     """
-    Schedule a follow-up appointment for a patient.
-    Sends notifications (simulated email to doctor & patient 2 days before).
+    Schedule a follow-up check-up appointment for a patient.
+    Captures patient-doctor relationship, emails, phone number, and schedules multi-channel notifications.
     """
     require_clinician(principal)
     p = db.query(PatientDB).filter(PatientDB.patient_id == payload.patient_id).first()
@@ -862,7 +867,12 @@ def schedule_appointment(
     except Exception:
         app_dt = now_ist()
 
+    if app_dt.tzinfo is None:
+        app_dt = app_dt.replace(tzinfo=IST)
+
     appt_id = f"APT-{uuid.uuid4().hex[:6].upper()}"
+    time_info = format_ist_datetime(app_dt)
+
     appt = AppointmentDB(
         appointment_id=appt_id,
         patient_id=payload.patient_id,
@@ -872,12 +882,22 @@ def schedule_appointment(
         reason=payload.reason,
         doctor_email=payload.doctor_email or "doctor@hospital.org",
         patient_email=payload.patient_email or "patient@de-identified.org",
+        patient_phone=payload.patient_phone or "+91-9876543210",
         notification_sent=True,
+        advance_notice_sent=True,
+        same_day_alert_sent=False,
+        delivery_status_json=json.dumps({
+            "advance_email": "SCHEDULED_2_DAYS_PRIOR",
+            "same_day_email": "SCHEDULED_MORNING_IST",
+            "same_day_sms": "SCHEDULED_0800_IST",
+            "same_day_in_app": "SCHEDULED_REALTIME"
+        }),
         status="SCHEDULED"
     )
     db.add(appt)
     db.commit()
 
+    # Log immutable audit event
     audit_logger.log_event(
         db=db,
         event_type="APPOINTMENT_SCHEDULED",
@@ -885,22 +905,107 @@ def schedule_appointment(
         patient_id=payload.patient_id,
         clinician_id=principal.get("clinician_id", "DOC-DEMO-01"),
         clinician_role=principal.get("clinician_role", "ATTENDING_PHYSICIAN"),
-        action_summary=f"Follow-up appointment scheduled for {payload.patient_id} on {app_dt.strftime('%d %b %Y')}.",
+        action_summary=f"Check-up appointment scheduled for {payload.patient_id} on {time_info['formatted']}.",
         payload={
             "appointment_id": appt_id,
-            "appointment_date": app_dt.isoformat(),
+            "appointment_date_ist": time_info["iso"],
+            "formatted_time": time_info["formatted"],
             "reason": payload.reason,
-            "notification_scheduled": "2 days before appointment"
+            "patient_phone": appt.patient_phone,
+            "doctor_email": appt.doctor_email,
+            "patient_email": appt.patient_email
         }
     )
+
+    # If appointment is scheduled for today (IST), trigger immediate notification engine
+    same_day_triggered = False
+    if app_dt.date() == now_ist().date():
+        scan_and_trigger_same_day_notifications(db)
+        same_day_triggered = True
 
     return {
         "status": "SCHEDULED",
         "appointment_id": appt_id,
         "patient_id": payload.patient_id,
         "appointment_date": app_dt.isoformat(),
+        "formatted_date_ist": time_info["formatted"],
+        "day_of_week": time_info["day_of_week"],
+        "time": time_info["time"],
         "reason": payload.reason,
-        "notification": "Follow-up email notifications scheduled for doctor and patient (2 days prior)."
+        "same_day_alert_triggered": same_day_triggered,
+        "notification_channels": ["Email (Doctor & Patient)", "SMS / WhatsApp", "In-App Console Alert"],
+        "notification": "Follow-up notifications and same-day morning alerts (IST) configured."
+    }
+
+
+@app.post("/api/notifications/trigger-same-day")
+def trigger_same_day_notifications_endpoint(
+    db: Session = Depends(get_db),
+    principal: Dict[str, str] = Depends(get_current_principal)
+):
+    """
+    Automated / manual trigger for same-day check-up notification scan.
+    Identifies appointments occurring on current date (IST), dispatches multi-channel alerts,
+    and updates audit log.
+    """
+    require_clinician(principal)
+    report = scan_and_trigger_same_day_notifications(db)
+    return report
+
+
+@app.get("/api/notifications/in-app")
+def get_in_app_notifications(patient_id: Optional[str] = None):
+    """
+    Fetch active in-app notifications for clinician/patient console.
+    """
+    if patient_id:
+        return [n for n in IN_APP_NOTIFICATIONS_STORE if n.get("patient_id") == patient_id]
+    return IN_APP_NOTIFICATIONS_STORE[:20]
+
+
+@app.get("/api/patients/{patient_id}/next-appointment")
+def get_next_patient_appointment(patient_id: str, db: Session = Depends(get_db)):
+    """
+    Retrieve the next scheduled check-up appointment for a specific patient.
+    """
+    p = db.query(PatientDB).filter(PatientDB.patient_id == patient_id).first()
+    if not p:
+        raise HTTPException(status_code=404, detail="Patient not found")
+
+    start_today, _ = format_ist_datetime(now_ist()), now_ist()
+    appt = (
+        db.query(AppointmentDB)
+        .filter(
+            AppointmentDB.patient_id == patient_id,
+            AppointmentDB.status == "SCHEDULED"
+        )
+        .order_by(AppointmentDB.appointment_date.asc())
+        .first()
+    )
+
+    if not appt:
+        return {"has_appointment": False, "message": "No upcoming check-up scheduled."}
+
+    time_info = format_ist_datetime(appt.appointment_date)
+    is_today = appt.appointment_date.date() == now_ist().date()
+
+    return {
+        "has_appointment": True,
+        "appointment_id": appt.appointment_id,
+        "patient_id": appt.patient_id,
+        "visit_id": appt.visit_id,
+        "doctor_id": appt.doctor_id,
+        "appointment_date": appt.appointment_date.isoformat(),
+        "formatted_date_ist": time_info["formatted"],
+        "day_of_week": time_info["day_of_week"],
+        "time": time_info["time"],
+        "date": time_info["date"],
+        "reason": appt.reason,
+        "is_today": is_today,
+        "same_day_alert_sent": appt.same_day_alert_sent,
+        "doctor_email": appt.doctor_email,
+        "patient_email": appt.patient_email,
+        "patient_phone": appt.patient_phone
     }
 
 

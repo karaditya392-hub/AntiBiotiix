@@ -64,15 +64,18 @@ export default function PatientProfile() {
   const { patient_id } = useParams<{ patient_id: string }>();
   const [, setLocation] = useLocation();
   const [data, setData] = useState<HistoryData | null>(null);
+  const [nextAppointment, setNextAppointment] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   async function loadPatientProfile() {
     if (!patient_id) return;
     try {
-      const res = await fetch(`/api/patients/${encodeURIComponent(patient_id)}/history`);
-      if (res.ok) {
-        setData(await res.json());
-      }
+      const [histRes, apptRes] = await Promise.all([
+        fetch(`/api/patients/${encodeURIComponent(patient_id)}/history`),
+        fetch(`/api/patients/${encodeURIComponent(patient_id)}/next-appointment`),
+      ]);
+      if (histRes.ok) setData(await histRes.json());
+      if (apptRes.ok) setNextAppointment(await apptRes.json());
     } catch {
       // Keep state
     } finally {
@@ -143,6 +146,46 @@ export default function PatientProfile() {
           </Link>
         </div>
       </div>
+
+      {/* AUTOMATED CHECK-UP NOTIFICATION BANNER */}
+      {nextAppointment?.has_appointment && (
+        <section
+          className="info-section"
+          style={{
+            marginBottom: "20px",
+            background: nextAppointment.is_today ? "#fbe9e5" : "#eef8f3",
+            borderColor: nextAppointment.is_today ? "#a65e38" : "#2d7064",
+          }}
+        >
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div>
+              <p
+                className="dashboard-kicker"
+                style={{ color: nextAppointment.is_today ? "#a65e38" : "#2d7064" }}
+              >
+                {nextAppointment.is_today
+                  ? "NOTIFICATION ALERT: CHECK-UP SCHEDULED FOR TODAY (IST)"
+                  : "NEXT UPCOMING CHECK-UP (IST)"}
+              </p>
+              <h2 style={{ margin: "2px 0", color: "#173c3d", fontSize: "1.15rem" }}>
+                {nextAppointment.formatted_date_ist}
+              </h2>
+              <p style={{ margin: "4px 0 0", fontSize: "0.84rem", color: "#526968" }}>
+                <b>Reason:</b> {nextAppointment.reason} · <b>Attending Doctor:</b> {nextAppointment.doctor_id} ·{" "}
+                <b>Multi-channel Alerts:</b> Email ({nextAppointment.doctor_email}), SMS ({nextAppointment.patient_phone})
+              </p>
+            </div>
+            {nextAppointment.is_today && (
+              <button
+                className="dashboard-button primary"
+                onClick={() => setLocation(`/patients/${patient.patient_id}/visit/new`)}
+              >
+                Start Check-up Visit
+              </button>
+            )}
+          </div>
+        </section>
+      )}
 
       {/* DEMOGRAPHICS & CLINICAL FACTORS GRID */}
       <section className="info-section" style={{ marginBottom: "20px" }}>

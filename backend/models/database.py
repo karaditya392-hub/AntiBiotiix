@@ -246,7 +246,12 @@ class AppointmentDB(Base):
     reason = Column(Text, nullable=False)
     doctor_email = Column(String(128), nullable=True)
     patient_email = Column(String(128), nullable=True)
+    patient_phone = Column(String(32), nullable=True)
     notification_sent = Column(Boolean, default=False)
+    advance_notice_sent = Column(Boolean, default=False)
+    same_day_alert_sent = Column(Boolean, default=False)
+    same_day_alert_timestamp = Column(DateTime, nullable=True)
+    delivery_status_json = Column(Text, default="{}")
     status = Column(String(32), default="SCHEDULED")
     created_at = Column(DateTime, default=now_ist)
 
@@ -362,7 +367,12 @@ def init_db():
             "ALTER TABLE patients ADD COLUMN display_name VARCHAR(128) DEFAULT 'Synthetic Patient'",
             "ALTER TABLE patients ADD COLUMN medical_history_json TEXT DEFAULT '[]'",
             "ALTER TABLE patients ADD COLUMN updated_at DATETIME",
-            "ALTER TABLE prescriptions ADD COLUMN visit_id VARCHAR(64)"
+            "ALTER TABLE prescriptions ADD COLUMN visit_id VARCHAR(64)",
+            "ALTER TABLE appointments ADD COLUMN patient_phone VARCHAR(32)",
+            "ALTER TABLE appointments ADD COLUMN advance_notice_sent BOOLEAN DEFAULT 0",
+            "ALTER TABLE appointments ADD COLUMN same_day_alert_sent BOOLEAN DEFAULT 0",
+            "ALTER TABLE appointments ADD COLUMN same_day_alert_timestamp DATETIME",
+            "ALTER TABLE appointments ADD COLUMN delivery_status_json TEXT DEFAULT '{}'"
         ]:
             try:
                 conn.execute(text(stmt))

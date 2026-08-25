@@ -209,6 +209,7 @@ class AppointmentCreate(BaseModel):
     reason: str = Field(..., description="Reason for follow-up appointment")
     doctor_email: Optional[str] = Field(None, description="Doctor notification email")
     patient_email: Optional[str] = Field(None, description="Patient notification email")
+    patient_phone: Optional[str] = Field(None, description="Patient notification phone number")
 
 
 class PrescriptionCreate(BaseModel):

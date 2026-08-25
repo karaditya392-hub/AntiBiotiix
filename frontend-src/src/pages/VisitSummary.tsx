@@ -18,6 +18,7 @@ export default function VisitSummary() {
   const [followupReason, setFollowupReason] = useState("Routine post-antimicrobial clinical follow-up");
   const [doctorEmail, setDoctorEmail] = useState("doctor@hospital.org");
   const [patientEmail, setPatientEmail] = useState("patient@de-identified.org");
+  const [patientPhone, setPatientPhone] = useState("+91-9876543210");
   const [followupMsg, setFollowupMsg] = useState("");
   const [followupError, setFollowupError] = useState("");
   const [followupSubmitting, setFollowupSubmitting] = useState(false);
@@ -74,12 +75,17 @@ export default function VisitSummary() {
           reason: followupReason,
           doctor_email: doctorEmail,
           patient_email: patientEmail,
+          patient_phone: patientPhone,
         }),
       });
 
       if (res.ok) {
-        setFollowupMsg("Follow-up appointment scheduled! Notification emails scheduled for 2 days prior.");
-        setTimeout(() => setShowFollowupModal(false), 2000);
+        const appData = await res.json();
+        const msg = appData.same_day_alert_triggered
+          ? "Check-up scheduled for TODAY! Multi-channel alerts (Email, SMS, In-App) triggered immediately in IST."
+          : `Check-up scheduled for ${appData.formatted_date_ist || "selected date"}. Automated IST notifications configured across Email, SMS, and In-App Console.`;
+        setFollowupMsg(msg);
+        setTimeout(() => setShowFollowupModal(false), 2500);
       } else {
         setFollowupError("Failed to schedule appointment.");
       }
@@ -272,11 +278,21 @@ export default function VisitSummary() {
               </div>
 
               <div>
-                <label className="field-label">Patient Email (Notification 2 days before)</label>
+                <label className="field-label">Patient Email (Same-day & advance notification)</label>
                 <input
                   type="email"
                   value={patientEmail}
                   onChange={(e) => setPatientEmail(e.target.value)}
+                  className="dashboard-select"
+                />
+              </div>
+
+              <div>
+                <label className="field-label">Patient Mobile / WhatsApp Number (Same-day SMS alert)</label>
+                <input
+                  type="tel"
+                  value={patientPhone}
+                  onChange={(e) => setPatientPhone(e.target.value)}
                   className="dashboard-select"
                 />
               </div>
