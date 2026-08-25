@@ -59,6 +59,26 @@
   --radius-full: 9999px;
 }
 
+.clinical-report { margin: 1rem 0; border: 1px solid var(--border-color); background: var(--bg-secondary); padding: 1rem; }
+.report-header { display: flex; justify-content: space-between; gap: 1rem; border-bottom: 2px solid var(--accent-primary); padding-bottom: .75rem; }
+.report-label, .report-header h5, .report-header dt, .clinical-report h6 { text-transform: uppercase; letter-spacing: .08em; }
+.report-label { color: var(--accent-primary); font-size: .68rem; font-weight: 700; }
+.report-header h5 { margin: .3rem 0 0; font-size: 1rem; }
+.report-header dl { margin: 0; min-width: 12rem; font-size: .7rem; }
+.report-header dt { color: var(--text-subtle); float: left; clear: left; margin-right: .5rem; }
+.report-header dd { margin: 0 0 .2rem; text-align: right; font-family: var(--font-mono); }
+.report-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin-top: 1rem; }
+.clinical-report section { min-width: 0; }
+.clinical-report h6 { color: var(--accent-primary); margin: 0 0 .45rem; font-size: .7rem; }
+.clinical-report p, .clinical-report li, .clinical-report td, .clinical-report th { font-size: .76rem; line-height: 1.5; }
+.clinical-report p { margin: 0 0 .45rem; }
+.clinical-report ul { margin: 0; padding-left: 1.1rem; }
+.clinical-report li { margin-bottom: .45rem; }
+.clinical-report q { color: var(--text-muted); }
+.report-findings { margin-top: 1rem; border-top: 1px solid var(--border-color); padding-top: 1rem; }
+.report-severity { font-weight: 700; }
+@media (max-width: 700px) { .report-header, .report-grid { display: block; } .report-header dl { margin-top: .75rem; } .clinical-report section { margin-bottom: 1rem; } }
+
 [data-theme="light"] {
   --bg-primary: #f8fafc;
   --bg-secondary: #ffffff;
@@ -426,6 +446,34 @@ h1, h2, h3, h4, h5, h6 {
   cursor: pointer;
 }
 
+.header-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.4rem 0.75rem;
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  transition: all 0.15s ease;
+}
+
+.header-nav-btn:hover {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+  background: rgba(56, 189, 248, 0.08);
+}
+
+.header-nav-exit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
 .btn-chip {
   background: var(--bg-tertiary);
   border: 1px solid var(--border-color);
@@ -435,6 +483,11 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: var(--radius-full);
   cursor: pointer;
   transition: all 0.15s ease;
+}
+
+.btn-chip.registered-chip {
+  border-color: rgba(56, 189, 248, 0.4);
+  color: var(--accent-primary);
 }
 
 .btn-chip:hover {

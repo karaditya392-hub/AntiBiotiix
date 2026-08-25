@@ -16,6 +16,9 @@
     </div>
     
     <div class="header-right">
+      <a href="#/review" class="btn btn-secondary header-nav-btn" title="Return to Patient Dashboard">
+        <span aria-hidden="true">◀</span> Patient Dashboard
+      </a>
       <div class="role-selector-wrapper">
         <label for="clinicianRoleSelect">Clinician Role:</label>
         <select id="clinicianRoleSelect" class="form-select">
@@ -30,6 +33,10 @@
       <button id="themeToggleBtn" class="btn btn-icon" title="Toggle Theme">
         <span id="themeIcon" aria-hidden="true">◐</span>
       </button>
+
+      <a href="#/" class="btn btn-icon header-nav-exit" title="Exit to Home">
+        <span aria-hidden="true">✕</span>
+      </a>
     </div>
   </header>
 
@@ -131,15 +138,28 @@
               <h3><span class="icon" aria-hidden="true">⌁</span> Enter Prescription Order</h3>
             </div>
 
-            <div class="quick-presets">
+            <div class="quick-presets" id="scenarioPresetsContainer">
               <span class="preset-label">Quick Scenario Presets:</span>
-              <button class="btn btn-chip" data-preset="cap-pen-allergy">CAP: Amox in Penicillin Allergy</button>
-              <button class="btn btn-chip" data-preset="uti-ckd">UTI: Nitrofurantoin in CKD-4</button>
-              <button class="btn btn-chip" data-preset="cirrhosis-flagyl">Cirrhosis: Metronidazole Overdose</button>
-              <button class="btn btn-chip" data-preset="pregnancy-quinolone">Pregnancy: Ciprofloxacin</button>
-              <button class="btn btn-chip" data-preset="ddi-qt">DDI: Azithro + Ondansetron (QT)</button>
-              <button class="btn btn-chip" data-preset="dup-anaerobic">Duplication: Pip-Taz + Flagyl</button>
-              <button class="btn btn-chip" data-preset="prompt-injection">Adversarial Prompt Injection</button>
+              <button class="btn btn-chip" data-preset="cap-amox-pen-allergy">CAP: Amox in Penicillin Allergy</button>
+              <button class="btn btn-chip" data-preset="uti-nitro-ckd">UTI: Nitrofurantoin in CKD-4</button>
+              <button class="btn btn-chip" data-preset="cirrhosis-metronidazole">Cirrhosis: Metronidazole Overdose</button>
+              <button class="btn btn-chip" data-preset="pregnancy-ciprofloxacin">Pregnancy: Ciprofloxacin</button>
+              <button class="btn btn-chip" data-preset="ddi-clarithro-warfarin">DDI: Clarithromycin + Warfarin/Statin</button>
+              <button class="btn btn-chip" data-preset="peds-cefaclor-otitis">Peds Otitis: Cefaclor in Cephalosporin Allergy</button>
+              <button class="btn btn-chip" data-preset="ddi-qt-azithro">DDI: Azithro + Ondansetron (QT)</button>
+              <button class="btn btn-chip" data-preset="ddi-linezolid-ssri">DDI: Linezolid + Escitalopram</button>
+              <button class="btn btn-chip" data-preset="sepsis-erythromycin">Sepsis: Erythromycin in Macrolide Allergy</button>
+              <button class="btn btn-chip" data-preset="sinusitis-doxy-pregnancy">Sinusitis: Doxycycline in Unconfirmed Pregnancy</button>
+              <button class="btn btn-chip" data-preset="cellulitis-vancomycin">Cellulitis: Vancomycin in Glycopeptide Allergy</button>
+              <button class="btn btn-chip" data-preset="pyelo-ceftriaxone">Pyelonephritis: Ceftriaxone in Beta-Lactam Allergy</button>
+              <button class="btn btn-chip" data-preset="hap-doxycycline">HAP: Doxycycline in Tetracycline Allergy</button>
+              <button class="btn btn-chip" data-preset="diarrhoea-nitrofurantoin">Enteritis: Nitrofurantoin in Nitro Allergy</button>
+              <button class="btn btn-chip" data-preset="meningitis-azithromycin">Meningitis: Azithromycin in Macrolide Allergy</button>
+              <button class="btn btn-chip" data-preset="endocarditis-gentamicin">Endocarditis: Gentamicin in Aminoglycoside Allergy</button>
+              <button class="btn btn-chip" data-preset="peds-pharyngitis-clinda">Peds Pharyngitis: Clindamycin in Lincosamide Allergy</button>
+              <button class="btn btn-chip" data-preset="dental-colistin">Dental: Colistin in Polymyxin Allergy</button>
+              <button class="btn btn-chip" data-preset="copd-levofloxacin">COPD Exacerbation: Levofloxacin in Quinolone Allergy</button>
+              <button class="btn btn-chip" data-preset="enteric-cefixime">Enteric Fever: Cefixime in Cephalosporin Allergy</button>
             </div>
 
             <div class="form-group">
@@ -225,7 +245,7 @@
             <!-- Sandboxed LLM Explanation Banner -->
             <div id="llmExplanationCard" class="explanation-box hidden">
               <div class="explanation-header">
-                <h4><span class="icon" aria-hidden="true">≡</span> Clinical Decision-Support Summary</h4>
+                <h4><span class="icon" aria-hidden="true">≡</span> Clinical Decision Support Summary Report</h4>
                 <span id="llmModelBadge" class="badge badge-mono">Model: pinned-v1</span>
               </div>
               <div id="injectionBanner" class="recommendation-box hidden"
@@ -238,6 +258,7 @@
                   structured clinical data only.
                 </p>
               </div>
+              <div id="clinicalReport" class="clinical-report"></div>
               <div id="llmExplanationText" class="markdown-rendered"></div>
             </div>
 

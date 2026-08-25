@@ -13,6 +13,7 @@ from backend.models.database import (
     SessionLocal, init_db, PatientDB, PrescriptionDB, PrescriptionItemDB,
     SafetyWarningDB, ClinicianOverrideDB, AuditLogDB, ClinicalRuleDB,
     GuidelineDocumentDB, AMRSurveillanceDB, AlertMetricsDB,
+    VisitDB, SymptomDB, DiagnosisDB, PatientRAGDocumentDB
 )
 from backend.guidelines.knowledge_base import knowledge_base
 
@@ -33,7 +34,7 @@ SEED_ROSTER = [
         "diagnosis": "Community-acquired pneumonia",
         "prescription": ("Azithromycin", 500, "mg", "PO", "QD", 3),
         "scenario": {
-            "key": "cap-pen-allergy",
+            "key": "cap-amox-pen-allergy",
             "label": "CAP: Amox in Penicillin Allergy",
             "diagnosis": "Community-Acquired Pneumonia (CAP)",
             "text": "Amoxicillin 500mg PO TID x 7 days for community acquired pneumonia",
@@ -51,7 +52,7 @@ SEED_ROSTER = [
         "diagnosis": "Acute uncomplicated cystitis",
         "prescription": ("Nitrofurantoin", 100, "mg", "PO", "BID", 5),
         "scenario": {
-            "key": "uti-ckd",
+            "key": "uti-nitro-ckd",
             "label": "UTI: Nitrofurantoin in CKD-4",
             "diagnosis": "Uncomplicated Urinary Tract Infection (Cystitis)",
             "text": "Nitrofurantoin 100mg PO BID x 5 days for acute cystitis",
@@ -69,7 +70,7 @@ SEED_ROSTER = [
         "diagnosis": "Spontaneous bacterial peritonitis",
         "prescription": ("Cefotaxime", 2, "g", "IV", "Q8H", 5),
         "scenario": {
-            "key": "cirrhosis-flagyl",
+            "key": "cirrhosis-metronidazole",
             "label": "Cirrhosis: Metronidazole Overdose",
             "diagnosis": "Intra-abdominal Infection",
             "text": "Metronidazole 500mg IV TID x 10 days",
@@ -87,7 +88,7 @@ SEED_ROSTER = [
         "diagnosis": "Pregnancy-associated urinary tract infection",
         "prescription": ("Cephalexin", 500, "mg", "PO", "QID", 7),
         "scenario": {
-            "key": "pregnancy-quinolone",
+            "key": "pregnancy-ciprofloxacin",
             "label": "Pregnancy: Ciprofloxacin",
             "diagnosis": "Acute Pyelonephritis",
             "text": "Ciprofloxacin 500mg PO BID x 7 days",
@@ -105,7 +106,7 @@ SEED_ROSTER = [
         "diagnosis": "Acute bacterial bronchitis",
         "prescription": ("Doxycycline", 100, "mg", "PO", "BID", 5),
         "scenario": {
-            "key": "ddi-warfarin-macrolide",
+            "key": "ddi-clarithro-warfarin",
             "label": "DDI: Clarithromycin + Warfarin/Statin",
             "diagnosis": "Acute Bacterial Bronchitis",
             "text": "Clarithromycin 500mg PO BID x 7 days",
@@ -123,10 +124,10 @@ SEED_ROSTER = [
         "diagnosis": "Acute otitis media",
         "prescription": ("Amoxicillin", 400, "mg", "PO", "BID", 7),
         "scenario": {
-            "key": "peds-cefaclor-allergy",
-            "label": "Allergy: Cefaclor in Otitis Media",
-            "diagnosis": "Acute Otitis Media",
-            "text": "Cefaclor 250mg PO TID x 7 days",
+            "key": "peds-cefaclor-otitis",
+            "label": "Peds Otitis: Cefaclor in Cephalosporin Allergy",
+            "diagnosis": "Acute Otitis Media (Pediatric)",
+            "text": "Cefaclor 250mg PO TID x 7 days for acute otitis media",
         },
     },
     {
@@ -141,7 +142,7 @@ SEED_ROSTER = [
         "diagnosis": "Febrile neutropenia",
         "prescription": ("Piperacillin-Tazobactam", 4.5, "g", "IV", "Q6H", 7),
         "scenario": {
-            "key": "ddi-qt",
+            "key": "ddi-qt-azithro",
             "label": "DDI: Azithro + Ondansetron (QT)",
             "diagnosis": "Atypical Pneumonia",
             "text": "Azithromycin 500mg PO QD x 5 days",
@@ -177,8 +178,8 @@ SEED_ROSTER = [
         "diagnosis": "Suspected sepsis",
         "prescription": ("Meropenem", 1, "g", "IV", "Q8H", 7),
         "scenario": {
-            "key": "allergy-erythromycin-sepsis",
-            "label": "Allergy: Erythromycin in Sepsis",
+            "key": "sepsis-erythromycin",
+            "label": "Sepsis: Erythromycin in Macrolide Allergy",
             "diagnosis": "Suspected Sepsis",
             "text": "Erythromycin 500mg IV Q6H x 7 days",
         },
@@ -195,8 +196,8 @@ SEED_ROSTER = [
         "diagnosis": "Acute bacterial sinusitis",
         "prescription": ("Amoxicillin-clavulanate", 875, "mg", "PO", "BID", 5),
         "scenario": {
-            "key": "unknown-pregnancy-doxy",
-            "label": "Unknown Pregnancy: Doxycycline",
+            "key": "sinusitis-doxy-pregnancy",
+            "label": "Sinusitis: Doxycycline in Unconfirmed Pregnancy",
             "diagnosis": "Acute Bacterial Sinusitis",
             "text": "Doxycycline 100mg PO BID x 7 days",
         },
@@ -213,8 +214,8 @@ SEED_ROSTER = [
         "diagnosis": "Non-purulent cellulitis",
         "prescription": ("Clindamycin", 300, "mg", "PO", "QID", 5),
         "scenario": {
-            "key": "allergy-vanc-cellulitis",
-            "label": "Allergy: Vancomycin in Cellulitis",
+            "key": "cellulitis-vancomycin",
+            "label": "Cellulitis: Vancomycin in Glycopeptide Allergy",
             "diagnosis": "Non-purulent Cellulitis",
             "text": "Vancomycin 1g IV Q12H x 7 days",
         },
@@ -231,8 +232,8 @@ SEED_ROSTER = [
         "diagnosis": "Acute pyelonephritis",
         "prescription": ("Ciprofloxacin", 500, "mg", "PO", "BID", 7),
         "scenario": {
-            "key": "allergy-ceftriaxone-pyelo",
-            "label": "Allergy: Ceftriaxone in Pyelonephritis",
+            "key": "pyelo-ceftriaxone",
+            "label": "Pyelonephritis: Ceftriaxone in Beta-Lactam Allergy",
             "diagnosis": "Acute Pyelonephritis",
             "text": "Ceftriaxone 2g IV QD x 7 days",
         },
@@ -249,8 +250,8 @@ SEED_ROSTER = [
         "diagnosis": "Hospital-acquired pneumonia",
         "prescription": ("Vancomycin", 1, "g", "IV", "Q12H", 7),
         "scenario": {
-            "key": "allergy-doxy-hap",
-            "label": "Allergy: Doxycycline in HAP",
+            "key": "hap-doxycycline",
+            "label": "HAP: Doxycycline in Tetracycline Allergy",
             "diagnosis": "Hospital-Acquired Pneumonia",
             "text": "Doxycycline 100mg PO BID x 7 days",
         },
@@ -267,8 +268,8 @@ SEED_ROSTER = [
         "diagnosis": "Acute infectious diarrhoea",
         "prescription": ("Metronidazole", 400, "mg", "PO", "TID", 5),
         "scenario": {
-            "key": "allergy-nitro-diarrhoea",
-            "label": "Allergy: Nitrofurantoin",
+            "key": "diarrhoea-nitrofurantoin",
+            "label": "Enteritis: Nitrofurantoin in Nitro Allergy",
             "diagnosis": "Acute Infectious Diarrhoea",
             "text": "Nitrofurantoin 100mg PO BID x 5 days",
         },
@@ -285,8 +286,8 @@ SEED_ROSTER = [
         "diagnosis": "Suspected bacterial meningitis",
         "prescription": ("Ceftriaxone", 2, "g", "IV", "Q12H", 10),
         "scenario": {
-            "key": "allergy-azithro-meningitis",
-            "label": "Allergy: Azithromycin in Meningitis",
+            "key": "meningitis-azithromycin",
+            "label": "Meningitis: Azithromycin in Macrolide Allergy",
             "diagnosis": "Suspected Bacterial Meningitis",
             "text": "Azithromycin 500mg IV QD x 10 days",
         },
@@ -303,8 +304,8 @@ SEED_ROSTER = [
         "diagnosis": "Prosthetic-valve endocarditis",
         "prescription": ("Rifampicin", 600, "mg", "PO", "QD", 14),
         "scenario": {
-            "key": "allergy-gent-endocarditis",
-            "label": "Allergy: Gentamicin in Endocarditis",
+            "key": "endocarditis-gentamicin",
+            "label": "Endocarditis: Gentamicin in Aminoglycoside Allergy",
             "diagnosis": "Prosthetic-Valve Endocarditis",
             "text": "Gentamicin 70mg IV Q8H x 14 days",
         },
@@ -321,8 +322,8 @@ SEED_ROSTER = [
         "diagnosis": "Group-A streptococcal pharyngitis",
         "prescription": ("Penicillin V", 250, "mg", "PO", "BID", 10),
         "scenario": {
-            "key": "allergy-clinda-pharyngitis",
-            "label": "Allergy: Clindamycin in Pharyngitis",
+            "key": "peds-pharyngitis-clinda",
+            "label": "Peds Pharyngitis: Clindamycin in Lincosamide Allergy",
             "diagnosis": "Group-A Streptococcal Pharyngitis",
             "text": "Clindamycin 300mg PO TID x 10 days",
         },
@@ -339,8 +340,8 @@ SEED_ROSTER = [
         "diagnosis": "Acute odontogenic infection",
         "prescription": ("Ampicillin", 500, "mg", "PO", "TID", 5),
         "scenario": {
-            "key": "allergy-colistin-odontogenic",
-            "label": "Allergy: Colistin in Odontogenic Infection",
+            "key": "dental-colistin",
+            "label": "Dental: Colistin in Polymyxin Allergy",
             "diagnosis": "Acute Odontogenic Infection",
             "text": "Colistin 150mg IV BID x 5 days",
         },
@@ -357,8 +358,8 @@ SEED_ROSTER = [
         "diagnosis": "Bacterial COPD exacerbation",
         "prescription": ("Cefuroxime", 500, "mg", "PO", "BID", 5),
         "scenario": {
-            "key": "allergy-levo-copd",
-            "label": "Allergy: Levofloxacin in COPD",
+            "key": "copd-levofloxacin",
+            "label": "COPD Exacerbation: Levofloxacin in Quinolone Allergy",
             "diagnosis": "Bacterial COPD Exacerbation",
             "text": "Levofloxacin 500mg PO QD x 5 days",
         },
@@ -375,8 +376,8 @@ SEED_ROSTER = [
         "diagnosis": "Uncomplicated enteric fever",
         "prescription": ("Aztreonam", 1, "g", "IV", "Q8H", 10),
         "scenario": {
-            "key": "allergy-cefixime-enteric",
-            "label": "Allergy: Cefixime in Enteric Fever",
+            "key": "enteric-cefixime",
+            "label": "Enteric Fever: Cefixime in Cephalosporin Allergy",
             "diagnosis": "Uncomplicated Enteric Fever",
             "text": "Cefixime 200mg PO BID x 10 days",
         },
@@ -514,6 +515,10 @@ def seed_database(reset_patients: bool = False):
         db.query(SafetyWarningDB).delete(synchronize_session=False)
         db.query(PrescriptionItemDB).delete(synchronize_session=False)
         db.query(PrescriptionDB).delete(synchronize_session=False)
+        db.query(SymptomDB).delete(synchronize_session=False)
+        db.query(DiagnosisDB).delete(synchronize_session=False)
+        db.query(VisitDB).delete(synchronize_session=False)
+        db.query(PatientRAGDocumentDB).delete(synchronize_session=False)
         db.query(AuditLogDB).delete(synchronize_session=False)
         db.query(PatientDB).delete(synchronize_session=False)
         db.commit()
@@ -550,23 +555,67 @@ def seed_database(reset_patients: bool = False):
     # Each roster patient has one initial, intentionally distinct clinical
     # scenario. This makes the dashboard timeline useful immediately while
     # keeping the clinician free to add further visits and prescriptions.
+    from datetime import datetime, timezone
+    from backend.rag.patient_rag import index_visit_for_rag
+
     for index, entry in enumerate(SEED_ROSTER, 1):
         prescription_id = f"SEED-RX-{index:03d}"
-        if db.query(PrescriptionDB).filter(PrescriptionDB.prescription_id == prescription_id).first():
-            continue
-        medication, dose, unit, route, frequency, duration = entry["prescription"]
-        diagnosis = entry["diagnosis"]
-        db.add(PrescriptionDB(
-            prescription_id=prescription_id, patient_id=entry["patient_id"], diagnosis=diagnosis,
-            raw_text=f"{medication} {dose}{unit} {route} {frequency} for {duration} days",
-            clinician_id="SYSTEM-SEED", clinician_role="ATTENDING_PHYSICIAN", status="RECORDED",
-        ))
-        db.add(PrescriptionItemDB(
-            prescription_id=prescription_id, medication_name=medication, dose=dose, unit=unit,
-            route=route, frequency=frequency, duration_days=duration, indication=diagnosis,
-            antimicrobial_class="SEED_SCENARIO", aware_category="NOT_APPLICABLE",
-            extraction_confidence_json=json.dumps({"seed": 1.0}),
-        ))
+        visit_id = f"VIS-{index:03d}"
+
+        if not db.query(PrescriptionDB).filter(PrescriptionDB.prescription_id == prescription_id).first():
+            medication, dose, unit, route, frequency, duration = entry["prescription"]
+            diagnosis = entry["diagnosis"]
+            db.add(PrescriptionDB(
+                prescription_id=prescription_id, patient_id=entry["patient_id"], visit_id=visit_id, diagnosis=diagnosis,
+                raw_text=f"{medication} {dose}{unit} {route} {frequency} for {duration} days",
+                clinician_id="SYSTEM-SEED", clinician_role="ATTENDING_PHYSICIAN", status="RECORDED",
+            ))
+            db.add(PrescriptionItemDB(
+                prescription_id=prescription_id, medication_name=medication, dose=dose, unit=unit,
+                route=route, frequency=frequency, duration_days=duration, indication=diagnosis,
+                antimicrobial_class="SEED_SCENARIO", aware_category="NOT_APPLICABLE",
+                extraction_confidence_json=json.dumps({"seed": 1.0}),
+            ))
+
+        if not db.query(VisitDB).filter(VisitDB.visit_id == visit_id).first():
+            v_date = datetime(2026, 8, 10, 10, 0, 0, tzinfo=timezone.utc)
+            if entry["patient_id"] == "PATIENT-001":
+                v_diag = "Upper respiratory infection"
+                v_symptoms = ["Fever", "Cough", "Sore throat"]
+                v_notes = "Patient presented with fever, cough, and sore throat."
+            else:
+                v_diag = entry["diagnosis"]
+                v_symptoms = [entry["diagnosis"]]
+                v_notes = entry["clinical_notes"]
+
+            visit_obj = VisitDB(
+                visit_id=visit_id,
+                patient_id=entry["patient_id"],
+                doctor_id="DOC-DEMO-01",
+                visit_date=v_date,
+                diagnosis=v_diag,
+                clinical_notes=v_notes,
+                prescription_id=prescription_id,
+                status="COMPLETED"
+            )
+            db.add(visit_obj)
+            db.flush()
+
+            for sym in v_symptoms:
+                db.add(SymptomDB(
+                    visit_id=visit_id,
+                    patient_id=entry["patient_id"],
+                    name=sym,
+                    severity="Moderate",
+                    duration="3 days"
+                ))
+            db.add(DiagnosisDB(
+                visit_id=visit_id,
+                patient_id=entry["patient_id"],
+                diagnosis_name=v_diag
+            ))
+            db.commit()
+            index_visit_for_rag(db, visit_id)
 
     # 2. Seed Clinical Rules
     for r in knowledge_base.rules_catalog:

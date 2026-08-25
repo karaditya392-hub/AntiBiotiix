@@ -28,7 +28,7 @@ import "@/styles/reference.css";
  *      since fired by the time React mounts, so it is re-dispatched once the
  *      module is loaded. Dispatching the event is what lets app.js stay unmodified.
  */
-export default function Console() {
+export default function Console({ view = "entry" }: { view?: "entry" | "safety" }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const bootedRef = useRef(false);
 
@@ -38,9 +38,13 @@ export default function Console() {
 
     let cancelled = false;
     // Plain ES5 script, intentionally excluded from the TS project.
-    import("@/legacy/app.js").then(() => {
+    import("@/legacy/app.js").then((mod: any) => {
       if (cancelled) return;
-      document.dispatchEvent(new Event("DOMContentLoaded", { bubbles: false }));
+      if (typeof mod?.bootApp === "function") {
+        mod.bootApp();
+      } else {
+        document.dispatchEvent(new Event("DOMContentLoaded", { bubbles: false }));
+      }
       // Presentational rule layered on top of app.js's own rendering (section 16).
       installPregnancyDisplayRule();
       // Read-only browser over the ingested guideline corpus. Separate from
@@ -58,10 +62,19 @@ export default function Console() {
     };
   }, []);
 
+  useEffect(() => {
+    if (bootedRef.current) {
+      window.dispatchEvent(
+        new CustomEvent("antibiotix:sync-patient", { detail: { view } })
+      );
+    }
+  }, [view]);
+
   return (
     <div
       ref={containerRef}
       data-antibiotix-console=""
+      data-review-intent={view}
       dangerouslySetInnerHTML={{ __html: consoleMarkup }}
     />
   );

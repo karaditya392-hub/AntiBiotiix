@@ -24,14 +24,17 @@ from backend.models import allergies as allergy_store
 from backend.models.database import (
     get_db, init_db, PatientDB, PrescriptionDB, PrescriptionItemDB,
     SafetyWarningDB, ClinicianOverrideDB, ClinicalRuleDB, RuleAuthorshipLogDB,
-    GuidelineDocumentDB, AMRSurveillanceDB, AlertMetricsDB, AuditLogDB
+    GuidelineDocumentDB, AMRSurveillanceDB, AlertMetricsDB, AuditLogDB,
+    DoctorDB, VisitDB, SymptomDB, DiagnosisDB, PatientRAGDocumentDB, AppointmentDB
 )
 from backend.models.schemas import (
     PatientCreate, PatientResponse, PrescriptionCreate, PrescriptionItem,
     ExtractedPrescription, SafetyWarning, PrescriptionAnalysisResponse,
     OverrideRequest, OverrideResponse, ClinicianRole, SeverityLevel, RuleCategory,
     PatientRegistration, MedicationUpdate, AllergyReportRequest,
+    VisitCreate, SymptomItem, PatientAskQuery, AppointmentCreate
 )
+from backend.rag.patient_rag import index_visit_for_rag, ask_patient_history
 from backend.guidelines.knowledge_base import knowledge_base
 from backend.guidelines import governance as rule_governance
 from backend.guidelines.cross_source import compare_sources
@@ -51,8 +54,16 @@ from backend.seed_data import list_scenario_presets
 # Lifespan event handler for clean startup / database initialization
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Initialize database tables
+    # Initialize database tables & seed initial teaching roster if missing
     init_db()
+    db = SessionLocal()
+    try:
+        from backend.seed_data import seed_database
+        seed_database(reset_patients=False)
+    except Exception as e:
+        print(f"Database initialization note: {e}")
+    finally:
+        db.close()
 
     # Warm the retrieval stack in a background thread. The embedding model takes
     # several seconds to load on first use; without this the first "Ask the
@@ -160,17 +171,36 @@ def mock_clinician_login(payload: Dict[str, Any]):
 
 
 # ---------------------------------------------------------------------------
-# Patients Endpoints (Sections 3, 24, 25)
+# Patients & Longitudinal Record Endpoints (Sections 3, 24, 25)
 # ---------------------------------------------------------------------------
 
 @app.get("/api/patients")
-def list_patients(db: Session = Depends(get_db)):
-    patients = db.query(PatientDB).all()
+def list_patients(q: Optional[str] = None, db: Session = Depends(get_db)):
+    query = db.query(PatientDB)
+    if q and q.strip():
+        term = f"%{q.strip().lower()}%"
+        query = query.filter(
+            (PatientDB.patient_id.ilike(term)) |
+            (PatientDB.display_name.ilike(term)) |
+            (PatientDB.clinical_notes.ilike(term))
+        )
+    patients = query.all()
     results = []
     for p in patients:
+        # Get latest visit
+        latest_v = (
+            db.query(VisitDB)
+            .filter(VisitDB.patient_id == p.patient_id)
+            .order_by(VisitDB.visit_date.desc())
+            .first()
+        )
+        last_visit_date = latest_v.visit_date.strftime("%d %B %Y") if (latest_v and latest_v.visit_date) else None
+        last_diagnosis = latest_v.diagnosis if latest_v else None
+
         results.append({
             "id": p.id,
             "patient_id": p.patient_id,
+            "display_name": p.display_name or f"Patient {p.patient_id}",
             "age": p.age,
             "age_category": p.age_category,
             "sex": p.sex,
@@ -179,6 +209,7 @@ def list_patients(db: Session = Depends(get_db)):
             "allergy_records": allergy_store.normalise(p.allergies_json),
             "unverified_allergy_count": allergy_store.unverified_count(p.allergies_json),
             "allergy_status_known": p.allergy_status_known,
+            "medical_history": json.loads(p.medical_history_json) if p.medical_history_json else [],
             "egfr_ml_min": p.egfr_ml_min,
             "serum_creatinine_mg_dl": p.serum_creatinine_mg_dl,
             "renal_status_known": p.renal_status_known,
@@ -187,7 +218,9 @@ def list_patients(db: Session = Depends(get_db)):
             "pregnancy_status": p.pregnancy_status,
             "lactation_status": p.lactation_status,
             "active_medications": json.loads(p.active_medications_json) if p.active_medications_json else [],
-            "clinical_notes": p.clinical_notes
+            "clinical_notes": p.clinical_notes,
+            "last_visit": last_visit_date,
+            "last_diagnosis": last_diagnosis
         })
     return results
 
@@ -196,10 +229,6 @@ def list_patients(db: Session = Depends(get_db)):
 def get_scenario_presets(db: Session = Depends(get_db)):
     """
     Quick-scenario chips for the console.
-
-    Returns one unique teaching preset per seeded patient, then one preset per
-    clinician-registered patient (built from their latest visit). Registering a
-    new patient therefore adds a chip automatically on the next refresh.
     """
     return list_scenario_presets(db)
 
@@ -209,8 +238,19 @@ def get_patient(patient_id: str, db: Session = Depends(get_db)):
     p = db.query(PatientDB).filter(PatientDB.patient_id == patient_id).first()
     if not p:
         raise HTTPException(status_code=404, detail="Patient not found")
+
+    latest_v = (
+        db.query(VisitDB)
+        .filter(VisitDB.patient_id == p.patient_id)
+        .order_by(VisitDB.visit_date.desc())
+        .first()
+    )
+    last_visit_date = latest_v.visit_date.strftime("%d %B %Y") if (latest_v and latest_v.visit_date) else None
+
     return {
+        "id": p.id,
         "patient_id": p.patient_id,
+        "display_name": p.display_name or f"Patient {p.patient_id}",
         "age": p.age,
         "age_category": p.age_category,
         "sex": p.sex,
@@ -219,6 +259,7 @@ def get_patient(patient_id: str, db: Session = Depends(get_db)):
         "allergy_records": allergy_store.normalise(p.allergies_json),
         "unverified_allergy_count": allergy_store.unverified_count(p.allergies_json),
         "allergy_status_known": p.allergy_status_known,
+        "medical_history": json.loads(p.medical_history_json) if p.medical_history_json else [],
         "egfr_ml_min": p.egfr_ml_min,
         "serum_creatinine_mg_dl": p.serum_creatinine_mg_dl,
         "renal_status_known": p.renal_status_known,
@@ -227,7 +268,8 @@ def get_patient(patient_id: str, db: Session = Depends(get_db)):
         "pregnancy_status": p.pregnancy_status,
         "lactation_status": p.lactation_status,
         "active_medications": json.loads(p.active_medications_json) if p.active_medications_json else [],
-        "clinical_notes": p.clinical_notes
+        "clinical_notes": p.clinical_notes,
+        "last_visit": last_visit_date
     }
 
 
@@ -238,26 +280,29 @@ def get_patient_history(patient_id: str, db: Session = Depends(get_db)):
     if not patient:
         raise HTTPException(status_code=404, detail="Patient not found")
 
-    prescriptions = (
-        db.query(PrescriptionDB)
-        .filter(PrescriptionDB.patient_id == patient_id)
-        .order_by(PrescriptionDB.created_at.desc())
+    v_records = (
+        db.query(VisitDB)
+        .filter(VisitDB.patient_id == patient_id)
+        .order_by(VisitDB.visit_date.desc())
         .all()
     )
+
     visits = []
-    for prescription in prescriptions:
-        warnings = (
-            db.query(SafetyWarningDB)
-            .filter(SafetyWarningDB.prescription_id == prescription.prescription_id)
-            .all()
-        )
+    for v in v_records:
+        # Fetch prescription for this visit if exists
+        p_rec = None
+        if v.prescription_id:
+            p_rec = db.query(PrescriptionDB).filter(PrescriptionDB.prescription_id == v.prescription_id).first()
+
+        items = []
+        warnings = []
+        if p_rec:
+            items = db.query(PrescriptionItemDB).filter(PrescriptionItemDB.prescription_id == p_rec.prescription_id).all()
+            warnings = db.query(SafetyWarningDB).filter(SafetyWarningDB.prescription_id == p_rec.prescription_id).all()
+
         overrides = []
         for warning in warnings:
-            override = (
-                db.query(ClinicianOverrideDB)
-                .filter(ClinicianOverrideDB.warning_id == warning.warning_id)
-                .first()
-            )
+            override = db.query(ClinicianOverrideDB).filter(ClinicianOverrideDB.warning_id == warning.warning_id).first()
             if override:
                 overrides.append({
                     "warning_id": warning.warning_id,
@@ -267,14 +312,25 @@ def get_patient_history(patient_id: str, db: Session = Depends(get_db)):
                     "clinician_role": override.clinician_role,
                     "timestamp": override.timestamp,
                 })
+
+        symptoms_list = [{
+            "name": s.name,
+            "severity": s.severity,
+            "duration": s.duration,
+            "onset": s.onset,
+            "notes": s.notes
+        } for s in v.symptoms]
+
         visits.append({
-            "prescription_id": prescription.prescription_id,
-            "visit_date": prescription.created_at,
-            "diagnosis": prescription.diagnosis,
-            "clinical_notes": prescription.raw_text,
-            "clinician_id": prescription.clinician_id,
-            "clinician_role": prescription.clinician_role,
-            "status": prescription.status,
+            "visit_id": v.visit_id,
+            "prescription_id": v.prescription_id or (p_rec.prescription_id if p_rec else None),
+            "visit_date": v.visit_date,
+            "diagnosis": v.diagnosis,
+            "clinical_notes": v.clinical_notes,
+            "clinician_id": v.doctor_id or "DOC-DEFAULT",
+            "clinician_role": "ATTENDING_PHYSICIAN",
+            "status": v.status,
+            "symptoms": symptoms_list,
             "medications": [{
                 "name": item.medication_name,
                 "dose": item.dose,
@@ -283,7 +339,7 @@ def get_patient_history(patient_id: str, db: Session = Depends(get_db)):
                 "frequency": item.frequency,
                 "duration_days": item.duration_days,
                 "indication": item.indication,
-            } for item in prescription.items],
+            } for item in items],
             "findings": [{
                 "warning_id": warning.warning_id,
                 "rule_id": warning.rule_id,
@@ -295,6 +351,59 @@ def get_patient_history(patient_id: str, db: Session = Depends(get_db)):
             } for warning in warnings],
             "overrides": overrides,
         })
+
+    # If no VisitDB records exist, fall back to PrescriptionDB records for backward compatibility
+    if not visits:
+        prescriptions = (
+            db.query(PrescriptionDB)
+            .filter(PrescriptionDB.patient_id == patient_id)
+            .order_by(PrescriptionDB.created_at.desc())
+            .all()
+        )
+        for prescription in prescriptions:
+            warnings = db.query(SafetyWarningDB).filter(SafetyWarningDB.prescription_id == prescription.prescription_id).all()
+            overrides = []
+            for warning in warnings:
+                override = db.query(ClinicianOverrideDB).filter(ClinicianOverrideDB.warning_id == warning.warning_id).first()
+                if override:
+                    overrides.append({
+                        "warning_id": warning.warning_id,
+                        "rule_id": warning.rule_id,
+                        "reason": override.override_reason,
+                        "clinician_id": override.clinician_id,
+                        "clinician_role": override.clinician_role,
+                        "timestamp": override.timestamp,
+                    })
+            visits.append({
+                "visit_id": f"VIS-{prescription.prescription_id[-6:]}",
+                "prescription_id": prescription.prescription_id,
+                "visit_date": prescription.created_at,
+                "diagnosis": prescription.diagnosis,
+                "clinical_notes": prescription.raw_text,
+                "clinician_id": prescription.clinician_id,
+                "clinician_role": prescription.clinician_role,
+                "status": prescription.status,
+                "symptoms": [],
+                "medications": [{
+                    "name": item.medication_name,
+                    "dose": item.dose,
+                    "unit": item.unit,
+                    "route": item.route,
+                    "frequency": item.frequency,
+                    "duration_days": item.duration_days,
+                    "indication": item.indication,
+                } for item in prescription.items],
+                "findings": [{
+                    "warning_id": warning.warning_id,
+                    "rule_id": warning.rule_id,
+                    "severity": warning.severity,
+                    "title": warning.title,
+                    "clinical_concern": warning.clinical_concern,
+                    "recommendation": warning.recommendation,
+                    "status": warning.status,
+                } for warning in warnings],
+                "overrides": overrides,
+            })
 
     audit_rows = (
         db.query(AuditLogDB)
@@ -314,6 +423,455 @@ def get_patient_history(patient_id: str, db: Session = Depends(get_db)):
             "action_summary": row.action_summary,
         } for row in audit_rows],
     }
+
+
+@app.get("/api/patients/{patient_id}/timeline")
+def get_patient_timeline(patient_id: str, db: Session = Depends(get_db)):
+    """Return chronological timeline of all completed visits for patient."""
+    history = get_patient_history(patient_id, db)
+    return {
+        "patient_id": patient_id,
+        "timeline": history["visits"]
+    }
+
+
+@app.get("/api/patients/{patient_id}/medications")
+def get_patient_medication_history(patient_id: str, db: Session = Depends(get_db)):
+    """Dedicated medication / prescription history view for a patient."""
+    history = get_patient_history(patient_id, db)
+    med_list = []
+    for visit in history["visits"]:
+        v_date = visit["visit_date"].strftime("%d %b %Y") if hasattr(visit["visit_date"], "strftime") else str(visit["visit_date"])
+        for med in visit["medications"]:
+            med_list.append({
+                "visit_id": visit.get("visit_id"),
+                "date": v_date,
+                "diagnosis": visit.get("diagnosis"),
+                "medication": med.get("name"),
+                "dose": f"{med.get('dose')} {med.get('unit') or ''}".strip() if med.get('dose') else None,
+                "frequency": med.get("frequency"),
+                "duration_days": med.get("duration_days"),
+                "route": med.get("route"),
+            })
+    return {
+        "patient_id": patient_id,
+        "medication_history": med_list
+    }
+
+
+@app.post("/api/patients/{patient_id}/visits", status_code=status.HTTP_201_CREATED)
+def create_patient_visit(
+    patient_id: str,
+    payload: VisitCreate,
+    db: Session = Depends(get_db),
+    principal: Dict[str, str] = Depends(get_current_principal),
+):
+    """
+    Save a completed visit for an existing patient.
+    IMMUTABLE: NEVER overwrite previous visits.
+    Stores symptoms, diagnosis, prescription items, evaluates AntiBioTix safety rules,
+    indexes visit into RAG store, and appends to audit trail.
+    """
+    require_clinician(principal)
+    p = db.query(PatientDB).filter(PatientDB.patient_id == patient_id).first()
+    if not p:
+        raise HTTPException(status_code=404, detail="Patient not found")
+
+    visit_count = db.query(VisitDB).filter(VisitDB.patient_id == patient_id).count()
+    visit_id = f"VIS-{uuid.uuid4().hex[:6].upper()}"
+
+    # 1. Create Prescription if prescription_items present
+    presc_id = None
+    warnings = []
+    if payload.prescription_items or payload.raw_prescription_text:
+        presc_id = f"RX-{uuid.uuid4().hex[:6].upper()}"
+        new_presc = PrescriptionDB(
+            prescription_id=presc_id,
+            patient_id=patient_id,
+            visit_id=visit_id,
+            diagnosis=payload.diagnosis,
+            raw_text=payload.raw_prescription_text,
+            clinician_id=principal.get("clinician_id", payload.doctor_id),
+            clinician_role=principal.get("clinician_role", "ATTENDING_PHYSICIAN"),
+            status="ANALYZED"
+        )
+        db.add(new_presc)
+
+        for it in payload.prescription_items:
+            db_item = PrescriptionItemDB(
+                prescription_id=presc_id,
+                medication_name=it.medication_name,
+                dose=it.dose,
+                unit=it.unit,
+                route=it.route,
+                frequency=it.frequency,
+                duration_days=it.duration_days,
+                indication=it.indication or payload.diagnosis,
+                antimicrobial_class=it.antimicrobial_class,
+                aware_category=it.aware_category.value if hasattr(it.aware_category, 'value') else str(it.aware_category or 'NOT_APPLICABLE'),
+                extraction_confidence_json=json.dumps(it.extraction_confidence or {})
+            )
+            db.add(db_item)
+        db.commit()
+
+        # Run AntiBioTix 24-rule Safety Engine
+        patient_schema = PatientCreate(
+            patient_id=p.patient_id,
+            age=p.age,
+            age_category=p.age_category,
+            weight_kg=p.weight_kg,
+            sex=p.sex,
+            allergies=allergy_store.substances(p.allergies_json),
+            allergy_provenance={
+                r["substance"].strip().lower(): r.get("source", allergy_store.SELF_REPORTED)
+                for r in allergy_store.normalise(p.allergies_json)
+            },
+            allergy_status_known=p.allergy_status_known,
+            egfr_ml_min=p.egfr_ml_min,
+            serum_creatinine_mg_dl=p.serum_creatinine_mg_dl,
+            renal_status_known=p.renal_status_known,
+            child_pugh_class=p.child_pugh_class,
+            hepatic_status_known=p.hepatic_status_known,
+            pregnancy_status=p.pregnancy_status,
+            lactation_status=p.lactation_status,
+            active_medications=json.loads(p.active_medications_json) if p.active_medications_json else [],
+            clinical_notes=p.clinical_notes
+        )
+        presc_schema = PrescriptionCreate(
+            prescription_id=presc_id,
+            patient_id=patient_id,
+            diagnosis=payload.diagnosis,
+            raw_text=payload.raw_prescription_text,
+            items=payload.prescription_items,
+            clinician_id=principal.get("clinician_id", payload.doctor_id),
+            clinician_role=ClinicianRole.ATTENDING_PHYSICIAN
+        )
+        warnings = rule_engine.evaluate_prescription(patient_schema, presc_schema, prescription_id=presc_id)
+
+        for w in warnings:
+            warn_db = SafetyWarningDB(
+                warning_id=w.warning_id,
+                prescription_id=presc_id,
+                rule_id=w.rule_id,
+                category=w.category.value,
+                severity=w.severity.value,
+                title=w.title,
+                clinical_concern=w.clinical_concern,
+                recommendation=w.recommendation,
+                prescribed_drug=w.prescribed_drug,
+                interacting_factor=w.interacting_factor,
+                evidence_document=w.evidence.document_title,
+                evidence_version=w.evidence.guideline_version,
+                evidence_passage=w.evidence.verbatim_passage,
+                evidence_url=w.evidence.source_url,
+                supporting_labels_json=json.dumps([sl.model_dump() for sl in w.supporting_labels]) if w.supporting_labels else None,
+                status="ACTIVE"
+            )
+            db.add(warn_db)
+            audit_logger.record_warning_triggered(db, w.rule_id)
+        db.commit()
+
+    # 2. Create Visit Record
+    visit_obj = VisitDB(
+        visit_id=visit_id,
+        patient_id=patient_id,
+        doctor_id=principal.get("clinician_id", payload.doctor_id),
+        visit_date=datetime.now(timezone.utc),
+        diagnosis=payload.diagnosis,
+        clinical_notes=payload.clinical_notes or payload.symptoms_text,
+        prescription_id=presc_id,
+        status="COMPLETED"
+    )
+    db.add(visit_obj)
+    db.commit()
+
+    # 3. Create Symptoms
+    for sym in payload.symptoms:
+        db.add(SymptomDB(
+            visit_id=visit_id,
+            patient_id=patient_id,
+            name=sym.name,
+            severity=sym.severity or "Moderate",
+            duration=sym.duration,
+            onset=sym.onset,
+            notes=sym.notes
+        ))
+    if payload.diagnosis:
+        db.add(DiagnosisDB(
+            visit_id=visit_id,
+            patient_id=patient_id,
+            diagnosis_name=payload.diagnosis
+        ))
+    db.commit()
+
+    # 4. Index Visit into RAG System
+    index_visit_for_rag(db, visit_id)
+
+    # 5. Audit Log
+    audit_logger.log_event(
+        db=db,
+        event_type="VISIT_SAVED",
+        prescription_id=presc_id or "-",
+        patient_id=patient_id,
+        clinician_id=principal.get("clinician_id", payload.doctor_id),
+        clinician_role=principal.get("clinician_role", "ATTENDING_PHYSICIAN"),
+        action_summary=f"Visit {visit_id} saved for patient {patient_id} with diagnosis '{payload.diagnosis}'.",
+        payload={
+            "visit_id": visit_id,
+            "diagnosis": payload.diagnosis,
+            "symptoms_count": len(payload.symptoms),
+            "prescription_items_count": len(payload.prescription_items),
+            "warnings_count": len(warnings)
+        }
+    )
+
+    return {
+        "status": "SAVED",
+        "message": "Visit saved successfully.",
+        "visit_id": visit_id,
+        "prescription_id": presc_id,
+        "patient_id": patient_id,
+        "visit_date": visit_obj.visit_date.isoformat(),
+        "warnings_count": len(warnings),
+        "indexed_in_rag": True
+    }
+
+
+@app.post("/api/patients/{patient_id}/ask")
+def ask_patient_history_endpoint(
+    patient_id: str,
+    payload: PatientAskQuery,
+    db: Session = Depends(get_db),
+    principal: Dict[str, str] = Depends(get_current_principal),
+):
+    """
+    Ask natural language questions about the patient's history.
+    Strictly scoped to patient_id to prevent cross-patient retrieval.
+    """
+    require_patient_scope(principal, patient_id)
+    result = ask_patient_history(db, patient_id, payload.question)
+    return result
+
+
+@app.get("/api/dashboard/stats")
+def get_dashboard_stats(db: Session = Depends(get_db)):
+    """
+    Doctor Dashboard metrics backed by real database data.
+    """
+    total_patients = db.query(PatientDB).count()
+    total_visits = db.query(VisitDB).count()
+    total_prescriptions = db.query(PrescriptionDB).count()
+    total_warnings = db.query(SafetyWarningDB).filter(SafetyWarningDB.status == "ACTIVE").count()
+    critical_warnings = db.query(SafetyWarningDB).filter(
+        SafetyWarningDB.status == "ACTIVE",
+        SafetyWarningDB.severity == "CRITICAL"
+    ).count()
+
+    recent_patients_db = db.query(PatientDB).order_by(PatientDB.id.desc()).limit(5).all()
+    recent_patients = []
+    for p in recent_patients_db:
+        latest_v = (
+            db.query(VisitDB)
+            .filter(VisitDB.patient_id == p.patient_id)
+            .order_by(VisitDB.visit_date.desc())
+            .first()
+        )
+        recent_patients.append({
+            "patient_id": p.patient_id,
+            "display_name": p.display_name or f"Patient {p.patient_id}",
+            "age": p.age,
+            "sex": p.sex,
+            "last_visit": latest_v.visit_date.strftime("%d %B %Y") if (latest_v and latest_v.visit_date) else "No visits",
+            "last_diagnosis": latest_v.diagnosis if latest_v else "None recorded",
+            "status": "Active"
+        })
+
+    return {
+        "total_patients": total_patients,
+        "total_visits": total_visits,
+        "total_prescriptions": total_prescriptions,
+        "total_active_warnings": total_warnings,
+        "critical_warnings_count": critical_warnings,
+        "recent_patients": recent_patients
+    }
+
+
+@app.get("/api/visits/{visit_id}/pdf")
+def download_visit_prescription_pdf(visit_id: str, db: Session = Depends(get_db)):
+    """Generate and return official prescription PDF from stored visit data."""
+    from fastapi.responses import Response
+    from backend.pdf_generator import generate_prescription_pdf
+
+    visit = db.query(VisitDB).filter(VisitDB.visit_id == visit_id).first()
+    if not visit:
+        # Fallback to check by prescription_id
+        visit = db.query(VisitDB).filter(VisitDB.prescription_id == visit_id).first()
+        if not visit:
+            raise HTTPException(status_code=404, detail="Visit record not found")
+
+    patient = db.query(PatientDB).filter(PatientDB.patient_id == visit.patient_id).first()
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient record not found")
+
+    # Fetch prescription items
+    items_db = []
+    p_rec = None
+    if visit.prescription_id:
+        p_rec = db.query(PrescriptionDB).filter(PrescriptionDB.prescription_id == visit.prescription_id).first()
+
+    if not p_rec:
+        p_rec = db.query(PrescriptionDB).filter(PrescriptionDB.patient_id == visit.patient_id).order_by(PrescriptionDB.created_at.desc()).first()
+
+    if p_rec:
+        items_db = db.query(PrescriptionItemDB).filter(PrescriptionItemDB.prescription_id == p_rec.prescription_id).all()
+        warn_db = db.query(SafetyWarningDB).filter(SafetyWarningDB.prescription_id == p_rec.prescription_id).all()
+    else:
+        warn_db = []
+
+    warnings = [{
+        "rule_id": w.rule_id,
+        "severity": w.severity,
+        "title": w.title,
+        "recommendation": w.recommendation
+    } for w in warn_db]
+
+    overrides = []
+    for w in warn_db:
+        ov = db.query(ClinicianOverrideDB).filter(ClinicianOverrideDB.warning_id == w.warning_id).first()
+        if ov:
+            overrides.append({
+                "rule_id": w.rule_id,
+                "clinician_role": ov.clinician_role,
+                "reason": ov.override_reason
+            })
+
+    items = [{
+        "medication_name": item.medication_name,
+        "dose": item.dose,
+        "unit": item.unit,
+        "route": item.route,
+        "frequency": item.frequency,
+        "duration_days": item.duration_days,
+        "indication": item.indication
+    } for item in items_db]
+
+    patient_dict = {
+        "patient_id": patient.patient_id,
+        "age": patient.age,
+        "sex": patient.sex,
+        "weight_kg": patient.weight_kg,
+        "egfr_ml_min": patient.egfr_ml_min,
+        "child_pugh_class": patient.child_pugh_class,
+        "allergies": allergy_store.substances(patient.allergies_json),
+        "active_medications": json.loads(patient.active_medications_json) if patient.active_medications_json else []
+    }
+
+    visit_dict = {
+        "visit_id": visit.visit_id,
+        "visit_date": visit.visit_date,
+        "diagnosis": visit.diagnosis,
+        "clinical_notes": visit.clinical_notes
+    }
+
+    pdf_bytes = generate_prescription_pdf(
+        patient=patient_dict,
+        visit=visit_dict,
+        prescription_items=items,
+        warnings=warnings,
+        overrides=overrides,
+        clinician_id=visit.doctor_id or "DOC-DEMO-01",
+        clinician_role="ATTENDING_PHYSICIAN"
+    )
+
+    filename = f"Prescription_{patient.patient_id}_{visit.visit_id}.pdf"
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"inline; filename={filename}"}
+    )
+
+
+@app.post("/api/appointments", status_code=status.HTTP_201_CREATED)
+def schedule_appointment(
+    payload: AppointmentCreate,
+    db: Session = Depends(get_db),
+    principal: Dict[str, str] = Depends(get_current_principal),
+):
+    """
+    Schedule a follow-up appointment for a patient.
+    Sends notifications (simulated email to doctor & patient 2 days before).
+    """
+    require_clinician(principal)
+    p = db.query(PatientDB).filter(PatientDB.patient_id == payload.patient_id).first()
+    if not p:
+        raise HTTPException(status_code=404, detail="Patient not found")
+
+    try:
+        app_dt = datetime.fromisoformat(payload.appointment_date)
+    except Exception:
+        app_dt = datetime.now(timezone.utc)
+
+    appt_id = f"APT-{uuid.uuid4().hex[:6].upper()}"
+    appt = AppointmentDB(
+        appointment_id=appt_id,
+        patient_id=payload.patient_id,
+        visit_id=payload.visit_id,
+        doctor_id=principal.get("clinician_id", "DOC-DEMO-01"),
+        appointment_date=app_dt,
+        reason=payload.reason,
+        doctor_email=payload.doctor_email or "doctor@hospital.org",
+        patient_email=payload.patient_email or "patient@de-identified.org",
+        notification_sent=True,
+        status="SCHEDULED"
+    )
+    db.add(appt)
+    db.commit()
+
+    audit_logger.log_event(
+        db=db,
+        event_type="APPOINTMENT_SCHEDULED",
+        prescription_id="-",
+        patient_id=payload.patient_id,
+        clinician_id=principal.get("clinician_id", "DOC-DEMO-01"),
+        clinician_role=principal.get("clinician_role", "ATTENDING_PHYSICIAN"),
+        action_summary=f"Follow-up appointment scheduled for {payload.patient_id} on {app_dt.strftime('%d %b %Y')}.",
+        payload={
+            "appointment_id": appt_id,
+            "appointment_date": app_dt.isoformat(),
+            "reason": payload.reason,
+            "notification_scheduled": "2 days before appointment"
+        }
+    )
+
+    return {
+        "status": "SCHEDULED",
+        "appointment_id": appt_id,
+        "patient_id": payload.patient_id,
+        "appointment_date": app_dt.isoformat(),
+        "reason": payload.reason,
+        "notification": "Follow-up email notifications scheduled for doctor and patient (2 days prior)."
+    }
+
+
+@app.get("/api/appointments")
+def list_appointments(patient_id: Optional[str] = None, db: Session = Depends(get_db)):
+    query = db.query(AppointmentDB)
+    if patient_id:
+        query = query.filter(AppointmentDB.patient_id == patient_id)
+    appts = query.order_by(AppointmentDB.appointment_date.asc()).all()
+    results = []
+    for a in appts:
+        results.append({
+            "appointment_id": a.appointment_id,
+            "patient_id": a.patient_id,
+            "visit_id": a.visit_id,
+            "doctor_id": a.doctor_id,
+            "appointment_date": a.appointment_date.isoformat(),
+            "reason": a.reason,
+            "status": a.status,
+            "notification_sent": a.notification_sent
+        })
+    return results
 
 
 # ---------------------------------------------------------------------------

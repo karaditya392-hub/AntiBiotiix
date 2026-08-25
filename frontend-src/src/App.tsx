@@ -1,34 +1,57 @@
 import { useEffect, useState } from "react";
 import { Route, Router, Switch, useLocation } from "wouter";
 import { useHashLocation } from "wouter/use-hash-location";
+
 import Landing from "@/pages/Landing";
+import PatientTypeSelection from "@/pages/PatientTypeSelection";
+import SelectReturningPatient from "@/pages/SelectReturningPatient";
+import RegisterNewPatient from "@/pages/RegisterNewPatient";
+import PatientProfile from "@/pages/PatientProfile";
+import NewVisitEntry from "@/pages/NewVisitEntry";
+import PrescriptionEntry from "@/pages/PrescriptionEntry";
+import ClinicalSafetyAnalysis from "@/pages/ClinicalSafetyAnalysis";
+import VisitSummary from "@/pages/VisitSummary";
+import PatientMedicationHistory from "@/pages/PatientMedicationHistory";
+import PatientHistoryAssistant from "@/pages/PatientHistoryAssistant";
+import PatientDashboard from "@/pages/PatientDashboard";
+import ClinicalToolsLanding from "@/pages/ClinicalToolsLanding";
+import GuidelinesPage from "@/pages/GuidelinesPage";
+import EvidencePage from "@/pages/EvidencePage";
+import SafetyEnginePage from "@/pages/SafetyEnginePage";
+import AuditPage from "@/pages/AuditPage";
+import ReferencePage from "@/pages/ReferencePage";
 import Console from "@/pages/Console";
 
 /**
- * Routing is HASH-based on purpose.
+ * Multi-Step Doctor Workflow Routing (Hash-Based).
  *
- * backend/app.py serves exactly one HTML route ("/") and mounts /static. It has no
- * SPA catch-all, and the brief forbids changing the backend, so a real path like
- * /review would 404 on a hard refresh. Hash routes ("/#/review") are all served by
- * the same "/" document, which keeps routing entirely on the frontend.
+ * Initial Landing Page: / -> Landing
+ * Patient Workflow:
+ *   Page 1: /patient-type -> PatientTypeSelection (RETURNING PATIENT vs NEW PATIENT)
+ *   Page 2A: /patients/returning -> SelectReturningPatient
+ *   Page 2B: /patients/new -> RegisterNewPatient
+ *   Page 3: /patients/:patient_id -> PatientProfile
+ *   Page 4: /patients/:patient_id/visit/new -> NewVisitEntry
+ *   Page 5: /patients/:patient_id/visits/:visit_id/prescription -> PrescriptionEntry
+ *   Page 6: /patients/:patient_id/visits/:visit_id/analysis -> ClinicalSafetyAnalysis
+ *   Page 7: /patients/:patient_id/visits/:visit_id/summary -> VisitSummary
+ *
+ * Additional Views:
+ *   /patients/:patient_id/medications -> PatientMedicationHistory
+ *   /patients/:patient_id/history-assistant -> PatientHistoryAssistant
+ *   /dashboard -> PatientDashboard
+ *   /review/console or /review/safety -> Console (24-Rule Engine / Guidelines Explorer)
  */
 function Shell() {
   const [location] = useLocation();
-  const onConsole = location.startsWith("/review");
+  const onConsole = location.startsWith("/review/console") || location === "/review/safety";
+  const consoleView = location === "/review/safety" ? "safety" : "entry";
 
-  // Once mounted, the console STAYS mounted.
-  //
-  // app.js holds its DOM references in module scope and its module is cached after
-  // the first import, so if the console unmounted those references would point at
-  // detached nodes and every handler would silently stop working on return. Keeping
-  // it mounted and toggling visibility avoids that without touching app.js.
   const [consoleMounted, setConsoleMounted] = useState(false);
   useEffect(() => {
     if (onConsole) setConsoleMounted(true);
   }, [onConsole]);
 
-  // The console stylesheet styles <body> directly; the landing page provides its
-  // own full-viewport surface. This flag lets each own the page background.
   useEffect(() => {
     document.body.dataset.surface = onConsole ? "console" : "landing";
   }, [onConsole]);
@@ -38,15 +61,34 @@ function Shell() {
       <div hidden={onConsole}>
         <Switch>
           <Route path="/" component={Landing} />
-          <Route path="/review">{null}</Route>
+          <Route path="/landing" component={Landing} />
+          <Route path="/patient-type" component={PatientTypeSelection} />
+          <Route path="/clinical-tools" component={ClinicalToolsLanding} />
+          <Route path="/clinical-tools/guidelines" component={GuidelinesPage} />
+          <Route path="/clinical-tools/evidence" component={EvidencePage} />
+          <Route path="/clinical-tools/safety" component={SafetyEnginePage} />
+          <Route path="/clinical-tools/audit" component={AuditPage} />
+          <Route path="/clinical-tools/reference" component={ReferencePage} />
+          <Route path="/patients/returning" component={SelectReturningPatient} />
+          <Route path="/patients/new" component={RegisterNewPatient} />
+          <Route path="/patients/:patient_id/visit/new" component={NewVisitEntry} />
+          <Route path="/patients/:patient_id/visits/:visit_id/prescription" component={PrescriptionEntry} />
+          <Route path="/patients/:patient_id/visits/:visit_id/analysis" component={ClinicalSafetyAnalysis} />
+          <Route path="/patients/:patient_id/visits/:visit_id/summary" component={VisitSummary} />
+          <Route path="/patients/:patient_id/medications" component={PatientMedicationHistory} />
+          <Route path="/patients/:patient_id/history-assistant" component={PatientHistoryAssistant} />
+          <Route path="/patients/:patient_id" component={PatientProfile} />
+          <Route path="/dashboard" component={PatientDashboard} />
+          <Route path="/review">{PatientTypeSelection}</Route>
           <Route>
             <Landing />
           </Route>
         </Switch>
       </div>
+
       {consoleMounted && (
         <div hidden={!onConsole} data-console-host="">
-          <Console />
+          <Console view={consoleView} />
         </div>
       )}
     </>

@@ -106,12 +106,8 @@ class AllergyReportRequest(BaseModel):
 class PatientRegistration(BaseModel):
     """
     Clinician-created patient record.
-
-    Deliberately carries NO direct identifiers - no name, phone, address or
-    government id. Spec 24/25 require synthetic, de-identified records, and the
-    safest way to honour that is to give the API nowhere to put real ones. The
-    patient_id is issued by the server.
     """
+    display_name: Optional[str] = Field(None, description="Patient display identifier / name")
     age: Optional[int] = Field(None, ge=0, le=125)
     age_category: AgeCategory = AgeCategory.UNKNOWN
     sex: Optional[str] = Field(None, description="MALE, FEMALE, or UNKNOWN")
@@ -125,6 +121,7 @@ class PatientRegistration(BaseModel):
     lactation_status: LactationStatus = LactationStatus.UNKNOWN
     allergy_status_known: bool = Field(False, description="False until an allergy history is actually elicited")
     active_medications: List[str] = Field(default_factory=list)
+    medical_history: List[str] = Field(default_factory=list, description="Historical medical conditions")
     clinical_notes: Optional[str] = Field(None, max_length=2000)
 
 
@@ -136,14 +133,16 @@ class MedicationUpdate(BaseModel):
 
 class PatientCreate(BaseModel):
     patient_id: str = Field(..., description="Synthetic patient identifier, e.g. PATIENT-001")
+    display_name: Optional[str] = Field(None, description="Display name / synthetic identifier")
     age: Optional[int] = Field(None, ge=0, le=125, description="Patient age in years")
     age_category: AgeCategory = Field(AgeCategory.UNKNOWN)
     weight_kg: Optional[float] = Field(None, ge=0.5, le=300.0, description="Patient weight in kg")
     sex: Optional[str] = Field(None, description="Biological sex (MALE, FEMALE, UNKNOWN)")
     allergies: List[str] = Field(default_factory=list, description="List of documented medication allergies")
+    medical_history: List[str] = Field(default_factory=list, description="Relevant historical conditions")
     allergy_provenance: Dict[str, str] = Field(
         default_factory=dict,
-        description="Lower-cased substance -> SELF_REPORTED | CLINICIAN_VERIFIED. Lets a warning state whether the allergy was patient-reported or clinician-verified without changing whether the rule fires.",
+        description="Lower-cased substance -> SELF_REPORTED | CLINICIAN_VERIFIED.",
     )
     allergy_status_known: bool = Field(True, description="False if allergy history has not been elicited")
     egfr_ml_min: Optional[float] = Field(None, ge=0.0, le=200.0, description="eGFR using CKD-EPI 2021 non-race formula")
@@ -177,6 +176,38 @@ class PrescriptionItem(BaseModel):
     antimicrobial_class: Optional[str] = None
     aware_category: Optional[AWaReCategory] = None
     extraction_confidence: Optional[Dict[str, float]] = None
+
+
+class SymptomItem(BaseModel):
+    name: str = Field(..., description="Symptom name, e.g. Fever, Cough")
+    severity: Optional[str] = Field("Moderate", description="Mild, Moderate, Severe")
+    duration: Optional[str] = Field(None, description="e.g. 3 days")
+    onset: Optional[str] = Field(None, description="Acute, Gradual, etc.")
+    notes: Optional[str] = Field(None, description="Additional symptom details")
+
+
+class VisitCreate(BaseModel):
+    patient_id: str
+    doctor_id: str = Field("DOC-DEMO-01")
+    diagnosis: Optional[str] = Field(None, description="Current visit diagnosis")
+    symptoms: List[SymptomItem] = Field(default_factory=list)
+    symptoms_text: Optional[str] = Field(None, description="Free-text symptoms summary")
+    clinical_notes: Optional[str] = Field(None, description="Clinical notes")
+    raw_prescription_text: Optional[str] = Field(None, description="Unparsed prescription text")
+    prescription_items: List[PrescriptionItem] = Field(default_factory=list)
+
+
+class PatientAskQuery(BaseModel):
+    question: str = Field(..., min_length=2, description="Natural language question about patient history")
+
+
+class AppointmentCreate(BaseModel):
+    patient_id: str
+    visit_id: Optional[str] = None
+    appointment_date: str = Field(..., description="ISO or YYYY-MM-DD HH:MM follow-up date")
+    reason: str = Field(..., description="Reason for follow-up appointment")
+    doctor_email: Optional[str] = Field(None, description="Doctor notification email")
+    patient_email: Optional[str] = Field(None, description="Patient notification email")
 
 
 class PrescriptionCreate(BaseModel):

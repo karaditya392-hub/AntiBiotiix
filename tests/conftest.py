@@ -55,3 +55,9 @@ def verify_seeded_database():
             + f"\n\nRun this first, then re-run the tests:\n    {SEED_COMMAND}\n",
             returncode=1,
         )
+
+    yield
+
+    # Clean up any non-seed test patients created during test execution
+    from backend.seed_data import seed_database
+    seed_database(reset_patients=True)

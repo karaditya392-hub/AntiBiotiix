@@ -74,6 +74,30 @@ def test_server_issues_patient_id(doctor):
     assert r.json()["patient_id"] != "CHOSEN-BY-CLIENT"
 
 
+def test_patient_history_is_scoped_and_includes_visit_findings(doctor, new_patient):
+    pid = new_patient["patient_id"]
+    rx = client.post("/api/prescriptions", json={
+        "patient_id": pid, "diagnosis": "cellulitis",
+        "raw_text": "Amoxicillin 500mg PO TID x 7 days",
+        "items": [{"medication_name": "Amoxicillin", "dose": 500, "unit": "mg",
+                   "route": "PO", "frequency": "TID", "duration_days": 7}],
+    }).json()["prescription_id"]
+    client.post(f"/api/prescriptions/{rx}/analyze", json={})
+
+    history = client.get(f"/api/patients/{pid}/history")
+    assert history.status_code == 200
+    body = history.json()
+    assert body["patient"]["patient_id"] == pid
+    assert body["visits"][0]["prescription_id"] == rx
+    assert body["visits"][0]["medications"][0]["name"] == "Amoxicillin"
+    assert any(row["prescription_id"] == rx for row in body["audit"])
+
+
+def test_patient_history_rejects_unknown_patient():
+    response = client.get("/api/patients/PATIENT-NOT-FOUND/history")
+    assert response.status_code == 404
+
+
 # --- medication reconciliation ---------------------------------------------
 
 def test_doctor_updates_medications(doctor, new_patient):
@@ -207,3 +231,40 @@ def test_seeded_patients_read_as_clinician_verified():
     assert p["allergies"], "PATIENT-001 has documented allergies"
     assert all(r["source"] == allergy_store.CLINICIAN_VERIFIED for r in p["allergy_records"])
     assert p["unverified_allergy_count"] == 0
+
+
+def test_scenario_presets_includes_seed_and_registered_patients(doctor, new_patient):
+    """
+    The scenario presets endpoint returns all 20 seed teaching presets (each unique
+    per seeded patient) and includes any clinician-registered patient once registered.
+    """
+    r = client.get("/api/scenario-presets")
+    assert r.status_code == 200
+    presets = r.json()
+    assert len(presets) >= 20
+
+    seed_presets = [p for p in presets if p.get("source") == "seed"]
+    assert len(seed_presets) == 20
+
+    # Ensure all 20 seed presets have unique keys, unique labels, and map to PATIENT-001..020
+    keys = [p["key"] for p in seed_presets]
+    labels = [p["label"] for p in seed_presets]
+    pids = [p["patient_id"] for p in seed_presets]
+    assert len(set(keys)) == 20, "All 20 preset keys must be unique"
+    assert len(set(labels)) == 20, "All 20 preset labels must be unique"
+    assert len(set(pids)) == 20, "All 20 preset patient_ids must be unique"
+
+    for i in range(1, 21):
+        expected_pid = f"PATIENT-{i:03d}"
+        assert expected_pid in pids, f"Expected preset for {expected_pid}"
+
+    # The newly registered patient should appear in the presets list with a unique registered preset
+    pid = new_patient["patient_id"]
+    reg_key = f"registered-{pid.lower()}"
+    reg_preset = next((p for p in presets if p["key"] == reg_key or p["patient_id"] == pid), None)
+    assert reg_preset is not None, f"Expected preset chip for newly registered patient {pid}"
+    assert reg_preset["source"] == "registered"
+    assert reg_preset["patient_id"] == pid
+    assert reg_preset["label"].startswith(pid)
+
+

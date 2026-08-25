@@ -38,6 +38,10 @@ class ClinicalAuditLogger:
         Guarantees unbranched hash chain under concurrency via transaction-level / thread locking.
         """
         with _audit_chain_lock:
+            try:
+                db.rollback()
+            except Exception:
+                pass
             log_id = f"LOG-{uuid.uuid4().hex[:12].upper()}"
             timestamp = datetime.now(timezone.utc)
             ts_str = timestamp.strftime("%Y-%m-%dT%H:%M:%S.%f")

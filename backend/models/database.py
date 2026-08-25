@@ -57,12 +57,14 @@ class PatientDB(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     patient_id = Column(String(64), unique=True, index=True, nullable=False)
+    display_name = Column(String(128), default="Synthetic Patient")
     age = Column(Integer, nullable=True)
     age_category = Column(String(32), default="UNKNOWN")
     weight_kg = Column(Float, nullable=True)
     sex = Column(String(16), default="UNKNOWN")
     allergies_json = Column(Text, default="[]")  # JSON list
     allergy_status_known = Column(Boolean, default=True)
+    medical_history_json = Column(Text, default="[]") # JSON list of conditions
     egfr_ml_min = Column(Float, nullable=True)
     serum_creatinine_mg_dl = Column(Float, nullable=True)
     renal_status_known = Column(Boolean, default=True)
@@ -73,8 +75,83 @@ class PatientDB(Base):
     active_medications_json = Column(Text, default="[]")  # JSON list
     clinical_notes = Column(Text, nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     prescriptions = relationship("PrescriptionDB", back_populates="patient")
+    visits = relationship("VisitDB", back_populates="patient", cascade="all, delete-orphan")
+
+
+class DoctorDB(Base):
+    __tablename__ = "doctors"
+
+    id = Column(Integer, primary_key=True, index=True)
+    doctor_id = Column(String(64), unique=True, index=True, nullable=False)
+    display_name = Column(String(128), nullable=False)
+    role = Column(String(64), default="ATTENDING_PHYSICIAN")
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+
+class VisitDB(Base):
+    __tablename__ = "visits"
+
+    id = Column(Integer, primary_key=True, index=True)
+    visit_id = Column(String(64), unique=True, index=True, nullable=False)
+    patient_id = Column(String(64), ForeignKey("patients.patient_id"), nullable=False)
+    doctor_id = Column(String(64), default="DOC-DEFAULT")
+    visit_date = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    diagnosis = Column(String(256), nullable=True)
+    clinical_notes = Column(Text, nullable=True)
+    prescription_id = Column(String(64), nullable=True)
+    status = Column(String(32), default="COMPLETED")
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+    patient = relationship("PatientDB", back_populates="visits")
+    symptoms = relationship("SymptomDB", back_populates="visit", cascade="all, delete-orphan")
+    diagnoses = relationship("DiagnosisDB", back_populates="visit", cascade="all, delete-orphan")
+
+
+class SymptomDB(Base):
+    __tablename__ = "symptoms"
+
+    id = Column(Integer, primary_key=True, index=True)
+    visit_id = Column(String(64), ForeignKey("visits.visit_id"), nullable=False)
+    patient_id = Column(String(64), ForeignKey("patients.patient_id"), nullable=False)
+    name = Column(String(128), nullable=False)
+    severity = Column(String(32), default="Moderate")
+    duration = Column(String(64), nullable=True)
+    onset = Column(String(64), nullable=True)
+    notes = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+    visit = relationship("VisitDB", back_populates="symptoms")
+
+
+class DiagnosisDB(Base):
+    __tablename__ = "diagnoses"
+
+    id = Column(Integer, primary_key=True, index=True)
+    visit_id = Column(String(64), ForeignKey("visits.visit_id"), nullable=False)
+    patient_id = Column(String(64), ForeignKey("patients.patient_id"), nullable=False)
+    diagnosis_name = Column(String(256), nullable=False)
+    icd_code = Column(String(32), nullable=True)
+    notes = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+    visit = relationship("VisitDB", back_populates="diagnoses")
+
+
+class PatientRAGDocumentDB(Base):
+    __tablename__ = "patient_rag_documents"
+
+    id = Column(Integer, primary_key=True, index=True)
+    doc_id = Column(String(64), unique=True, index=True, nullable=False)
+    patient_id = Column(String(64), index=True, nullable=False)
+    visit_id = Column(String(64), index=True, nullable=False)
+    visit_date = Column(String(32), nullable=False)
+    record_type = Column(String(32), default="visit")
+    content = Column(Text, nullable=False)
+    embedding_json = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 class PrescriptionDB(Base):
@@ -83,6 +160,7 @@ class PrescriptionDB(Base):
     id = Column(Integer, primary_key=True, index=True)
     prescription_id = Column(String(64), unique=True, index=True, nullable=False)
     patient_id = Column(String(64), ForeignKey("patients.patient_id"), nullable=False)
+    visit_id = Column(String(64), nullable=True)
     diagnosis = Column(String(256), nullable=True)
     raw_text = Column(Text, nullable=True)
     clinician_id = Column(String(64), default="DOC-DEFAULT")
@@ -149,6 +227,23 @@ class RuleAuthorshipLogDB(Base):
     approved_by = Column(String(64), nullable=True)
     change_summary = Column(Text, nullable=False)
     timestamp = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+
+class AppointmentDB(Base):
+    __tablename__ = "appointments"
+
+    id = Column(Integer, primary_key=True, index=True)
+    appointment_id = Column(String(64), unique=True, index=True, nullable=False)
+    patient_id = Column(String(64), ForeignKey("patients.patient_id"), nullable=False)
+    visit_id = Column(String(64), nullable=True)
+    doctor_id = Column(String(64), default="DOC-DEFAULT")
+    appointment_date = Column(DateTime, nullable=False)
+    reason = Column(Text, nullable=False)
+    doctor_email = Column(String(128), nullable=True)
+    patient_email = Column(String(128), nullable=True)
+    notification_sent = Column(Boolean, default=False)
+    status = Column(String(32), default="SCHEDULED")
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 class GuidelineDocumentDB(Base):
@@ -254,4 +349,18 @@ class AlertMetricsDB(Base):
 
 
 def init_db():
+    from sqlalchemy import text
     Base.metadata.create_all(bind=engine)
+    # Perform column migrations for SQLite if columns were added
+    with engine.connect() as conn:
+        for stmt in [
+            "ALTER TABLE patients ADD COLUMN display_name VARCHAR(128) DEFAULT 'Synthetic Patient'",
+            "ALTER TABLE patients ADD COLUMN medical_history_json TEXT DEFAULT '[]'",
+            "ALTER TABLE patients ADD COLUMN updated_at DATETIME",
+            "ALTER TABLE prescriptions ADD COLUMN visit_id VARCHAR(64)"
+        ]:
+            try:
+                conn.execute(text(stmt))
+                conn.commit()
+            except Exception:
+                pass

@@ -52,7 +52,7 @@ export default function Landing() {
         <nav aria-label="Primary navigation">
           <a href="#capabilities">Safety signals</a>
           <a href="#workflow">Review path</a>
-          <Link href="/review" className="landing-nav-cta">Open review <ArrowRight size={15} /></Link>
+          <Link href="/patient-type" className="landing-nav-cta">Start Patient Visit <ArrowRight size={15} /></Link>
         </nav>
       </header>
 
@@ -62,7 +62,7 @@ export default function Landing() {
           <h1 id="landing-title">Clinical decisions,<br /><em>supported by evidence.</em></h1>
           <p className="landing-lede">Review prescriptions against patient-specific risks, antimicrobial guidelines, and resistance patterns &mdash; while keeping the clinician firmly in control.</p>
           <div className="landing-actions">
-            <Link href="/review" className="landing-primary-cta">Open Clinical Review <ArrowRight size={17} /></Link>
+            <Link href="/patient-type" className="landing-primary-cta">Start Patient Visit <ArrowRight size={17} /></Link>
             <a href="#workflow" className="landing-secondary-cta">Explore how it works <span>&#8600;</span></a>
           </div>
           <div className="hero-proof"><Check size={14} /><span>Clinical decision support only &mdash; never a prescribing system.</span></div>
@@ -122,7 +122,7 @@ export default function Landing() {
         <div className="feature-grid">{features.map(({ icon: Icon, index, title, text }) => <article className="feature-item" key={title}><div className="feature-top"><Icon size={18} strokeWidth={1.7} /><span>{index}</span></div><h3>{title}</h3><p>{text}</p><ArrowRight className="feature-arrow" size={15} /></article>)}</div>
       </section>
 
-      <section className="landing-final-cta"><div className="final-orb"><div /><div /><div /></div><div><p className="eyebrow">Authorized clinical workspace</p><h2>Review the signal.<br /><em>Document the decision.</em></h2></div><Link href="/review" className="landing-primary-cta">Open Clinical Review <ArrowRight size={17} /></Link></section>
+      <section className="landing-final-cta"><div className="final-orb"><div /><div /><div /></div><div><p className="eyebrow">Authorized clinical workspace</p><h2>Review the signal.<br /><em>Document the decision.</em></h2></div><Link href="/patient-type" className="landing-primary-cta">Start Patient Visit <ArrowRight size={17} /></Link></section>
 
       <footer className="landing-footer"><span>AntiBioTix</span><span>Reliable. Precise. Traceable.</span><span>Clinical decision support only.</span></footer>
     </main>
