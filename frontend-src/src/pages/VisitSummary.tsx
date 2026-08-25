@@ -90,8 +90,32 @@ export default function VisitSummary() {
     }
   }
 
-  function handleDownloadPDF() {
-    window.open(`/api/visits/${visit_id}/pdf`, "_blank");
+  const [downloadingPDF, setDownloadingPDF] = useState(false);
+
+  async function handleDownloadPDF() {
+    if (!visit_id) return;
+    setDownloadingPDF(true);
+    try {
+      const targetId = visit?.visit_id || visit_id;
+      const res = await fetch(`/api/visits/${encodeURIComponent(targetId)}/pdf`);
+      if (!res.ok) {
+        alert("Prescription PDF is not available for this record.");
+        return;
+      }
+      const blob = await res.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = `Prescription_${patient_id}_${targetId}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(blobUrl);
+    } catch {
+      alert("An error occurred while downloading the prescription PDF.");
+    } finally {
+      setDownloadingPDF(false);
+    }
   }
 
   if (loading) {
@@ -191,8 +215,8 @@ export default function VisitSummary() {
           <h2>Post-Visit Options</h2>
         </div>
         <div className="action-buttons">
-          <button className="dashboard-button primary" onClick={handleDownloadPDF}>
-            <Download size={16} /> Download Prescription PDF
+          <button className="dashboard-button primary" onClick={handleDownloadPDF} disabled={downloadingPDF}>
+            <Download size={16} /> {downloadingPDF ? "Generating PDF..." : "Download Prescription PDF"}
           </button>
           <button className="dashboard-button secondary" onClick={() => setShowFollowupModal(true)}>
             <Calendar size={16} /> Schedule Follow-up

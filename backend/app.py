@@ -743,7 +743,19 @@ def download_visit_prescription_pdf(visit_id: str, db: Session = Depends(get_db)
         # Fallback to check by prescription_id
         visit = db.query(VisitDB).filter(VisitDB.prescription_id == visit_id).first()
         if not visit:
-            raise HTTPException(status_code=404, detail="Visit record not found")
+            p_direct = db.query(PrescriptionDB).filter(PrescriptionDB.prescription_id == visit_id).first()
+            if p_direct:
+                visit = VisitDB(
+                    visit_id=f"VIS-{p_direct.prescription_id[-6:]}",
+                    patient_id=p_direct.patient_id,
+                    doctor_id=p_direct.clinician_id,
+                    visit_date=p_direct.created_at,
+                    diagnosis=p_direct.diagnosis,
+                    clinical_notes=p_direct.raw_text,
+                    prescription_id=p_direct.prescription_id
+                )
+            else:
+                raise HTTPException(status_code=404, detail="Visit or prescription record not found")
 
     patient = db.query(PatientDB).filter(PatientDB.patient_id == visit.patient_id).first()
     if not patient:
@@ -823,7 +835,10 @@ def download_visit_prescription_pdf(visit_id: str, db: Session = Depends(get_db)
     return Response(
         content=pdf_bytes,
         media_type="application/pdf",
-        headers={"Content-Disposition": f"inline; filename={filename}"}
+        headers={
+            "Content-Disposition": f'attachment; filename="{filename}"',
+            "Access-Control-Expose-Headers": "Content-Disposition"
+        }
     )
 
 
