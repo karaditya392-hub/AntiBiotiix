@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { BookOpenCheck, Calendar, CheckCircle2, Download, History, X } from "lucide-react";
 import { Link, useLocation, useParams } from "wouter";
 import UnifiedHeader from "@/components/UnifiedHeader";
+import { patientName } from "@/lib/patient";
 import "@/styles/patient-dashboard.css";
 
 export default function VisitSummary() {
@@ -9,7 +10,7 @@ export default function VisitSummary() {
   const [, setLocation] = useLocation();
 
   const [visit, setVisit] = useState<any>(null);
-  const [_patient, setPatient] = useState<any>(null);
+  const [patient, setPatient] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   // Follow-up modal state
@@ -141,7 +142,7 @@ export default function VisitSummary() {
           <p className="dashboard-kicker">PATIENT WORKFLOW STEP 7</p>
           <h1>Visit Summary & Confirmation</h1>
           <p className="dashboard-subtitle">
-            Visit <strong>{visit_id}</strong> for Patient <strong>{patient_id}</strong>
+            Visit <strong>{visit_id}</strong> for <strong>{patientName(patient?.display_name, patient_id)}</strong>
           </p>
         </div>
         <Link href={`/patients/${patient_id}`} className="dashboard-button secondary">

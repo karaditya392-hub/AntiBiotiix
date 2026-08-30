@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { ArrowLeft, Pill } from "lucide-react";
 import { Link, useParams } from "wouter";
 import UnifiedHeader from "@/components/UnifiedHeader";
+import { patientName } from "@/lib/patient";
 import "@/styles/patient-dashboard.css";
 
 export default function PatientMedicationHistory() {
@@ -33,6 +34,8 @@ export default function PatientMedicationHistory() {
   }
 
   const medList = data?.medication_history || [];
+  const displayedName = patientName(data?.display_name, patient_id);
+  const idPrefix = displayedName === patient_id ? "" : `${patient_id} · `;
 
   return (
     <main className="dashboard-page">
@@ -41,8 +44,8 @@ export default function PatientMedicationHistory() {
       <div className="dashboard-header" style={{ marginBottom: "16px" }}>
         <div>
           <p className="dashboard-kicker">PRESCRIPTION MEMORY RECORD</p>
-          <h1>Medication History — {patient_id}</h1>
-          <p className="dashboard-subtitle">Chronological record of all historical prescribed antimicrobials and medications.</p>
+          <h1>Medication History — {displayedName}</h1>
+          <p className="dashboard-subtitle">{idPrefix}Chronological record of all historical prescribed antimicrobials and medications.</p>
         </div>
         <Link href={`/patients/${patient_id}`} className="dashboard-button secondary">
           <ArrowLeft size={15} /> Back to Profile

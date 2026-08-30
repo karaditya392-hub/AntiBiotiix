@@ -28,6 +28,11 @@ export default function RegisterNewPatient() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+    if (!form.name.trim()) {
+      setError("Patient full name is required to create the record.");
+      setActiveTab("demographics");
+      return;
+    }
     if (!form.age) {
       setError("Patient age is required to create the record.");
       setActiveTab("demographics");
@@ -44,7 +49,7 @@ export default function RegisterNewPatient() {
       const auth = await login.json();
 
       const payload = {
-        display_name: form.name.trim() || undefined,
+        display_name: form.name.trim(),
         age: Number(form.age),
         age_category: Number(form.age) >= 18 ? "ADULT" : "CHILD",
         sex: form.sex,
@@ -141,6 +146,10 @@ export default function RegisterNewPatient() {
         </div>
 
         <form onSubmit={handleSubmit}>
+          {/* Rendered outside the tab panels: a validation failure switches tabs,
+              and the reason has to travel with the clinician. */}
+          {error && <p className="form-error">{error}</p>}
+
           {/* TAB 1: DEMOGRAPHICS & ORGAN FUNCTION */}
           {activeTab === "demographics" && (
             <div style={{ display: "grid", gap: "20px" }}>
@@ -311,7 +320,6 @@ export default function RegisterNewPatient() {
                 />
               </div>
 
-              {error && <p className="form-error">{error}</p>}
 
               <div style={{ marginTop: "16px", display: "flex", justifyContent: "space-between" }}>
                 <button

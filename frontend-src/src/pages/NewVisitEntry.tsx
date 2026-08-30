@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { ArrowRight, History, Plus, X } from "lucide-react";
 import { useLocation, useParams } from "wouter";
 import UnifiedHeader from "@/components/UnifiedHeader";
+import { patientName } from "@/lib/patient";
 import "@/styles/patient-dashboard.css";
 
 type Symptom = {
@@ -95,6 +96,11 @@ export default function NewVisitEntry() {
     );
   }
 
+  // Lead with the name; the record id stays in the subtitle, but drop it there
+  // when no name was captured and the heading is already showing the id.
+  const displayedName = patientName(patient?.display_name, patient_id);
+  const idPrefix = displayedName === patient_id ? "" : `${patient_id} · `;
+
   return (
     <main className="dashboard-page">
       <UnifiedHeader />
@@ -102,9 +108,9 @@ export default function NewVisitEntry() {
       <div className="dashboard-header" style={{ marginBottom: "16px" }}>
         <div>
           <p className="dashboard-kicker">PATIENT WORKFLOW STEP 4</p>
-          <h1>New Visit — {patient_id}</h1>
+          <h1>New Visit — {displayedName}</h1>
           <p className="dashboard-subtitle">
-            {patient?.age ?? "Unknown"} years · {patient?.sex || "Sex unrecorded"} · Documented Allergies: {patient?.allergies?.join(", ") || "None"}
+            {idPrefix}{patient?.age ?? "Unknown"} years · {patient?.sex || "Sex unrecorded"} · Documented Allergies: {patient?.allergies?.join(", ") || "None"}
           </p>
         </div>
         <div style={{ display: "flex", gap: "10px" }}>

@@ -40,6 +40,7 @@ import Console from "@/pages/Console";
  *
  * Additional Views:
  *   /login -> Login (OAuth Doctor Credential Verification)
+ *   /clinical-tools and /clinical-tools/* -> Clinical Tools (Protected by OAuth Login)
  *   /patients/:patient_id/medications -> PatientMedicationHistory
  *   /patients/:patient_id/history-assistant -> PatientHistoryAssistant
  *   /dashboard -> PatientDashboard
@@ -67,11 +68,21 @@ function Shell() {
           <Route path="/landing" component={Landing} />
           <Route path="/login" component={Login} />
           <Route path="/patient-type" component={PatientTypeSelection} />
-          <Route path="/clinical-tools" component={ClinicalToolsLanding} />
-          <Route path="/clinical-tools/guidelines" component={GuidelinesPage} />
-          <Route path="/clinical-tools/evidence" component={EvidencePage} />
-          <Route path="/clinical-tools/safety" component={SafetyEnginePage} />
-          <Route path="/clinical-tools/reference" component={ReferencePage} />
+          <Route path="/clinical-tools">
+            {() => <ProtectedRoute component={ClinicalToolsLanding} path="/clinical-tools" />}
+          </Route>
+          <Route path="/clinical-tools/guidelines">
+            {() => <ProtectedRoute component={GuidelinesPage} path="/clinical-tools/guidelines" />}
+          </Route>
+          <Route path="/clinical-tools/evidence">
+            {() => <ProtectedRoute component={EvidencePage} path="/clinical-tools/evidence" />}
+          </Route>
+          <Route path="/clinical-tools/safety">
+            {() => <ProtectedRoute component={SafetyEnginePage} path="/clinical-tools/safety" />}
+          </Route>
+          <Route path="/clinical-tools/reference">
+            {() => <ProtectedRoute component={ReferencePage} path="/clinical-tools/reference" />}
+          </Route>
           <Route path="/patients/returning">
             {() => <ProtectedRoute component={SelectReturningPatient} path="/patients/returning" />}
           </Route>

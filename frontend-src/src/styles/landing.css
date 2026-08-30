@@ -4,6 +4,7 @@
  * lines, and CSS-3D motion that communicates evidence moving into context.
  */
 .landing-page { min-height: 100vh; overflow: hidden; background: #f4f7f6; color: #102324; font-family: 'IBM Plex Sans', sans-serif; }
+.landing-scroll-progress { position: fixed; top: 0; left: 0; right: 0; z-index: 60; height: 3px; transform-origin: 0%; background: linear-gradient(90deg, #0d5f60, #4bb0a0); }
 .landing-nav { position: relative; z-index: 10; max-width: 1320px; margin: 0 auto; padding: 1.15rem 2.5rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(16,66,65,.14); }
 .landing-brand { display: flex; align-items: center; gap: .72rem; color: #102324; text-decoration: none; }
 .landing-brand-mark { width: 2.45rem; height: 2.45rem; display: grid; place-items: center; overflow: hidden; background: #edf3f1; border: 1px solid #cfe0dc; border-radius: 9px; box-shadow: 0 4px 12px rgba(15,92,94,.08); }
@@ -14,8 +15,8 @@
 .landing-nav nav, .landing-nav > nav { display: flex; align-items: center; gap: 1.5rem; }
 .landing-nav nav a { color: #657674; font-size: .78rem; text-decoration: none; transition: color 180ms ease, transform 180ms ease; }
 .landing-nav nav a:hover { color: #0d5f60; transform: translateY(-1px); }
-.landing-nav-cta, .landing-primary-cta { display: inline-flex; align-items: center; gap: .5rem; color: #fff !important; background: #0d5f60; padding: .68rem .92rem; border-radius: 7px; box-shadow: 0 7px 18px rgba(13,95,96,.16); transition: transform 180ms cubic-bezier(.23,1,.32,1), background 180ms ease, box-shadow 180ms ease; }
-.landing-nav-cta:hover, .landing-primary-cta:hover { color: #fff !important; background: #084b4d; transform: translateY(-2px); box-shadow: 0 10px 24px rgba(13,95,96,.23); }
+.landing-nav-cta, .landing-primary-cta { display: inline-flex; align-items: center; gap: .5rem; color: #fff !important; background: #0d5f60; padding: .68rem .92rem; border-radius: 7px; box-shadow: 0 7px 18px rgba(13,95,96,.16); transition: background 180ms ease, box-shadow 180ms ease; }
+.landing-nav-cta:hover, .landing-primary-cta:hover { color: #fff !important; background: #084b4d; box-shadow: 0 10px 24px rgba(13,95,96,.23); }
 .landing-hero { position: relative; max-width: 1320px; min-height: 675px; margin: 0 auto; padding: 5.2rem 2.5rem 5rem; display: grid; grid-template-columns: .82fr 1.18fr; gap: 2rem; align-items: center; }
 .landing-hero::before { content: ''; position: absolute; width: 36rem; height: 36rem; right: -11rem; top: 3rem; border: 1px solid rgba(13,95,96,.08); border-radius: 50%; box-shadow: 0 0 0 3.5rem rgba(13,95,96,.025), 0 0 0 8rem rgba(13,95,96,.018); pointer-events: none; }
 .hero-signal, .eyebrow { color: #0d5f60; font-size: .68rem; letter-spacing: .12em; text-transform: uppercase; font-weight: 700; }
@@ -99,8 +100,8 @@
 .workflow-arrow { position: absolute; right: -.55rem; top: 50%; z-index: 2; color: #6a9791; background: #f4f7f6; }
 .capability-heading { margin-bottom: 2.6rem; }
 .feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid #cdded9; border-left: 1px solid #cdded9; }
-.feature-item { position: relative; min-height: 11.3rem; padding: 1.35rem 1.35rem 1.4rem; border-right: 1px solid #cdded9; border-bottom: 1px solid #cdded9; transition: background 180ms ease, transform 180ms cubic-bezier(.23,1,.32,1), box-shadow 180ms ease; }
-.feature-item:hover { z-index: 1; background: #fff; transform: translateY(-3px); box-shadow: 0 12px 24px rgba(20,69,65,.1); }
+.feature-item { position: relative; min-height: 11.3rem; padding: 1.35rem 1.35rem 1.4rem; border-right: 1px solid #cdded9; border-bottom: 1px solid #cdded9; transition: background 180ms ease, box-shadow 180ms ease; }
+.feature-item:hover { z-index: 1; background: #fff; box-shadow: 0 12px 24px rgba(20,69,65,.1); }
 .feature-top { display: flex; justify-content: space-between; color: #0d6969; }
 .feature-top span { color: #91a29f; font: 600 .58rem 'IBM Plex Mono', monospace; }
 .feature-item h3 { color: #173031; font-size: .92rem; margin: 1.25rem 0 .48rem; }
@@ -132,6 +133,7 @@
 /* Accepted style-review amendment: console-dominant dark clinical instrumentation. */
 .landing-page { background: #0b292b; color: #e5f1ee; background-image: radial-gradient(circle at 74% 21%, rgba(28,116,112,.16), transparent 31rem), linear-gradient(90deg, rgba(155,224,210,.025) 1px, transparent 1px), linear-gradient(rgba(155,224,210,.025) 1px, transparent 1px); background-size: auto, 4rem 4rem, 4rem 4rem; }
 .landing-nav { border-bottom-color: rgba(160,221,208,.18); }
+.landing-scroll-progress { background: linear-gradient(90deg, #0f7774, #8ed8c8); }
 .landing-brand { color: #e5f1ee; }
 .landing-brand strong { color: #9fddd0; }
 .landing-brand small, .landing-nav nav a { color: #94aaa6; }

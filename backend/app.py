@@ -576,6 +576,8 @@ def get_patient_medication_history(patient_id: str, db: Session = Depends(get_db
             })
     return {
         "patient_id": patient_id,
+        # The clinician recognises the patient by name; the id keys the record.
+        "display_name": (history.get("patient") or {}).get("display_name"),
         "medication_history": med_list
     }
 

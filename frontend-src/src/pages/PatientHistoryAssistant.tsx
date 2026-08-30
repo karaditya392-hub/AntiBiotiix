@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowLeft, BookOpenCheck } from "lucide-react";
 import { Link, useLocation, useParams } from "wouter";
 import UnifiedHeader from "@/components/UnifiedHeader";
+import { patientName } from "@/lib/patient";
 import "@/styles/patient-dashboard.css";
 
 export default function PatientHistoryAssistant() {
@@ -11,6 +12,21 @@ export default function PatientHistoryAssistant() {
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [patient, setPatient] = useState<any>(null);
+
+  // The page only ever needed the id to query with, but a clinician should see
+  // whose records they are asking about.
+  useEffect(() => {
+    if (!patient_id) return;
+    (async () => {
+      try {
+        const res = await fetch(`/api/patients/${encodeURIComponent(patient_id)}`);
+        if (res.ok) setPatient(await res.json());
+      } catch {
+        // Non-fatal: the heading falls back to the record id.
+      }
+    })();
+  }, [patient_id]);
 
   async function handleAsk(e: React.FormEvent) {
     e.preventDefault();
@@ -44,6 +60,9 @@ export default function PatientHistoryAssistant() {
     }
   }
 
+  const displayedName = patientName(patient?.display_name, patient_id);
+  const idSuffix = displayedName === patient_id ? "" : ` (${patient_id})`;
+
   return (
     <main className="dashboard-page">
       <UnifiedHeader />
@@ -51,9 +70,9 @@ export default function PatientHistoryAssistant() {
       <div className="dashboard-header" style={{ marginBottom: "16px" }}>
         <div>
           <p className="dashboard-kicker">PATIENT RAG RETRIEVAL LAYER</p>
-          <h1>Ask About Patient {patient_id}'s History</h1>
+          <h1>Ask About {displayedName}'s History</h1>
           <p className="dashboard-subtitle">
-            Answers are grounded EXCLUSIVELY in <strong>{patient_id}</strong>'s stored records with strict patient isolation.
+            Answers are grounded EXCLUSIVELY in <strong>{displayedName}</strong>'s stored records{idSuffix} with strict patient isolation.
           </p>
         </div>
         <Link href={`/patients/${patient_id}`} className="dashboard-button secondary">

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { ArrowLeft, CheckCircle2, ShieldAlert, ShieldCheck, X } from "lucide-react";
 import { Link, useLocation, useParams } from "wouter";
 import UnifiedHeader from "@/components/UnifiedHeader";
+import { patientName } from "@/lib/patient";
 import "@/styles/patient-dashboard.css";
 
 export default function ClinicalSafetyAnalysis() {
@@ -202,7 +203,7 @@ export default function ClinicalSafetyAnalysis() {
           <p className="dashboard-kicker">PATIENT WORKFLOW STEP 6</p>
           <h1>Clinical Decision Support Analysis</h1>
           <p className="dashboard-subtitle">
-            Evaluated by 24 Deterministic Safety Rules · Priority Level: <strong>{priorityTier}</strong>
+            {patientName(patient?.display_name, patient_id)} · Evaluated by 24 Deterministic Safety Rules · Priority Level: <strong>{priorityTier}</strong>
           </p>
         </div>
         <Link href={`/patients/${patient_id}/visits/${visit_id}/prescription`} className="dashboard-button secondary">
