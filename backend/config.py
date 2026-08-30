@@ -2,6 +2,7 @@
 System Configuration, Version Pinning & Precedence Rules for S11 Assistant
 """
 import hashlib
+import os
 from typing import Dict, List, Any
 
 SYSTEM_VERSION = "1.4.0-clinical-safety"
@@ -118,3 +119,62 @@ AUTHORIZED_RULE_AUTHORING_ROLES = [
 # If override rate exceeds 60% with at least 10 triggers, rule is flagged for clinical recalibration
 ALERT_FATIGUE_OVERRIDE_RATE_THRESHOLD = 0.60
 ALERT_FATIGUE_MIN_TRIGGERS = 10
+
+
+# ---------------------------------------------------------------------------
+# Appointment notification delivery (Section 28)
+#
+# Every value is read from the environment and every one defaults to empty. That
+# is deliberate: with nothing configured the system sends nothing and SAYS it
+# sent nothing. The previous engine returned "DELIVERED" from functions whose own
+# docstrings said "Simulate", which recorded a delivery that never happened -- the
+# same class of false claim the guideline provenance work exists to prevent.
+#
+# Configure SMTP to turn e-mail on, and an SMS webhook to turn SMS on. Until then
+# the channels report NOT_CONFIGURED and only the in-app channel is real.
+# ---------------------------------------------------------------------------
+
+def _env_flag(name: str, default: str = "1") -> bool:
+    return os.getenv(name, default).strip().lower() not in ("0", "false", "no", "off", "")
+
+
+NOTIFICATION_SMTP_HOST = os.getenv("S11_SMTP_HOST", "").strip()
+NOTIFICATION_SMTP_PORT = int(os.getenv("S11_SMTP_PORT", "587") or 587)
+NOTIFICATION_SMTP_USER = os.getenv("S11_SMTP_USER", "").strip()
+NOTIFICATION_SMTP_PASSWORD = os.getenv("S11_SMTP_PASSWORD", "")
+NOTIFICATION_SMTP_FROM = os.getenv("S11_SMTP_FROM", "").strip()
+NOTIFICATION_SMTP_STARTTLS = _env_flag("S11_SMTP_STARTTLS", "1")
+NOTIFICATION_SMTP_TIMEOUT_SECONDS = int(os.getenv("S11_SMTP_TIMEOUT_SECONDS", "20") or 20)
+
+# Provider-agnostic: any endpoint accepting a JSON POST of {to, message}. Keeping
+# it generic avoids taking a dependency on one vendor's SDK for one feature.
+NOTIFICATION_SMS_WEBHOOK_URL = os.getenv("S11_SMS_WEBHOOK_URL", "").strip()
+NOTIFICATION_SMS_AUTH_HEADER = os.getenv("S11_SMS_AUTH_HEADER", "").strip()
+NOTIFICATION_SMS_TIMEOUT_SECONDS = int(os.getenv("S11_SMS_TIMEOUT_SECONDS", "15") or 15)
+
+# How far ahead the advance reminder goes out. The record used to claim
+# "SCHEDULED_2_DAYS_PRIOR" while no code ever sent it; this is the real offset the
+# scheduler now acts on.
+NOTIFICATION_ADVANCE_NOTICE_DAYS = int(os.getenv("S11_ADVANCE_NOTICE_DAYS", "2") or 2)
+
+# Background scheduler. Without it an appointment booked for next week is never
+# announced, because the only trigger was a manual endpoint call.
+NOTIFICATION_SCHEDULER_INTERVAL_SECONDS = int(
+    os.getenv("S11_NOTIFICATION_INTERVAL_SECONDS", "900") or 900
+)
+
+
+def notification_scheduler_enabled() -> bool:
+    """
+    Read at thread start, not at import, so a test run or a deployment can switch
+    the scheduler off without depending on module import order.
+    """
+    return _env_flag("S11_NOTIFICATION_SCHEDULER", "1")
+
+
+def email_channel_configured() -> bool:
+    return bool(NOTIFICATION_SMTP_HOST and (NOTIFICATION_SMTP_FROM or NOTIFICATION_SMTP_USER))
+
+
+def sms_channel_configured() -> bool:
+    return bool(NOTIFICATION_SMS_WEBHOOK_URL)

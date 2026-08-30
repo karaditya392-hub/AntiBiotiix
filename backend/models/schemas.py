@@ -123,6 +123,18 @@ class PatientRegistration(BaseModel):
     active_medications: List[str] = Field(default_factory=list)
     medical_history: List[str] = Field(default_factory=list, description="Historical medical conditions")
     clinical_notes: Optional[str] = Field(None, max_length=2000)
+    contact_email: Optional[str] = Field(
+        None, max_length=128,
+        description="Patient e-mail address for appointment reminders. Stored on the "
+                    "record so a returning patient is not asked again.",
+    )
+    contact_phone: Optional[str] = Field(None, max_length=32, description="Reminder SMS number")
+
+
+class PatientContactUpdate(BaseModel):
+    """Add or correct reminder contact details on an existing patient."""
+    contact_email: Optional[str] = Field(None, max_length=128)
+    contact_phone: Optional[str] = Field(None, max_length=32)
 
 
 class MedicationUpdate(BaseModel):

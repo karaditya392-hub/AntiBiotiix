@@ -79,6 +79,11 @@ class PatientDB(Base):
     lactation_status = Column(String(32), default="UNKNOWN")
     active_medications_json = Column(Text, default="[]")  # JSON list
     clinical_notes = Column(Text, nullable=True)
+    # Real patient contact details, stored so appointment reminders can reach the
+    # patient and so a returning patient is not asked for an address at every
+    # booking. Both are optional: a patient who supplies neither is never contacted.
+    contact_email = Column(String(128), nullable=True)
+    contact_phone = Column(String(32), nullable=True)
     created_at = Column(DateTime, default=now_ist)
     updated_at = Column(DateTime, default=now_ist, onupdate=now_ist)
 
@@ -94,6 +99,10 @@ class DoctorDB(Base):
     display_name = Column(String(128), nullable=False)
     role = Column(String(64), default="ATTENDING_PHYSICIAN")
     password_hash = Column(String(256), nullable=True)
+    # Where the "your patient X is coming at TIME" reminder is sent. Without it the
+    # doctor half of every appointment reminder has nowhere to go and is recorded
+    # as NO_CONTACT_ON_RECORD.
+    email = Column(String(128), nullable=True)
     created_at = Column(DateTime, default=now_ist)
 
 
@@ -250,6 +259,7 @@ class AppointmentDB(Base):
     patient_phone = Column(String(32), nullable=True)
     notification_sent = Column(Boolean, default=False)
     advance_notice_sent = Column(Boolean, default=False)
+    advance_notice_timestamp = Column(DateTime, nullable=True)
     same_day_alert_sent = Column(Boolean, default=False)
     same_day_alert_timestamp = Column(DateTime, nullable=True)
     delivery_status_json = Column(Text, default="{}")
@@ -348,6 +358,41 @@ class AuditLogDB(Base):
     prompt_template_id = Column(String(64), default=PROMPT_TEMPLATE_ID)
 
 
+class NotificationDB(Base):
+    """
+    One row per dispatch ATTEMPT, on every channel.
+
+    Replaces a module-level Python list that held the in-app queue in memory: it
+    emptied on restart and was invisible to any other worker process, so a
+    notification a clinician had not yet opened could simply cease to exist.
+
+    Recording failed and unconfigured attempts alongside delivered ones is the
+    point. "No e-mail was sent because no SMTP server is configured" is a fact the
+    record has to be able to state; the previous engine could only say DELIVERED.
+    """
+    __tablename__ = "notifications"
+
+    id = Column(Integer, primary_key=True, index=True)
+    notification_id = Column(String(64), unique=True, index=True, nullable=False)
+    appointment_id = Column(String(64), index=True, nullable=True)
+    patient_id = Column(String(64), index=True, nullable=True)
+    doctor_id = Column(String(64), index=True, nullable=True)
+    # ADVANCE_NOTICE or SAME_DAY_ALERT.
+    kind = Column(String(32), nullable=False, default="SAME_DAY_ALERT")
+    # EMAIL, SMS, IN_APP.
+    channel = Column(String(16), nullable=False)
+    # DOCTOR or PATIENT.
+    recipient_type = Column(String(16), nullable=False)
+    recipient = Column(String(256), nullable=True)
+    title = Column(String(256), nullable=True)
+    message = Column(Text, nullable=True)
+    # DELIVERED, FAILED, NOT_CONFIGURED, NO_CONTACT_ON_RECORD.
+    status = Column(String(32), nullable=False)
+    detail = Column(Text, nullable=True)
+    read = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=now_ist)
+
+
 class AlertMetricsDB(Base):
     __tablename__ = "alert_metrics"
 
@@ -374,7 +419,14 @@ def init_db():
             "ALTER TABLE appointments ADD COLUMN advance_notice_sent BOOLEAN DEFAULT 0",
             "ALTER TABLE appointments ADD COLUMN same_day_alert_sent BOOLEAN DEFAULT 0",
             "ALTER TABLE appointments ADD COLUMN same_day_alert_timestamp DATETIME",
-            "ALTER TABLE appointments ADD COLUMN delivery_status_json TEXT DEFAULT '{}'"
+            "ALTER TABLE appointments ADD COLUMN delivery_status_json TEXT DEFAULT '{}'",
+            # Timestamped when the advance reminder is actually dispatched. The
+            # advance_notice_sent flag above used to be set true at booking for a
+            # notice no code ever sent; it is now written only by the scheduler.
+            "ALTER TABLE appointments ADD COLUMN advance_notice_timestamp DATETIME",
+            "ALTER TABLE patients ADD COLUMN contact_email VARCHAR(128)",
+            "ALTER TABLE patients ADD COLUMN contact_phone VARCHAR(32)",
+            "ALTER TABLE doctors ADD COLUMN email VARCHAR(128)",
         ]:
             try:
                 conn.execute(text(stmt))

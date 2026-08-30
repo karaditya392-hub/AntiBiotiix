@@ -21,6 +21,8 @@ export default function RegisterNewPatient() {
     medications: "",
     medicalHistory: "",
     notes: "",
+    contactEmail: "",
+    contactPhone: "",
   });
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -64,6 +66,10 @@ export default function RegisterNewPatient() {
         active_medications: form.medications.split("\n").map((v) => v.trim()).filter(Boolean),
         medical_history: form.medicalHistory.split(",").map((v) => v.trim()).filter(Boolean),
         clinical_notes: form.notes || undefined,
+        // Optional. Captured once here so appointment reminders have somewhere to
+        // go on every future booking without asking the patient again.
+        contact_email: form.contactEmail.trim() || undefined,
+        contact_phone: form.contactPhone.trim() || undefined,
       };
 
       const res = await fetch("/api/patients", {
@@ -163,6 +169,31 @@ export default function RegisterNewPatient() {
                   style={{ width: "100%" }}
                 />
               </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+                <div>
+                  <label className="field-label">Email for appointment reminders</label>
+                  <input
+                    type="email"
+                    placeholder="Optional - leave blank if the patient declines"
+                    value={form.contactEmail}
+                    onChange={(e) => setForm({ ...form, contactEmail: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="field-label">Mobile for reminder SMS</label>
+                  <input
+                    type="tel"
+                    placeholder="Optional"
+                    value={form.contactPhone}
+                    onChange={(e) => setForm({ ...form, contactPhone: e.target.value })}
+                  />
+                </div>
+              </div>
+              <p className="muted" style={{ fontSize: "0.76rem", margin: "-10px 0 0" }}>
+                Used to send appointment reminders. Leave blank and the patient is simply
+                never contacted.
+              </p>
 
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "16px" }}>
                 <div>
