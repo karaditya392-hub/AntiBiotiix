@@ -38,7 +38,7 @@ const features = [
     icon: BookOpenCheck,
     index: "03",
     title: "Guideline precedence",
-    text: "Keep local hospital guidance, national ICMR 2022-23 recommendations, and WHO AWaRe in a 3-tier precedence hierarchy.",
+    text: "Keep local hospital guidance, the ICMR and NCDC national antimicrobial guidelines, and WHO AWaRe in a documented precedence hierarchy, with reference-only material ranked below all of them.",
   },
   {
     icon: FileCheck2,

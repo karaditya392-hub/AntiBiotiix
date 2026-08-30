@@ -18,15 +18,22 @@ export default function GuidelinesPage() {
   const [reviewError, setReviewError] = useState("");
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
   const [reviewSuccessMsg, setReviewSuccessMsg] = useState("");
+  const [corpus, setCorpus] = useState<any>(null);
 
   async function loadData() {
     setLoading(true);
     setError("");
     try {
-      const [rulesRes, govRes] = await Promise.all([
+      const [rulesRes, govRes, healthRes] = await Promise.all([
         fetch("/api/guidelines/rules"),
         fetch("/api/rules/governance"),
+        // Corpus size is read from the system, never typed into the page: the old
+        // hardcoded passage count was wrong the first time a document was ingested.
+        fetch("/api/system/health"),
       ]);
+      if (healthRes.ok) {
+        setCorpus((await healthRes.json())?.guideline_corpus ?? null);
+      }
 
       if (rulesRes.ok) {
         const rulesData = await rulesRes.json();
@@ -121,7 +128,11 @@ export default function GuidelinesPage() {
       <section className="info-section" style={{ background: "#ffffff", padding: "24px" }}>
         <div className="section-title-row" style={{ marginBottom: "16px" }}>
           <div>
-            <p className="dashboard-kicker">2,276 INDEXED GUIDELINE PASSAGES & CATALOG</p>
+            <p className="dashboard-kicker">
+              {corpus?.chunks
+                ? `${corpus.chunks.toLocaleString()} INDEXED PASSAGES ACROSS ${corpus.documents} DOCUMENTS & CATALOG`
+                : "INDEXED GUIDELINE PASSAGES & CATALOG"}
+            </p>
             <h2>Clinical Guidelines & Rules Explorer</h2>
           </div>
           <button className="dashboard-button secondary" onClick={loadData}>

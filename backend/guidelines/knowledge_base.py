@@ -554,18 +554,65 @@ class ClinicalKnowledgeBase:
                 results.append(row)
         return results
 
+    def national_antimicrobial_authorities(self) -> List[Dict[str, Any]]:
+        """
+        The national antimicrobial guidelines this system actually holds.
+
+        Read from the ingested corpus, not hardcoded. The previous hardcoded string
+        named "ICMR Edition 3", an edition never present in this repository, which is
+        precisely the stale-version claim Spec 22 exists to prevent. Two authorities
+        are held now and the count is not assumed either.
+        """
+        from backend.config import NATIONAL_ANTIMICROBIAL_AUTHORITY_DOCUMENT_IDS
+
+        try:
+            from backend.rag.store import vector_store
+            docs = vector_store.docs
+        except Exception:  # pragma: no cover - retrieval must never break policy
+            return []
+
+        out = []
+        for doc_id in NATIONAL_ANTIMICROBIAL_AUTHORITY_DOCUMENT_IDS:
+            doc = docs.get(doc_id)
+            if not doc:
+                continue
+            out.append({
+                "document_id": doc_id,
+                "title": doc.get("title"),
+                "version": doc.get("version"),
+                "issuing_org": doc.get("issuing_org"),
+                "precedence_rank": doc.get("precedence_rank"),
+            })
+        return out
+
     def resolve_guideline_precedence(self, syndrome_key: str) -> Dict[str, Any]:
         """
         Documented guideline precedence policy (Section 8A):
-        Returns the precedence order and surfaces any known conflicts between National (ICMR)
-        and International (WHO/IDSA) guidance.
+        Returns the precedence order and surfaces any known conflicts between National
+        and International guidance.
         """
+        authorities = self.national_antimicrobial_authorities()
         precedence = {
             "hierarchy": GUIDELINE_PRECEDENCE_HIERARCHY,
-            "selected_scope": "National (India - ICMR Edition 3)",
+            # Derived from the corpus rather than asserted. If nothing is ingested the
+            # honest answer is that no national guideline is held, not a version string.
+            "national_antimicrobial_authorities": authorities,
+            "selected_scope": (
+                "National (India) - "
+                + "; ".join(f"{a['title']} [{a['version']}]" for a in authorities)
+                if authorities else
+                "No national antimicrobial guideline is currently ingested."
+            ),
+            "multiple_national_authorities_note": (
+                "Two national antimicrobial guidelines from different bodies are held. "
+                "Neither supersedes the other in this system and no adjudication between "
+                "them is performed; where they differ, both are shown and the clinical "
+                "resolution belongs to the reader."
+                if len(authorities) > 1 else None
+            ),
             "conflict_surfaced": None
         }
-        
+
         # Documented conflict: Fluoroquinolones in uncomplicated UTI
         s_lower = syndrome_key.lower()
         if "uti" in s_lower or "cystitis" in s_lower or "urinary" in s_lower:

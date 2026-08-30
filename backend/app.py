@@ -124,6 +124,46 @@ def _ingested_editions() -> List[str]:
         return ["Guideline corpus unavailable"]
 
 
+def _corpus_summary() -> Dict[str, Any]:
+    """
+    What the corpus holds, in a shape a caller can act on.
+
+    The flat edition list above is still returned for continuity, but at 39
+    documents it is a wall of prose that hides the two facts that actually change
+    how a passage should be read: which documents carry national antimicrobial
+    authority, and which are held for reference without being guidelines at all.
+    """
+    try:
+        from backend.rag.store import NOT_A_CLINICAL_GUIDELINE_RANK, vector_store
+        from backend.config import NATIONAL_ANTIMICROBIAL_AUTHORITY_DOCUMENT_IDS
+
+        docs = vector_store.docs
+        by_rank: Dict[str, int] = {}
+        by_provenance: Dict[str, int] = {}
+        not_guidelines: List[str] = []
+        for doc_id, d in docs.items():
+            rank = d.get("precedence_rank")
+            by_rank[f"rank_{rank}"] = by_rank.get(f"rank_{rank}", 0) + 1
+            basis = d.get("provenance_basis", "HASH_VERIFIED_PDF")
+            by_provenance[basis] = by_provenance.get(basis, 0) + 1
+            if rank == NOT_A_CLINICAL_GUIDELINE_RANK:
+                not_guidelines.append(doc_id)
+        return {
+            "documents": len(docs),
+            "chunks": len(vector_store.chunks),
+            "documents_by_precedence_rank": dict(sorted(by_rank.items())),
+            "documents_by_provenance_basis": by_provenance,
+            "national_antimicrobial_authorities": [
+                doc_id for doc_id in NATIONAL_ANTIMICROBIAL_AUTHORITY_DOCUMENT_IDS
+                if doc_id in docs
+            ],
+            "held_for_reference_not_clinical_guidelines": sorted(not_guidelines),
+            "retrieval": vector_store.backend_description(),
+        }
+    except Exception as exc:  # pragma: no cover - never fail a health check on this
+        return {"available": False, "detail": f"{type(exc).__name__}"}
+
+
 # ---------------------------------------------------------------------------
 # System & Health Endpoints (Section 22, 28)
 # ---------------------------------------------------------------------------
@@ -136,6 +176,7 @@ def get_system_health():
         "version": SYSTEM_VERSION,
         "clinical_role": "CLINICAL_DECISION_SUPPORT_ONLY",
         "guideline_editions_held": _ingested_editions(),
+        "guideline_corpus": _corpus_summary(),
         "timestamp": now_ist().isoformat()
     }
 
@@ -151,6 +192,7 @@ def get_model_and_template_version():
         "prompt_template_hash": PROMPT_TEMPLATE_HASH,
         "stewardship_priority_method": "Deterministic Clinical Severity Rollup (Pure Function)",
         "guideline_sources": _ingested_editions(),
+        "guideline_corpus": _corpus_summary(),
         "guideline_sources_note": (
             "Derived from the documents actually ingested into this system, not a "
             "hardcoded list. Renal calculations use the CKD-EPI 2021 non-race "

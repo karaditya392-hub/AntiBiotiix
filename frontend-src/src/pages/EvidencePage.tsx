@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Search, BookOpenCheck, ShieldAlert } from "lucide-react";
 import ClinicalToolsLayout from "@/components/ClinicalToolsLayout";
 import "@/styles/patient-dashboard.css";
@@ -8,6 +8,17 @@ export default function EvidencePage() {
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [corpus, setCorpus] = useState<any>(null);
+
+  // The corpus description used to be a hardcoded passage count and source list.
+  // It went stale the first time a document was ingested, so read it from the
+  // system instead: what this page claims to search is now what it searches.
+  useEffect(() => {
+    fetch("/api/system/health")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => setCorpus(d?.guideline_corpus ?? null))
+      .catch(() => setCorpus(null));
+  }, []);
 
   async function handleSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -55,8 +66,21 @@ export default function EvidencePage() {
         </div>
 
         <p style={{ color: "#607371", fontSize: "0.86rem", margin: "0 0 16px" }}>
-          Search 2,276 verbatim guideline passages from ICMR STG 2022-23, WHO AWaRe 2023, and DailyMed drug labels. Answers are strictly extractive with score citations — no LLM hallucinations.
+          {corpus?.chunks
+            ? `Search ${corpus.chunks.toLocaleString()} verbatim passages across ${corpus.documents} ingested guideline documents, plus DailyMed drug labels.`
+            : "Search the ingested guideline corpus and DailyMed drug labels."}{" "}
+          Answers are strictly extractive with score citations — no LLM generates the content.
         </p>
+
+        {/* Held for reference but not clinical guidelines: the reader has to know
+            these are in the searchable corpus before a passage from one appears. */}
+        {corpus?.held_for_reference_not_clinical_guidelines?.length > 0 && (
+          <p style={{ color: "#607371", fontSize: "0.76rem", margin: "-8px 0 16px" }}>
+            {corpus.held_for_reference_not_clinical_guidelines.length} of these documents are held
+            for reference only and are not clinical guidelines. A passage from one is labelled as
+            such and is never a basis for a prescribing decision.
+          </p>
+        )}
 
         {/* EXAMPLE CHIPS */}
         <div className="example-chips" style={{ marginBottom: "16px" }}>
@@ -103,6 +127,17 @@ export default function EvidencePage() {
               </div>
             ) : (
               <div style={{ display: "grid", gap: "14px" }}>
+                {result.caveats?.map((c: string, idx: number) => (
+                  <div
+                    key={`caveat-${idx}`}
+                    style={{ background: "#fdf3e3", border: "1px solid #e0c9a0", padding: "12px",
+                             borderRadius: "6px", color: "#7a5520", fontSize: "0.8rem" }}
+                  >
+                    <ShieldAlert size={14} style={{ verticalAlign: "-2px", marginRight: "6px" }} />
+                    {c}
+                  </div>
+                ))}
+
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <span style={{ fontSize: "0.82rem", fontWeight: 700, color: "#173c3d" }}>
                     Retrieved {result.passage_count || result.passages?.length || 0} Verbatim Passage(s)
@@ -128,6 +163,14 @@ export default function EvidencePage() {
                       <strong style={{ color: "#173c3d" }}>{p.document_title}</strong>
                       <span style={{ color: "#2d7064", fontWeight: 600 }}>Score: {p.retrieval_score ?? "N/A"}</span>
                     </div>
+
+                    {p.clinical_standing && (
+                      <p style={{ fontSize: "0.74rem", color: "#8a4b1f", background: "#fdf3e3",
+                                  border: "1px solid #e0c9a0", borderRadius: "4px",
+                                  padding: "6px 8px", margin: "0 0 8px" }}>
+                        {p.clinical_standing}
+                      </p>
+                    )}
 
                     <p style={{ fontSize: "0.88rem", lineHeight: "1.55", margin: "8px 0", color: "#203236" }}>
                       “{p.verbatim_passage}”

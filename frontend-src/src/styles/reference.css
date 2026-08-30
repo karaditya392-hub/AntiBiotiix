@@ -377,6 +377,18 @@
 .cross-prov.verified { background: var(--success-bg); border: 1px solid var(--success-border); color: var(--success-text); }
 .cross-prov.attested { background: var(--moderate-bg); border: 1px solid var(--moderate-border); color: var(--moderate-text); }
 
+/* Documents held for reference only (precedence rank 4): a public information
+   sheet, a community programme leaflet, or a file whose issuing body could not be
+   established. They sit in the same comparison grid as national guidelines, so the
+   distinction is carried by the column itself rather than by the reader's memory. */
+.cross-doc-reference-only { border-style: dashed; opacity: 0.92; }
+.cross-standing {
+  display: block; margin-top: 0.35rem; padding: 0.3rem 0.45rem;
+  background: var(--moderate-bg); border: 1px solid var(--moderate-border);
+  border-radius: var(--radius-sm); color: var(--moderate-text);
+  font-size: 0.66rem; line-height: 1.45;
+}
+
 .cross-drugs { display: flex; flex-wrap: wrap; gap: 0.25rem; margin-bottom: 0.6rem; }
 
 .cross-passage {

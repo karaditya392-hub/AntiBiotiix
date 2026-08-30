@@ -38,6 +38,94 @@ OFFICIAL = {
     "ICMR-STW-PTB-EPTB-2022": "95f06c22b936875baf358853e598e4425dfc667d1857fae8d64c9d3884490ad2",
 }
 
+# MoHFW / NHSRC Standard Treatment Guidelines (scripts/ingest_mohfw_stg.py).
+#
+# National Indian guidelines, but CONDITION-SPECIFIC and almost entirely
+# non-antimicrobial. They sit at the same precedence rank as the ICMR sources, so
+# the only thing stopping a dry eye or hypertension passage from being read as
+# antimicrobial guidance is the scope declaration in its notes. These tests treat
+# that declaration as load-bearing and check it is actually there.
+MOHFW = {
+    "MOHFW-STG-SNAKEBITE-2016": "5b7ea408dade69aae0c9ab8a7536cec29bafbb190586e144bc1066fd8d1e18d9",
+    "MOHFW-STG-OA-KNEE-2017": "4f09392e32f0fe866b954391b26c23792a30d846cd5a586ddd3d131c66dd9ca3",
+    "MOHFW-STG-NEONATAL-JAUNDICE-2016": "be5c94263bdaa67f4a0b893e8d6135ccb92d64fd1a8fe21f6c516730220f69e3",
+    "MOHFW-STG-LBW-FEEDING-UNDATED": "9bb8912d7a27f5c76877002d1e081780fa11c19789a037f9367d41ee7329b824",
+    "MOHFW-STG-ACUTE-SINUSITIS-UNDATED": "925bbcd1f5ddaff8a95fc777e1609811398229a75e04f19a5910025de492f5af",
+    "MOHFW-STG-RSA-2017": "24032ffe321caa23d7f3434441623f0bc028c77b92f9d89d89bd6e554487cee3",
+    "MOHFW-STG-PAED-RESP-INFECTIONS-2016": "5453d568e787c9f1bb5f4e8e3ad04af6e016d3d015589173b9ac13e167eb1673",
+    "MOHFW-STG-DIABETIC-FOOT-2016-DRAFT": "0884abe17b5e3732fa29c976333d4e50cf304841d60e26000b22173efa49ac41",
+    "MOHFW-STG-DRY-EYE-2016": "2034ac57f6c7b149fa20ec04e096ca9ba2e694037102e40bff29c6c244130267",
+    "MOHFW-STG-ALCOHOL-DEPENDENCE-2016": "77a0f8fa83fb7bde3895dadd876c1e22b86a775c9438e380ea83cca02461226f",
+    "MOHFW-STG-HYPERTENSION-2016": "8388906c4f3ce1beb4355d9c5fcc16f25dd96580532a78a5ab3e27e8f41b49da",
+    "MOHFW-STG-MAJOR-TRAUMA-UNDATED": "bcdaa14b89629be96107d0b4526aabbe37425b46e41ab8ed2bb2cdbfa36171b2",
+}
+
+# Indian national programme guidelines (scripts/ingest_national_guidelines.py).
+#
+# Unlike the MoHFW batch this one is mostly infectious disease, and NCDC-NTG-AMR-2016
+# is a national antimicrobial guideline in its own right -- the second such authority
+# in the corpus, alongside ICMR and from a different issuing body.
+NATIONAL = {
+    "NCDC-NTG-AMR-2016": "15861464a570eb0d4aeb0cce7f88047e7361e2a36b32cf604a1418f3f83b817a",
+    "NCDC-LEPTOSPIROSIS-2015": "a5b69959502df4a7e4fe43804e1f049b8b0d2c6812b673528fece74cd2b58a2e",
+    "NCDC-RABIES-PROPHYLAXIS-2015": "c8c6cb6c88aa0377ea6c5cb114aea8adc12349290a01e81c60f7193ac2cf9951",
+    "MOHFW-NVHCP-VIRAL-HEPATITIS-2018": "167d0852b0202fc2e0617a6358d8068fdc0135fec1f23fc364708eb36b09162c",
+    "NVBDCP-MALARIA-DX-TX-2013": "3f6e8f9435cbe3671f70aa8ea8c47c18bcd8be23afdf180a8021edb1c914a766",
+    "NVBDCP-AES-JE-2009": "56e38290807ad972f917c56ff5b5b7b525078daa08c79ff8101530288d977b7e",
+    "NVBDCP-KALA-AZAR-ROADMAP-UNDATED": "d5ce5698af35c5f9d6e3653aff504fc814e4b5e21f34b2d907e7747c925e5666",
+    "NVBDCP-LF-DRUG-DISTRIBUTORS-UNDATED": "bfaabe67dac15db640a4a628c32ff08d84c355f11b8775597ea6dfa1bebc9d85",
+    "MOHFW-CHIKUNGUNYA-FACTS-2006": "7d958b7abb7c4942ae2b0c4020dffc29d4a3f4757e215d51b2fe29cf5ea76746",
+    "NACO-MOHFW-RTI-STI-2014": "298c574e0b38154020de41f6675b2b1afcb847a343787e939ce5c4413c5ba869",
+    "NLEP-DPMR-2012": "cf79605cdae2a9157eb4520627a33c197a1e7eb7987718c72e7e26f7a0a87cce",
+    "NLEP-MO-TRAINING-MANUAL-2013": "7482844e1c1467c8003a02d6f8294589d5cbabe1e62979712beb944d169d683f",
+    "NPPMBI-BURNS-UNDATED": "b2798ce89337b0f807b34aa46ac19068754977c0a0c9b095c7ec11e23d60a4c2",
+    "NPCDCS-MO-MANUAL-UNDATED": "f45a65f2404fdcfcbcf5c3d943942af81c2662d13fa6c34ec77f8c6017acb181",
+    "MOHFW-INTRAOCULAR-SURGERY-PRECAUTIONS-UNDATED":
+        "55ee44a2283130395b26812e7edde602fd2b9bda3f5d1a4fe858b876eecd687d",
+    "AYURVEDA-STG-UNATTRIBUTED-UNDATED":
+        "153d5f8af97e8e1d5dd7ca4879bafdf6d1429e0cff5c46c57bda02afe7814aa5",
+}
+
+OFFICIAL.update(MOHFW)
+OFFICIAL.update(NATIONAL)
+
+# Documents that are not clinical guidelines at all -- a community mass-drug-
+# administration leaflet, a 2006 public fact sheet, and an unattributed Ayurvedic
+# compilation. They are held below the clinical guidelines so they cannot sort
+# alongside ICMR and NCDC in a precedence-ordered comparison.
+UNRANKED_FOR_CLINICAL_USE = {
+    "NVBDCP-LF-DRUG-DISTRIBUTORS-UNDATED",
+    "MOHFW-CHIKUNGUNYA-FACTS-2006",
+    "AYURVEDA-STG-UNATTRIBUTED-UNDATED",
+}
+
+# National programme documents whose own title page states no publication date.
+NATIONAL_UNDATED = {
+    "NVBDCP-KALA-AZAR-ROADMAP-UNDATED",
+    "NVBDCP-LF-DRUG-DISTRIBUTORS-UNDATED",
+    "MOHFW-CHIKUNGUNYA-FACTS-2006",
+    "NPPMBI-BURNS-UNDATED",
+    "NPCDCS-MO-MANUAL-UNDATED",
+    "MOHFW-INTRAOCULAR-SURGERY-PRECAUTIONS-UNDATED",
+    "AYURVEDA-STG-UNATTRIBUTED-UNDATED",
+}
+
+# The three MoHFW documents that DO carry antibiotic recommendations, each for its
+# own condition only. Every other MoHFW document must declare that it carries none.
+MOHFW_WITH_ANTIMICROBIAL_CONTENT = {
+    "MOHFW-STG-ACUTE-SINUSITIS-UNDATED",
+    "MOHFW-STG-PAED-RESP-INFECTIONS-2016",
+    "MOHFW-STG-DIABETIC-FOOT-2016-DRAFT",
+}
+
+# MoHFW documents whose own title page states no publication date. A citation must
+# say so rather than borrow a year from the file name or the PDF creation stamp.
+MOHFW_UNDATED = {
+    "MOHFW-STG-LBW-FEEDING-UNDATED",
+    "MOHFW-STG-ACUTE-SINUSITIS-UNDATED",
+    "MOHFW-STG-MAJOR-TRAUMA-UNDATED",
+}
+
 TRANSCRIBED = {
     "ICMR-STG-2022-23-CH05-IAI": PAGE_NONE,
     "ICMR-STG-2022-23-CH06-SSTI": PAGE_NONE,
@@ -64,10 +152,11 @@ def _docs():
 # Corpus composition
 # ---------------------------------------------------------------------------
 
-def test_corpus_holds_all_eleven_documents():
+def test_corpus_holds_every_expected_document():
     docs = _docs()
-    assert len(docs) == 11
-    for doc_id in list(OFFICIAL) + list(TRANSCRIBED):
+    expected = list(OFFICIAL) + list(TRANSCRIBED)
+    assert len(docs) == len(expected) == 39
+    for doc_id in expected:
         assert doc_id in docs, f"{doc_id} missing from the corpus"
 
 
@@ -126,6 +215,174 @@ def test_edition_claim_is_marked_unverified_on_every_2022_23_chapter():
         assert "2022-23" in doc["version"]
         assert "unverified" in doc["version"].lower()
         assert "No official 2022-23 PDF is held" in doc["notes"]
+
+
+# ---------------------------------------------------------------------------
+# MoHFW STG scope declarations
+#
+# These documents are the reason a scope declaration is not decoration. A
+# hypertension or dry eye guideline sitting at the same precedence rank as ICMR
+# will surface on some query eventually, and the note is what tells the reader it
+# has no standing on antimicrobial choice.
+# ---------------------------------------------------------------------------
+
+def test_every_mohfw_document_declares_its_antimicrobial_scope():
+    docs = _docs()
+    for doc_id in MOHFW:
+        notes = docs[doc_id]["document"]["notes"]
+        if doc_id in MOHFW_WITH_ANTIMICROBIAL_CONTENT:
+            assert "CONTAINS ANTIMICROBIAL RECOMMENDATIONS" in notes, doc_id
+            # Naming the agents is not enough: the note must also say which source
+            # governs when they differ from ICMR or the local antibiogram.
+            assert "governing sources" in notes, doc_id
+        else:
+            assert "NOT AN ANTIMICROBIAL STEWARDSHIP SOURCE" in notes, doc_id
+            assert "never be cited for antimicrobial choice" in notes, doc_id
+
+
+def test_undated_mohfw_documents_do_not_invent_a_publication_date():
+    docs = _docs()
+    for doc_id in MOHFW_UNDATED:
+        doc = docs[doc_id]["document"]
+        assert "NOT STATED IN THE DOCUMENT" in doc["publication_date"], doc_id
+        # A file name or a PDF creation stamp is evidence of drafting, not of
+        # publication, and must never be promoted into a bare year.
+        assert not doc["publication_date"].strip().startswith("20"), doc_id
+
+
+def test_the_draft_is_labelled_a_draft_everywhere_a_reader_looks():
+    doc = _docs()["MOHFW-STG-DIABETIC-FOOT-2016-DRAFT"]["document"]
+    assert "DRAFT" in doc["title"]
+    assert "DRAFT" in doc["version"]
+    assert "draft" in doc["publication_date"]
+    assert "must be labelled a draft" in doc["notes"]
+
+
+def test_inferred_attribution_is_never_stated_as_printed_attribution():
+    docs = _docs()
+    for doc_id in ("MOHFW-STG-NEONATAL-JAUNDICE-2016", "MOHFW-STG-LBW-FEEDING-UNDATED"):
+        doc = docs[doc_id]["document"]
+        org, notes = doc["issuing_org"], doc["notes"]
+        assert ("NOT NAMED ON THE DOCUMENT" in org
+                or "No ministry imprint appears on the title page" in org), doc_id
+        # Both files still carry unresolved editorial placeholders.
+        assert ("WORKING COPY, NOT A FINAL PUBLICATION" in notes
+                or "UNDATED AND UNFINISHED" in notes), doc_id
+
+
+def test_mohfw_source_urls_do_not_claim_a_location_that_was_never_verified():
+    docs = _docs()
+    for doc_id in MOHFW:
+        doc = docs[doc_id]["document"]
+        assert doc["source_url"] == "https://www.mohfw.gov.in/", doc_id
+        assert "could not be verified" in doc["notes"], doc_id
+
+
+# ---------------------------------------------------------------------------
+# National programme guideline scope declarations
+#
+# This batch is mostly infectious disease, so "does it carry antimicrobial guidance"
+# is no longer a yes/no question: an antimalarial policy, an antiviral guideline, a
+# rabies prophylaxis schedule and a leprosy MDT regimen are four different answers
+# and none of them means "empirical antibacterial selection". Each document must
+# therefore say which it is.
+# ---------------------------------------------------------------------------
+
+# Every recognised way a document may describe its own antimicrobial scope. A new
+# document with none of these has not declared one, which is the failure this catches.
+_SCOPE_MARKERS = (
+    "PRIMARY ANTIMICROBIAL SOURCE",
+    "ANTIMICROBIAL RECOMMENDATIONS",
+    "NOT AN ANTIMICROBIAL STEWARDSHIP SOURCE",
+    "NOT ANTIBACTERIAL THERAPY",
+    "ANTIVIRAL THERAPY ONLY",
+    "ANTIMALARIAL DRUG POLICY",
+    "ANTIMICROBIAL-RELEVANT",
+    "ANTIPARASITIC DRUGS",
+    "not an antimicrobial selection guideline",
+    "any antimicrobial choice",
+    "cited for antimicrobial choice",
+)
+
+# Documents carrying antimicrobial recommendations that are NOT themselves a national
+# antimicrobial authority, and so must name what governs when they differ from one.
+NATIONAL_CITING_GOVERNING_SOURCES = {
+    "NCDC-LEPTOSPIROSIS-2015",
+    "NVBDCP-AES-JE-2009",
+    "NACO-MOHFW-RTI-STI-2014",
+    "NPPMBI-BURNS-UNDATED",
+    "MOHFW-INTRAOCULAR-SURGERY-PRECAUTIONS-UNDATED",
+}
+
+
+def test_every_national_document_declares_its_antimicrobial_scope():
+    docs = _docs()
+    for doc_id in NATIONAL:
+        notes = docs[doc_id]["document"]["notes"]
+        assert any(m in notes for m in _SCOPE_MARKERS), (
+            f"{doc_id} does not declare what antimicrobial content it carries"
+        )
+
+
+def test_documents_deferring_to_a_national_authority_name_which_one():
+    docs = _docs()
+    for doc_id in NATIONAL_CITING_GOVERNING_SOURCES:
+        notes = docs[doc_id]["document"]["notes"]
+        assert "ICMR" in notes and "NCDC-NTG-AMR-2016" in notes, doc_id
+        assert "local hospital antibiogram" in notes, doc_id
+
+
+def test_the_second_national_antimicrobial_authority_declares_the_overlap():
+    """
+    Holding two national antimicrobial guidelines from two bodies is a real change in
+    what the corpus can say. It must not be silent about the fact that they can differ,
+    and it must not imply this system picks a winner.
+    """
+    doc = _docs()["NCDC-NTG-AMR-2016"]["document"]
+    notes = doc["notes"]
+    assert "TWO NATIONAL AUTHORITIES ARE NOW HELD" in notes
+    assert "Neither supersedes the other" in notes
+    assert "no adjudication between them is performed" in notes
+    # Ingestion adds evidence; it must not be read as having changed a clinical rule.
+    assert "changes no rule" in notes
+    assert doc["precedence_rank"] == 2
+
+
+def test_undated_national_documents_do_not_invent_a_publication_date():
+    docs = _docs()
+    for doc_id in NATIONAL_UNDATED:
+        doc = docs[doc_id]["document"]
+        assert "NOT STATED IN THE DOCUMENT" in doc["publication_date"], doc_id
+        assert not doc["publication_date"].strip().startswith("20"), doc_id
+
+
+def test_non_guideline_documents_rank_below_the_clinical_guidelines():
+    docs = _docs()
+    for doc_id in NATIONAL:
+        rank = docs[doc_id]["document"]["precedence_rank"]
+        if doc_id in UNRANKED_FOR_CLINICAL_USE:
+            assert rank == 4, f"{doc_id} should not sort alongside ICMR and NCDC"
+        else:
+            assert rank == 2, doc_id
+
+
+def test_the_ayurvedic_compilation_declares_what_it_is_and_what_it_is_not():
+    doc = _docs()["AYURVEDA-STG-UNATTRIBUTED-UNDATED"]["document"]
+    notes = doc["notes"]
+    assert "NOT NAMED ANYWHERE IN THE DOCUMENT" in doc["issuing_org"]
+    assert "TRADITIONAL MEDICINE (AYURVEDA), NOT ALLOPATHIC GUIDANCE" in notes
+    assert "WEAKEST PROVENANCE IN THE CORPUS" in notes
+    # The safety analysis that surrounds the allopathic corpus does not apply here,
+    # and a passage retrieved from this file must not look as though it does.
+    assert "no interaction, dosing or safety checking for Ayurvedic preparations" in notes
+    # No issuer means no issuer website; inventing one would manufacture provenance.
+    assert doc["source_url"] == ""
+
+
+def test_commercial_sponsorship_in_a_source_is_disclosed_not_hidden():
+    notes = _docs()["NLEP-DPMR-2012"]["document"]["notes"]
+    assert "COMMERCIAL SPONSOR ACKNOWLEDGED IN THE SOURCE" in notes
+    assert "Novartis" in notes
 
 
 # ---------------------------------------------------------------------------
@@ -209,7 +466,7 @@ def test_vector_index_is_aligned_with_the_expanded_corpus():
     )
     assert store.available
     assert len(store.chunks) == store.matrix.shape[0]
-    assert len(store.docs) == 11
+    assert len(store.docs) == 39
 
 
 def test_new_chapters_are_actually_retrievable():
@@ -220,6 +477,79 @@ def test_new_chapters_are_actually_retrievable():
     hits = vector_store.search("catheter associated urinary tract infection", k=3, document_ids=ids)
     assert hits, "the ingested 2022-23 chapters returned nothing"
     assert all(h.document_id in ids for h in hits)
+
+
+def test_mohfw_documents_are_retrievable_on_their_own_subject():
+    vector_store.load()
+    ids = [d for d in vector_store.docs if d.startswith("MOHFW-STG-")]
+    assert len(ids) == 12
+
+    hits = vector_store.search("blood pressure target in adults with hypertension", k=3,
+                               document_ids=ids)
+    assert hits, "the ingested MoHFW documents returned nothing"
+    assert hits[0].document_id == "MOHFW-STG-HYPERTENSION-2016"
+    # A genuine page of a genuine document, not a transcript page.
+    assert hits[0].page_reference_kind == PAGE_OFFICIAL
+    assert hits[0].page and hits[0].page > 0
+
+
+def test_adding_non_antimicrobial_documents_did_not_displace_the_antimicrobial_corpus():
+    """
+    Twelve mostly non-antimicrobial documents now sit at the same precedence rank as
+    ICMR. That is safe only while an antimicrobial question still resolves to an
+    antimicrobial source, so the top hit is checked rather than assumed.
+    """
+    vector_store.load()
+    # NCDC-NTG-AMR-2016 belongs here too: it is a national antimicrobial guideline,
+    # so an antimicrobial query resolving to it is a correct answer, not displacement.
+    antimicrobial_corpus = {
+        d for d in vector_store.docs
+        if d.startswith(("ICMR-", "WHO-")) or d == "NCDC-NTG-AMR-2016"
+    }
+    for query in (
+        "empirical antibiotic therapy for hospital acquired pneumonia",
+        "WHO AWaRe reserve group antibiotics",
+        "nitrofurantoin in renal impairment",
+    ):
+        hits = vector_store.search(query, k=3)
+        assert hits, query
+        assert hits[0].document_id in antimicrobial_corpus, (
+            f"{query!r} now resolves to {hits[0].document_id}, which is not an "
+            f"antimicrobial source"
+        )
+
+
+def test_national_programme_documents_are_retrievable_on_their_own_subject():
+    vector_store.load()
+    for query, expected in (
+        ("syndromic empirical therapy for bacterial dysentery", "NCDC-NTG-AMR-2016"),
+        ("syndromic management of vaginal discharge", "NACO-MOHFW-RTI-STI-2014"),
+        ("multi drug therapy regimen for multibacillary leprosy",
+         "NLEP-MO-TRAINING-MANUAL-2013"),
+    ):
+        hits = vector_store.search(query, k=3)
+        assert hits, query
+        assert hits[0].document_id == expected, (
+            f"{query!r} resolved to {hits[0].document_id}, expected {expected}"
+        )
+        assert hits[0].page_reference_kind == PAGE_OFFICIAL
+        assert hits[0].page and hits[0].page > 0
+
+
+def test_the_ayurvedic_compilation_does_not_surface_on_antibacterial_questions():
+    """
+    The one document in the corpus for which this system performs no safety analysis
+    at all. It must stay out of the way of drug questions rather than being offered
+    as though it were part of the allopathic evidence base.
+    """
+    vector_store.load()
+    for query in (
+        "empirical antibiotic for community acquired pneumonia",
+        "amoxicillin dose in renal impairment",
+        "which antibiotic for urinary tract infection",
+    ):
+        hits = vector_store.search(query, k=5)
+        assert "AYURVEDA-STG-UNATTRIBUTED-UNDATED" not in [h.document_id for h in hits], query
 
 
 def test_retrieval_still_refuses_off_domain_queries():
