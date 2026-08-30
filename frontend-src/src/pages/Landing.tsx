@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { LazyMotion, MotionConfig, domAnimation, m, useMotionValue, useReducedMotion, useScroll, useSpring, useTransform } from "motion/react";
 import { Link } from "wouter";
+import SnakeVial from "@/components/ui/snake-vial";
 import logoSrc from "@/assets/antibiotix-logo.jpg";
 import "@/styles/landing.css";
 
@@ -235,6 +236,8 @@ export default function Landing() {
       <LazyMotion features={domAnimation}>
       <main className="landing-page">
         <m.div className="landing-scroll-progress" style={{ scaleX: progressScaleX }} />
+
+        <SnakeVial />
 
         {/* 1. TOP BRANDING & NAVIGATION HEADER */}
         <m.header

@@ -4,6 +4,13 @@
  * lines, and CSS-3D motion that communicates evidence moving into context.
  */
 .landing-page { min-height: 100vh; overflow: hidden; background: #f4f7f6; color: #102324; font-family: 'IBM Plex Sans', sans-serif; }
+/* Background watermark: snake coiled around a vial. A positioned element
+   paints above static siblings, so the page's own sections are lifted to
+   z-index 1 rather than pushing this to -1, which would drop it behind
+   .landing-page's own background and hide it entirely. */
+.landing-snake { position: fixed; inset: 0; z-index: 0; display: grid; place-items: center; pointer-events: none; color: #0d5f60; opacity: .075; }
+.landing-snake svg { width: clamp(230px, 32vw, 400px); height: auto; }
+.landing-page > header, .landing-page > section, .landing-page > footer { position: relative; z-index: 1; }
 .landing-scroll-progress { position: fixed; top: 0; left: 0; right: 0; z-index: 60; height: 3px; transform-origin: 0%; background: linear-gradient(90deg, #0d5f60, #4bb0a0); }
 .landing-nav { position: relative; z-index: 10; max-width: 1320px; margin: 0 auto; padding: 1.15rem 2.5rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(16,66,65,.14); }
 .landing-brand { display: flex; align-items: center; gap: .72rem; color: #102324; text-decoration: none; }
@@ -134,6 +141,7 @@
 .landing-page { background: #0b292b; color: #e5f1ee; background-image: radial-gradient(circle at 74% 21%, rgba(28,116,112,.16), transparent 31rem), linear-gradient(90deg, rgba(155,224,210,.025) 1px, transparent 1px), linear-gradient(rgba(155,224,210,.025) 1px, transparent 1px); background-size: auto, 4rem 4rem, 4rem 4rem; }
 .landing-nav { border-bottom-color: rgba(160,221,208,.18); }
 .landing-scroll-progress { background: linear-gradient(90deg, #0f7774, #8ed8c8); }
+.landing-snake { color: #9fe0d2; opacity: .10; }
 .landing-brand { color: #e5f1ee; }
 .landing-brand strong { color: #9fddd0; }
 .landing-brand small, .landing-nav nav a { color: #94aaa6; }
