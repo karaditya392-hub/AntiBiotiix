@@ -3,6 +3,7 @@ FastAPI Main Application for S11 Explainable Antimicrobial Stewardship & Safety 
 """
 import os
 import threading
+import time
 import uuid
 import json
 from contextlib import asynccontextmanager
@@ -13,11 +14,13 @@ from fastapi import FastAPI, Depends, HTTPException, Query, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from backend.config import (
     SYSTEM_VERSION, ENGINE_BUILD, MODEL_NAME, PROMPT_TEMPLATE_ID,
     PROMPT_TEMPLATE_HASH, GUIDELINE_PRECEDENCE_HIERARCHY,
+    NOTIFICATION_SCHEDULER_INTERVAL_SECONDS, notification_scheduler_enabled,
     AUTHORIZED_OVERRIDE_ROLES, ALERT_FATIGUE_OVERRIDE_RATE_THRESHOLD
 )
 from backend.models import allergies as allergy_store
@@ -25,10 +28,11 @@ from backend.models.database import (
     get_db, init_db, SessionLocal, IST, now_ist, PatientDB, PrescriptionDB, PrescriptionItemDB,
     SafetyWarningDB, ClinicianOverrideDB, ClinicalRuleDB, RuleAuthorshipLogDB,
     GuidelineDocumentDB, AMRSurveillanceDB, AlertMetricsDB, AuditLogDB,
-    DoctorDB, VisitDB, SymptomDB, DiagnosisDB, PatientRAGDocumentDB, AppointmentDB
+    DoctorDB, VisitDB, SymptomDB, DiagnosisDB, PatientRAGDocumentDB, AppointmentDB,
+    NotificationDB
 )
 from backend.models.schemas import (
-    PatientCreate, PatientResponse, PrescriptionCreate, PrescriptionItem,
+    PatientCreate, PatientResponse, PatientContactUpdate, PrescriptionCreate, PrescriptionItem,
     ExtractedPrescription, SafetyWarning, PrescriptionAnalysisResponse,
     OverrideRequest, OverrideResponse, ClinicianRole, SeverityLevel, RuleCategory,
     PatientRegistration, MedicationUpdate, AllergyReportRequest,
@@ -52,10 +56,22 @@ from backend.audit.logger import audit_logger
 from backend.seed_data import list_scenario_presets
 from backend.notifications import (
     scan_and_trigger_same_day_notifications,
+    scan_and_trigger_advance_notifications,
+    run_all_scans,
+    list_in_app_notifications,
+    channel_status,
     format_ist_datetime,
     get_ist_bounds_for_date,
-    IN_APP_NOTIFICATIONS_STORE,
 )
+
+
+# Observable state for the appointment notification scheduler. Reported on
+# /api/notifications/status so a silent scheduler is visible rather than assumed.
+_NOTIFICATION_SCHEDULER_STATE: Dict[str, Any] = {
+    "last_run_ist": None,
+    "last_error": None,
+    "runs": 0,
+}
 
 
 # Lifespan event handler for clean startup / database initialization
@@ -84,6 +100,42 @@ async def lifespan(app: FastAPI):
             pass
 
     threading.Thread(target=_warm_retrieval, name="rag-warmup", daemon=True).start()
+
+    # Appointment reminders, on a timer.
+    #
+    # There was no scheduler at all: the same-day scan ran only from a manual
+    # endpoint, or inline at booking when the appointment happened to be for that
+    # same day. An appointment booked for next Tuesday was therefore never
+    # announced to anyone unless a human remembered to call the endpoint on
+    # Tuesday. The loop below closes that gap for both the advance reminder and
+    # the same-day alert.
+    #
+    # Idempotency comes from the advance_notice_sent / same_day_alert_sent flags,
+    # so running every 15 minutes re-sends nothing.
+    def _notification_scheduler() -> None:
+        while True:
+            time.sleep(NOTIFICATION_SCHEDULER_INTERVAL_SECONDS)
+            if not notification_scheduler_enabled():
+                continue
+            session = SessionLocal()
+            try:
+                run_all_scans(session)
+                _NOTIFICATION_SCHEDULER_STATE["last_run_ist"] = now_ist().isoformat()
+                _NOTIFICATION_SCHEDULER_STATE["last_error"] = None
+                _NOTIFICATION_SCHEDULER_STATE["runs"] += 1
+            except Exception as exc:  # noqa: BLE001 - recorded, never fatal
+                # A failing reminder loop must not take the clinical API down, but
+                # it must not fail silently either: the error is surfaced on
+                # /api/notifications/status.
+                _NOTIFICATION_SCHEDULER_STATE["last_error"] = f"{type(exc).__name__}: {exc}"
+            finally:
+                session.close()
+
+    if notification_scheduler_enabled():
+        threading.Thread(
+            target=_notification_scheduler, name="appointment-notifications", daemon=True
+        ).start()
+
     yield
 
 
@@ -124,6 +176,46 @@ def _ingested_editions() -> List[str]:
         return ["Guideline corpus unavailable"]
 
 
+def _corpus_summary() -> Dict[str, Any]:
+    """
+    What the corpus holds, in a shape a caller can act on.
+
+    The flat edition list above is still returned for continuity, but at 39
+    documents it is a wall of prose that hides the two facts that actually change
+    how a passage should be read: which documents carry national antimicrobial
+    authority, and which are held for reference without being guidelines at all.
+    """
+    try:
+        from backend.rag.store import NOT_A_CLINICAL_GUIDELINE_RANK, vector_store
+        from backend.config import NATIONAL_ANTIMICROBIAL_AUTHORITY_DOCUMENT_IDS
+
+        docs = vector_store.docs
+        by_rank: Dict[str, int] = {}
+        by_provenance: Dict[str, int] = {}
+        not_guidelines: List[str] = []
+        for doc_id, d in docs.items():
+            rank = d.get("precedence_rank")
+            by_rank[f"rank_{rank}"] = by_rank.get(f"rank_{rank}", 0) + 1
+            basis = d.get("provenance_basis", "HASH_VERIFIED_PDF")
+            by_provenance[basis] = by_provenance.get(basis, 0) + 1
+            if rank == NOT_A_CLINICAL_GUIDELINE_RANK:
+                not_guidelines.append(doc_id)
+        return {
+            "documents": len(docs),
+            "chunks": len(vector_store.chunks),
+            "documents_by_precedence_rank": dict(sorted(by_rank.items())),
+            "documents_by_provenance_basis": by_provenance,
+            "national_antimicrobial_authorities": [
+                doc_id for doc_id in NATIONAL_ANTIMICROBIAL_AUTHORITY_DOCUMENT_IDS
+                if doc_id in docs
+            ],
+            "held_for_reference_not_clinical_guidelines": sorted(not_guidelines),
+            "retrieval": vector_store.backend_description(),
+        }
+    except Exception as exc:  # pragma: no cover - never fail a health check on this
+        return {"available": False, "detail": f"{type(exc).__name__}"}
+
+
 # ---------------------------------------------------------------------------
 # System & Health Endpoints (Section 22, 28)
 # ---------------------------------------------------------------------------
@@ -136,6 +228,7 @@ def get_system_health():
         "version": SYSTEM_VERSION,
         "clinical_role": "CLINICAL_DECISION_SUPPORT_ONLY",
         "guideline_editions_held": _ingested_editions(),
+        "guideline_corpus": _corpus_summary(),
         "timestamp": now_ist().isoformat()
     }
 
@@ -151,6 +244,7 @@ def get_model_and_template_version():
         "prompt_template_hash": PROMPT_TEMPLATE_HASH,
         "stewardship_priority_method": "Deterministic Clinical Severity Rollup (Pure Function)",
         "guideline_sources": _ingested_editions(),
+        "guideline_corpus": _corpus_summary(),
         "guideline_sources_note": (
             "Derived from the documents actually ingested into this system, not a "
             "hardcoded list. Renal calculations use the CKD-EPI 2021 non-race "
@@ -576,6 +670,8 @@ def get_patient_medication_history(patient_id: str, db: Session = Depends(get_db
             })
     return {
         "patient_id": patient_id,
+        # The clinician recognises the patient by name; the id keys the record.
+        "display_name": (history.get("patient") or {}).get("display_name"),
         "medication_history": med_list
     }
 
@@ -943,6 +1039,39 @@ def download_visit_prescription_pdf(visit_id: str, db: Session = Depends(get_db)
     )
 
 
+@app.put("/api/patients/{patient_id}/contact")
+def update_patient_contact(
+    patient_id: str,
+    payload: PatientContactUpdate,
+    db: Session = Depends(get_db),
+    principal: Dict[str, str] = Depends(get_current_principal),
+):
+    """
+    Add or correct the reminder contact for an existing patient.
+
+    Exists so a returning patient who never gave an address can be reached from the
+    next booking onwards without re-registering. Passing an empty string clears a
+    field, which is how a patient withdraws consent to be contacted.
+    """
+    require_clinician(principal)
+    patient = db.query(PatientDB).filter(PatientDB.patient_id == patient_id).first()
+    if not patient:
+        raise HTTPException(status_code=404, detail=f"Patient {patient_id} not found.")
+
+    if payload.contact_email is not None:
+        patient.contact_email = payload.contact_email.strip() or None
+    if payload.contact_phone is not None:
+        patient.contact_phone = payload.contact_phone.strip() or None
+    db.commit()
+
+    return {
+        "patient_id": patient_id,
+        "contact_email": patient.contact_email,
+        "contact_phone": patient.contact_phone,
+        "reminders_reachable": bool(patient.contact_email or patient.contact_phone),
+    }
+
+
 @app.post("/api/appointments", status_code=status.HTTP_201_CREATED)
 def schedule_appointment(
     payload: AppointmentCreate,
@@ -969,6 +1098,41 @@ def schedule_appointment(
     appt_id = f"APT-{uuid.uuid4().hex[:6].upper()}"
     time_info = format_ist_datetime(app_dt)
 
+    # --- resolve reminder contacts -----------------------------------------
+    patient_row = db.query(PatientDB).filter(
+        PatientDB.patient_id == payload.patient_id).first()
+    doctor_id = principal.get("clinician_id", "DOC-DEMO-01")
+    doctor_row = db.query(DoctorDB).filter(DoctorDB.doctor_id == doctor_id).first()
+
+    resolved_patient_email = (payload.patient_email or "").strip() or (
+        patient_row.contact_email if patient_row else None)
+    resolved_patient_phone = (payload.patient_phone or "").strip() or (
+        patient_row.contact_phone if patient_row else None)
+    resolved_doctor_email = (payload.doctor_email or "").strip() or (
+        doctor_row.email if doctor_row else None)
+
+    # Remember anything newly supplied, so the next booking for this patient does
+    # not ask again. Only ever fills a blank or replaces with an explicitly given
+    # value; it never quietly discards what is on file.
+    if patient_row:
+        if (payload.patient_email or "").strip():
+            patient_row.contact_email = payload.patient_email.strip()
+        if (payload.patient_phone or "").strip():
+            patient_row.contact_phone = payload.patient_phone.strip()
+    if (payload.doctor_email or "").strip():
+        # A clinician can authenticate through the in-memory credential registry
+        # without ever having a doctors row, so remembering their address means
+        # creating the row when it is missing. Otherwise every booking would ask
+        # for the clinician's e-mail again.
+        if not doctor_row:
+            doctor_row = DoctorDB(
+                doctor_id=doctor_id,
+                display_name=principal.get("clinician_name") or doctor_id,
+                role=principal.get("clinician_role", "ATTENDING_PHYSICIAN"),
+            )
+            db.add(doctor_row)
+        doctor_row.email = payload.doctor_email.strip()
+
     appt = AppointmentDB(
         appointment_id=appt_id,
         patient_id=payload.patient_id,
@@ -976,18 +1140,23 @@ def schedule_appointment(
         doctor_id=principal.get("clinician_id", "DOC-DEMO-01"),
         appointment_date=app_dt,
         reason=payload.reason,
-        doctor_email=payload.doctor_email or "doctor@hospital.org",
-        patient_email=payload.patient_email or "patient@de-identified.org",
-        patient_phone=payload.patient_phone or "+91-9876543210",
-        notification_sent=True,
-        advance_notice_sent=True,
+        # No placeholder contact details. A fabricated address meant a patient with
+        # nothing on file was still recorded as reminded, at an address that does
+        # not exist; a missing contact is now recorded as NO_CONTACT_ON_RECORD.
+        #
+        # Resolution order is: what this booking supplied, then what the patient and
+        # doctor records already hold. That is what makes a RETURNING patient work --
+        # they gave an address once and are not asked again.
+        doctor_email=resolved_doctor_email,
+        patient_email=resolved_patient_email,
+        patient_phone=resolved_patient_phone,
+        # Nothing has been sent at booking time. These flags are written by the
+        # scheduler after a dispatch attempt, never here: they previously claimed
+        # an advance notice that no code path ever sent.
+        notification_sent=False,
+        advance_notice_sent=False,
         same_day_alert_sent=False,
-        delivery_status_json=json.dumps({
-            "advance_email": "SCHEDULED_2_DAYS_PRIOR",
-            "same_day_email": "SCHEDULED_MORNING_IST",
-            "same_day_sms": "SCHEDULED_0800_IST",
-            "same_day_in_app": "SCHEDULED_REALTIME"
-        }),
+        delivery_status_json=json.dumps({}),
         status="SCHEDULED"
     )
     db.add(appt)
@@ -1029,6 +1198,23 @@ def schedule_appointment(
         "time": time_info["time"],
         "reason": payload.reason,
         "same_day_alert_triggered": same_day_triggered,
+        # What a reminder can actually reach for this appointment. Returned so the
+        # booking UI can say "no e-mail on file for this patient" at the moment a
+        # clinician could still fix it, rather than reporting success regardless.
+        "reminder_contacts": {
+            "patient_email": resolved_patient_email,
+            "patient_phone": resolved_patient_phone,
+            "doctor_email": resolved_doctor_email,
+            "patient_email_source": (
+                "SUPPLIED_NOW" if (payload.patient_email or "").strip()
+                else "PATIENT_RECORD" if resolved_patient_email else "NONE_ON_FILE"
+            ),
+            "doctor_email_source": (
+                "SUPPLIED_NOW" if (payload.doctor_email or "").strip()
+                else "DOCTOR_RECORD" if resolved_doctor_email else "NONE_ON_FILE"
+            ),
+        },
+        "channels": channel_status(),
         "notification_channels": ["Email (Doctor & Patient)", "SMS / WhatsApp", "In-App Console Alert"],
         "notification": "Follow-up notifications and same-day morning alerts (IST) configured."
     }
@@ -1050,13 +1236,53 @@ def trigger_same_day_notifications_endpoint(
 
 
 @app.get("/api/notifications/in-app")
-def get_in_app_notifications(patient_id: Optional[str] = None):
+def get_in_app_notifications(patient_id: Optional[str] = None, db: Session = Depends(get_db)):
     """
-    Fetch active in-app notifications for clinician/patient console.
+    Fetch active in-app notifications for the clinician/patient console.
+
+    Read from the notifications table rather than a module-level list, which
+    emptied on restart and was invisible to any other worker process.
     """
-    if patient_id:
-        return [n for n in IN_APP_NOTIFICATIONS_STORE if n.get("patient_id") == patient_id]
-    return IN_APP_NOTIFICATIONS_STORE[:20]
+    return list_in_app_notifications(db, patient_id=patient_id)
+
+
+@app.get("/api/notifications/status")
+def get_notification_channel_status(db: Session = Depends(get_db)):
+    """
+    What this deployment can actually deliver, and what it has recorded.
+
+    Exists so "was the patient actually told?" is answerable without reading the
+    source. An unconfigured channel reports itself as unconfigured here and in
+    every stored delivery record.
+    """
+    counts: Dict[str, int] = {}
+    for status_value, count in (
+        db.query(NotificationDB.status, func.count(NotificationDB.id))
+        .group_by(NotificationDB.status)
+        .all()
+    ):
+        counts[status_value] = int(count)
+    return {
+        "channels": channel_status(),
+        "scheduler": {
+            "enabled": notification_scheduler_enabled(),
+            "interval_seconds": NOTIFICATION_SCHEDULER_INTERVAL_SECONDS,
+            "last_run_ist": _NOTIFICATION_SCHEDULER_STATE.get("last_run_ist"),
+            "last_error": _NOTIFICATION_SCHEDULER_STATE.get("last_error"),
+            "runs_completed": _NOTIFICATION_SCHEDULER_STATE.get("runs", 0),
+        },
+        "delivery_attempts_by_status": counts,
+    }
+
+
+@app.post("/api/notifications/run-scan")
+def run_notification_scans(
+    db: Session = Depends(get_db),
+    principal: Dict[str, str] = Depends(get_current_principal),
+):
+    """Run both the advance and same-day scans now, as the scheduler does."""
+    require_clinician(principal)
+    return run_all_scans(db)
 
 
 @app.get("/api/patients/{patient_id}/next-appointment")
@@ -1161,9 +1387,13 @@ def register_patient(
     """
     Create a patient record. Clinician roles only.
 
-    The request model carries no name, phone, address or government identifier,
-    and the patient_id is issued by the server - spec 24/25 require synthetic,
-    de-identified records, so the API is given nowhere to put a real one.
+    The patient_id is issued by the server, never supplied by the caller.
+
+    Real contact details are accepted and stored: contact_email and contact_phone
+    exist so appointment reminders reach the patient, and so a returning patient is
+    not asked for an address at every booking. Both are optional -- a patient who
+    supplies neither is simply never sent a reminder -- and nothing outside the
+    reminder path reads them.
 
     Note the defaults: allergy, renal and hepatic status all start UNKNOWN
     rather than normal. A newly registered patient with nothing filled in
@@ -1196,6 +1426,8 @@ def register_patient(
         weight_kg=payload.weight_kg,
         allergies_json=allergy_store.dumps([]),
         allergy_status_known=payload.allergy_status_known,
+        contact_email=(payload.contact_email or "").strip() or None,
+        contact_phone=(payload.contact_phone or "").strip() or None,
         egfr_ml_min=payload.egfr_ml_min,
         serum_creatinine_mg_dl=payload.serum_creatinine_mg_dl,
         renal_status_known=payload.renal_status_known,

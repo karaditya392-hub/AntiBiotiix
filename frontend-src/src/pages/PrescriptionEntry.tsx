@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { ArrowLeft, ArrowRight, Plus, ShieldCheck, X } from "lucide-react";
 import { Link, useLocation, useParams } from "wouter";
 import UnifiedHeader from "@/components/UnifiedHeader";
+import { patientName } from "@/lib/patient";
 import "@/styles/patient-dashboard.css";
 
 type PrescriptionItem = {
@@ -129,6 +130,11 @@ export default function PrescriptionEntry() {
     );
   }
 
+  // Lead with the name; the record id stays in the subtitle, but drop it there
+  // when no name was captured and the heading is already showing the id.
+  const displayedName = patientName(patient?.display_name, patient_id);
+  const idPrefix = displayedName === patient_id ? "" : `${patient_id} · `;
+
   return (
     <main className="dashboard-page">
       <UnifiedHeader />
@@ -136,9 +142,9 @@ export default function PrescriptionEntry() {
       <div className="dashboard-header" style={{ marginBottom: "16px" }}>
         <div>
           <p className="dashboard-kicker">PATIENT WORKFLOW STEP 5</p>
-          <h1>Create Prescription — {patient_id}</h1>
+          <h1>Create Prescription — {displayedName}</h1>
           <p className="dashboard-subtitle">
-            Current Diagnosis: <strong>{visitDraft?.diagnosis || "Not specified"}</strong> · Allergies: {patient?.allergies?.join(", ") || "None"}
+            {idPrefix}Current Diagnosis: <strong>{visitDraft?.diagnosis || "Not specified"}</strong> · Allergies: {patient?.allergies?.join(", ") || "None"}
           </p>
         </div>
         <Link href={`/patients/${patient_id}/visit/new`} className="dashboard-button secondary">

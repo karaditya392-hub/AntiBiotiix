@@ -32,6 +32,16 @@ HELD = {
         "version": "2nd edition (2019)",
         "document_id": "ICMR-STG-2019-ED2",
     },
+    # A SECOND national antimicrobial guideline is now held, from a different body.
+    # Declared here so this script stops reporting NCDC as an authority with no
+    # document behind it. Re-citing any rule TO it is a clinical decision and is not
+    # done automatically: nothing below changes a rule's cited source on the basis of
+    # NCDC being present, and doing so needs clinical review.
+    "NCDC": {
+        "cite": "NCDC National Treatment Guidelines for Antimicrobial Use in Infectious Diseases",
+        "version": "Version 1.0 (2016)",
+        "document_id": "NCDC-NTG-AMR-2016",
+    },
     "WHO_AWARE": {
         "cite": "The WHO AWaRe (Access, Watch, Reserve) antibiotic book",
         "version": "2022 (ISBN 978-92-4-006238-2)",

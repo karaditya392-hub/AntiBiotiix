@@ -11,7 +11,7 @@ export default function ClinicalToolsLanding() {
       path: "/clinical-tools/guidelines",
       icon: BookOpenCheck,
       color: "#2d7064",
-      description: "Browse 2,276 indexed ICMR & WHO guideline passages, deterministic safety rules, input conditions, and governance review state.",
+      description: "Browse the indexed national and international guideline corpus, deterministic safety rules, input conditions, and governance review state.",
     },
     {
       id: "evidence",
@@ -19,7 +19,7 @@ export default function ClinicalToolsLanding() {
       path: "/clinical-tools/evidence",
       icon: Search,
       color: "#2d7064",
-      description: "Natural language extractive search over WHO AWaRe 2023, ICMR STGs, and FDA regulatory drug label evidence corpus.",
+      description: "Natural language extractive search over the ICMR and NCDC national antimicrobial guidelines, WHO AWaRe, the national programme guidelines, and FDA drug labels.",
     },
     {
       id: "safety",
@@ -35,7 +35,7 @@ export default function ClinicalToolsLanding() {
       path: "/clinical-tools/reference",
       icon: FileText,
       color: "#2d7064",
-      description: "Explore ICMR STG 2022-23 syndromes, ICMR STW 2022 conditions, national AMR surveillance antibiograms, and guideline precedence rules.",
+      description: "Explore ICMR STG syndromes, ICMR STW conditions, national AMR surveillance antibiograms, and the guideline precedence hierarchy.",
     },
   ];
 

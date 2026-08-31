@@ -23,6 +23,33 @@ An explainable, evidence-grounded Clinical Decision-Support System (CDSS) for an
    - **Rank 2:** Indian Council of Medical Research (ICMR) National Treatment Guidelines (Edition 3, 2022-2023)
    - **Rank 3:** WHO AWaRe Classification (Access, Watch, Reserve 2023) & IDSA Guidelines
    - Authentic Indian resistance data from the ICMR AMR Surveillance Network (98,400 isolates).
+   - **A second national antimicrobial authority:** the **NCDC National Treatment Guidelines
+     for Antimicrobial Use in Infectious Diseases, Version 1.0 (2016)** (`NCDC-NTG-AMR-2016`),
+     whose syndromic empirical-therapy chapter spans GI/intra-abdominal, CNS, cardiovascular,
+     SSTI, respiratory, urinary, obstetric, bone-and-joint and eye infections. It sits at
+     national rank alongside ICMR, from a different issuing body. **Neither supersedes the
+     other and this system does not adjudicate between them** — where they differ, the
+     difference is surfaced and its clinical resolution is the reader's. No clinical rule
+     cites it; ingesting it added evidence, not rule behaviour.
+   - **Retrieval corpus: 39 documents, 6,415 verbatim chunks.** Alongside ICMR and WHO it
+     holds 12 MoHFW/NHSRC Standard Treatment Guidelines and 16 national programme documents
+     (NCDC, NVBDCP, NLEP, NACO/MoHFW, NPCDCS, NPPMBI, plus one unattributed Ayurvedic file).
+     Every document records in its provenance notes **which kind of antimicrobial content it
+     carries** — empirical antibacterial therapy, antimalarial policy, antiviral therapy,
+     rabies prophylaxis, programme-set leprosy MDT, or none — because those are different
+     answers and none of them except the first is a basis for antibacterial selection. Those
+     that carry antibacterial recommendations name what governs when they differ from a
+     national antimicrobial guideline or the local antibiogram.
+   - **Provenance is recorded as found, not as preferred.** Ten documents declare themselves
+     undated rather than borrowing a year from a file name; the diabetic foot document
+     declares itself a draft; two declare their attribution inferred rather than printed; the
+     leprosy rehabilitation guideline discloses the commercial sponsor acknowledged in its own
+     text. Three documents that are **not clinical guidelines** — a community mass-drug-
+     administration leaflet, a 2006 public fact sheet, and an unattributed Ayurvedic
+     compilation — are held at **precedence rank 4 (`NOT_A_CLINICAL_GUIDELINE`)** so they
+     cannot sort alongside ICMR and NCDC. Ingested by `scripts/ingest_mohfw_stg.py` and
+     `scripts/ingest_national_guidelines.py`, which are the reproducibility record for what
+     was claimed about each file.
 5. **Deterministic Template Explainer with Injection-Hardened Input Handling (Section 10, 10A, 22A):**
    - Input sanitization and XML sandboxing neutralizing adversarial instructions embedded in free-text fields.
    - Model name, prompt template ID, and evidence SHA-256 hash computed and logged per explanation for full audit reproducibility.

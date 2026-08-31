@@ -13,7 +13,15 @@ seeded records instead of skipping them; this check is the other half, so the
 problem is reported at the start of the run in plain language rather than as a
 misleading assertion twenty tests later.
 """
+import os
+
 import pytest
+
+# The appointment notification scheduler is a real background thread in the app's
+# lifespan. Tests drive the scans directly, so leave the timer off rather than
+# starting one thread per TestClient. Read at thread start, so setting it here is
+# enough regardless of import order.
+os.environ.setdefault("S11_NOTIFICATION_SCHEDULER", "0")
 
 from backend.models.database import PatientDB, SessionLocal, init_db
 

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { Lock, User, AlertCircle, ArrowRight } from "lucide-react";
 import UnifiedHeader from "@/components/UnifiedHeader";
@@ -9,9 +9,25 @@ export default function Login() {
   const [, setLocation] = useLocation();
   const { login } = useAuth();
 
-  // Extract redirect target from URL query string if present
-  const searchParams = new URLSearchParams(window.location.hash.split("?")[1] || "");
-  const redirectTarget = searchParams.get("redirect") || "/patient-type";
+  // Extract redirect target from the URL if present. wouter's hash-location
+  // navigate() writes the query to the real search string (".../?redirect=x#/login"),
+  // so read that first and keep the in-hash form (".../#/login?redirect=x") as a
+  // fallback for links written by hand. Captured once, because the stale query is
+  // stripped from the address bar below.
+  const [redirectTarget] = useState(() => {
+    const params = new URLSearchParams(
+      window.location.search || `?${window.location.hash.split("?")[1] || ""}`
+    );
+    return params.get("redirect") || "/patient-type";
+  });
+
+  // navigate() never clears an existing search string, so drop it once captured.
+  // Otherwise a later visit to /login would inherit this redirect target.
+  useEffect(() => {
+    if (window.location.search) {
+      window.history.replaceState(null, "", window.location.pathname + window.location.hash);
+    }
+  }, []);
 
   const [doctorId, setDoctorId] = useState("");
   const [password, setPassword] = useState("");

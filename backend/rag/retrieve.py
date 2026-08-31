@@ -21,36 +21,63 @@ NO_EVIDENCE = "No sufficiently relevant evidence was retrieved."
 
 # Cosine similarity floor. Below this, a chunk is not offered as evidence.
 #
-# Calibrated against 12 legitimate and 7 nonsense queries over the ingested
-# corpus. Those two classes OVERLAP on cosine similarity alone: the lowest
-# legitimate score was 0.522 ("nitrofurantoin renal impairment") while the
-# highest nonsense score was 0.595 ("zzzzmycin 500mg indications"). A nonsense
-# drug name embedded in a well-formed dosing question matches dosing sections on
-# sentence FORM, not content, so no single threshold can separate them.
+# RECALIBRATED for the 39-document corpus (was 0.35, calibrated when 11 documents
+# were held). Measured over 24 legitimate and 15 off-domain queries:
 #
-# The floor is therefore set to catch clearly off-domain queries only, and is
-# paired with the lexical grounding check below, which catches queries naming
-# entities the corpus has never heard of. Neither check alone is sufficient.
-RELEVANCE_FLOOR = 0.35
+#   lowest legitimate  0.522  ("nitrofurantoin renal impairment")
+#   highest off-domain 0.341  ("how to train a puppy" -> NLEP-DPMR-2012)
+#
+# The old 0.35 sat 0.009 above the highest off-domain score. That margin was
+# 0.219 on the smaller corpus and the expansion consumed it: a food composition
+# table in the burns document, rehabilitation training language in the leprosy
+# guideline and cost discussion in the hypertension guideline all raise the score
+# of ordinary English that has nothing to do with any of them. 0.45 sits in the
+# middle of the measured gap, rejecting every off-domain query with room to spare
+# while keeping every legitimate one.
+#
+# Invented drug names still score high (0.62 for "flurbamycin dosing in adults"):
+# a nonsense name in a well-formed dosing question matches on sentence FORM, not
+# content, and no threshold separates those. They are caught before scoring by
+# unknown_entities() below. Neither check alone is sufficient.
+RELEVANCE_FLOOR = 0.45
 
 # Floor for the LEXICAL fallback, used when this machine could not load the
 # semantic model and the corpus was re-embedded with TF-IDF.
 #
 # It needs its own number because the two backends score on different scales:
-# applying 0.35 to TF-IDF rejected every genuine question, which is how a working
-# corpus came to answer "no sufficiently relevant evidence" on a machine without
-# the model cached.
+# applying the semantic floor to TF-IDF rejected every genuine question, which is
+# how a working corpus came to answer "no sufficiently relevant evidence" on a
+# machine without the model cached.
 #
-# Calibrated the same way as the semantic floor, on this corpus:
-#   lowest legitimate query  0.167  ("empirical treatment for typhoid fever")
-#   highest nonsense query   0.162  ("zzzzmycin 500mg indications")
-# Those two barely separate, exactly as they fail to separate for the semantic
-# backend. The floor is therefore NOT asked to carry the load alone: invented
-# drug names such as zzzzmycin are already rejected by unknown_entities() before
-# scoring, leaving genuinely off-domain English as what the floor must catch, and
-# that tops out at 0.131 ("how do I change a bicycle tyre"). 0.15 sits between
-# that and the lowest real question.
-LEXICAL_RELEVANCE_FLOOR = 0.15
+# THE TWO CLASSES NOW OVERLAP HERE, and the floor can no longer separate them.
+# Measured over the 39-document corpus, counting only queries that survive
+# unknown_entities() and therefore actually reach the floor:
+#
+#   lowest legitimate   0.156  ("vancomycin monitoring")
+#   highest off-domain  0.209  ("how to invest in mutual funds"
+#                               -> MOHFW-STG-HYPERTENSION-2016, on its cost text)
+#
+# The off-domain maximum is now ABOVE the legitimate minimum, so no threshold
+# admits every real question while rejecting every off-domain one. A term-overlap
+# guard was measured too and does not separate them either ("how do I change a
+# bicycle tyre" matches 2 of 3 terms; "fever in neutropenic patient" matches 1 of 3).
+#
+# 0.17 is therefore chosen as the best available compromise rather than a clean
+# separator: it rejects three of the five off-domain queries that reach it, keeps
+# 16 of 18 legitimate ones, and leaves the residual failure visible instead of
+# hidden -- see LEXICAL_OVERLAP_CAVEAT, which every degraded-mode response carries.
+LEXICAL_RELEVANCE_FLOOR = 0.17
+
+# Attached to every result produced by the lexical fallback, because on this corpus
+# a passage clearing the lexical floor is evidence of shared WORDING, not evidence
+# that the corpus addresses the question.
+LEXICAL_OVERLAP_CAVEAT = (
+    "Retrieval on this machine is LEXICAL, not semantic. On the current corpus the "
+    "lexical scores of genuine clinical questions and of off-domain questions overlap, "
+    "so a returned passage means the corpus contains similar WORDING, not that it "
+    "addresses this question. Read every passage below against the question before "
+    "relying on it, and install the semantic model to restore reliable retrieval."
+)
 
 
 def active_floor() -> float:
@@ -117,6 +144,36 @@ class RetrievalResult:
     floor: float
     best_score: Optional[float]
 
+    @property
+    def non_clinical_sources(self) -> List[str]:
+        """Retrieved documents that are held for reference but are not guidelines."""
+        seen = []
+        for c in self.chunks:
+            if not c.is_clinical_guideline and c.document_id not in seen:
+                seen.append(c.document_id)
+        return seen
+
+    def caveats(self) -> List[str]:
+        """
+        Everything a reader must know before using these passages.
+
+        Collected here rather than left implicit in the store description, because a
+        caveat the caller has to reconstruct from three separate fields is a caveat
+        that will not reach the clinician.
+        """
+        out: List[str] = []
+        if not vector_store.is_semantic:
+            out.append(LEXICAL_OVERLAP_CAVEAT)
+        if self.non_clinical_sources:
+            out.append(
+                "One or more passages come from documents held for reference only and "
+                "not as clinical guidelines: "
+                + ", ".join(self.non_clinical_sources)
+                + ". They carry no clinical authority and are never a basis for a "
+                "prescribing or antimicrobial decision."
+            )
+        return out
+
     def to_dict(self) -> Dict[str, Any]:
         return {
             "query": self.query,
@@ -127,6 +184,8 @@ class RetrievalResult:
             "relevance_floor": self.floor,
             "best_score": round(self.best_score, 4) if self.best_score is not None else None,
             "store": vector_store.backend_description(),
+            "non_clinical_sources": self.non_clinical_sources,
+            "caveats": self.caveats(),
         }
 
 

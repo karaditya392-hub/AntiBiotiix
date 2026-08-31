@@ -64,6 +64,8 @@ interface SourceDoc {
   version: string;
   precedence_rank: number | null;
   provenance_basis: string;
+  is_clinical_guideline?: boolean;
+  clinical_standing?: string | null;
   has_guidance: boolean;
   reason?: string;
   nearest_score?: number | null;
@@ -78,6 +80,7 @@ function renderCrossSource(data: {
   topic: string;
   documents_searched: number;
   documents_with_guidance: number;
+  documents_compared_for_agent_differences?: number;
   documents: SourceDoc[];
   differing_agents: Array<{ drug: string; named_by: string[]; not_named_by: string[] }>;
   curated_conflict: Record<string, string> | null;
@@ -85,6 +88,15 @@ function renderCrossSource(data: {
 }): void {
   const host = document.getElementById("crossSourceResults");
   if (!host) return;
+
+  // The panel badge was a hand-written count in the markup, so it stated whatever
+  // the corpus held on the day it was typed. Take it from the response instead:
+  // ingesting a document must not be able to leave the UI understating what the
+  // system searched.
+  const badge = document.getElementById("crossSourceBadge");
+  if (badge && typeof data.documents_searched === "number") {
+    badge.textContent = `${data.documents_searched} documents held`;
+  }
 
   if (!data.available) {
     host.innerHTML = `<p class="sub-text">${esc(data.message)}</p>`;
@@ -100,6 +112,12 @@ function renderCrossSource(data: {
     (data.differing_agents.length
       ? `<span class="badge badge-warning">${data.differing_agents.length} agent(s) named by some sources and not others</span>`
       : `<span class="badge badge-subtle">No difference in named agents</span>`) +
+    (typeof data.documents_compared_for_agent_differences === "number"
+      && data.documents_compared_for_agent_differences < onTopic.length
+      ? `<span class="badge badge-subtle">agent differences computed across ` +
+        `${data.documents_compared_for_agent_differences} guideline(s); reference-only ` +
+        `sources excluded</span>`
+      : "") +
     `</div>`;
 
   const curated = data.curated_conflict
@@ -114,14 +132,21 @@ function renderCrossSource(data: {
 
   const columns = onTopic.map(d => {
     const verified = d.provenance_basis === "HASH_VERIFIED_PDF";
+    // A reference-only document sitting in the same row of columns as a national
+    // guideline has to be readable as such at a glance, not two clicks away in a
+    // provenance note.
+    const notGuideline = d.is_clinical_guideline === false;
     return (
-      `<article class="cross-doc">` +
+      `<article class="cross-doc${notGuideline ? " cross-doc-reference-only" : ""}">` +
       `<header>` +
       `<span class="cross-rank">Precedence rank ${esc(d.precedence_rank ?? "—")}</span>` +
       `<strong>${esc(d.title)}</strong>` +
       `<span class="cross-version">${esc(d.version)}</span>` +
       `<span class="cross-prov ${verified ? "verified" : "attested"}">` +
       `${verified ? "hash-verified source" : "operator-attested source"}</span>` +
+      (notGuideline
+        ? `<span class="cross-standing">${esc(d.clinical_standing || "Not a clinical guideline.")}</span>`
+        : "") +
       `</header>` +
       (d.named_drugs.length
         ? `<div class="cross-drugs">${d.named_drugs.map(x => `<span class="tag">${esc(x)}</span>`).join("")}</div>`

@@ -60,6 +60,9 @@ class AskResult:
     injection_detected: bool = False
     sanitized_question: str = ""
     refusal_reason: Optional[str] = None
+    # Everything the reader must know before using the passages: degraded lexical
+    # retrieval, and passages drawn from documents that are not clinical guidelines.
+    caveats: List[str] = field(default_factory=list)
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -70,6 +73,7 @@ class AskResult:
             "passage_count": len(self.passages),
             "injection_detected": self.injection_detected,
             "refusal_reason": self.refusal_reason,
+            "caveats": self.caveats,
             "answer_mode": "EXTRACTIVE_NO_LLM",
             "disclaimer": (
                 "Retrieved verbatim from the ingested guideline corpus. No language "
@@ -118,4 +122,7 @@ def ask(question: str, k: int = 4) -> AskResult:
     passages = [c.to_citation() for c in result.chunks]
     return AskResult(
         q, True, None, passages=passages, sanitized_question=cleaned,
+        # Carried through from retrieval rather than recomputed: the answer and the
+        # warning about the answer must not be able to drift apart.
+        caveats=result.caveats(),
     )

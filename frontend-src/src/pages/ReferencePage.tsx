@@ -8,6 +8,9 @@ export default function ReferencePage() {
   const [stwConditions, setStwConditions] = useState<any[]>([]);
   const [amrData, setAmrData] = useState<any[]>([]);
   const [precedence, setPrecedence] = useState<any[]>([]);
+  // Which documents actually carry national antimicrobial authority, read from the
+  // corpus by the API rather than assumed to be a single named edition.
+  const [authorities, setAuthorities] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<"stg" | "stw" | "amr" | "precedence">("stg");
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
@@ -39,6 +42,7 @@ export default function ReferencePage() {
       setStwConditions(Array.isArray(stwData) ? stwData : (stwData.conditions || []));
       setAmrData(Array.isArray(amrDataRaw) ? amrDataRaw : (amrDataRaw.records || []));
       setPrecedence(Array.isArray(precDataRaw) ? precDataRaw : (precDataRaw.hierarchy || []));
+      setAuthorities(precDataRaw.national_antimicrobial_authorities || []);
     } catch (err: any) {
       setError(err.message || "Failed to load clinical reference corpus.");
     } finally {
@@ -323,22 +327,59 @@ export default function ReferencePage() {
             {activeTab === "precedence" && (
               <div style={{ display: "grid", gap: "12px" }}>
                 {precedence.length === 0 ? (
+                  // No invented fallback list. The previous one described an ICMR
+                  // edition this system does not hold and put FDA labels at rank 4,
+                  // where the hierarchy now places reference-only material -- a
+                  // hardcoded hierarchy is exactly what goes wrong silently.
                   <article style={{ background: "#fbfcf9", border: "1px solid #cbd9d4", padding: "16px", borderRadius: "6px" }}>
                     <h4>Guideline Precedence Order</h4>
-                    <ol style={{ paddingLeft: "20px", fontSize: "0.88rem", lineHeight: "1.6" }}>
-                      <li><strong>Local Hospital Antimicrobial Formulary (Rank 1)</strong> — Overrides regional/national defaults if local antibiogram indicates resistance.</li>
-                      <li><strong>ICMR STG 2022-23 National Guidelines (Rank 2)</strong> — Primary national reference for clinical syndromes and first-line dosing.</li>
-                      <li><strong>WHO AWaRe 2023 Classification (Rank 3)</strong> — Global stewardship framework (Access, Watch, Reserve categorization).</li>
-                      <li><strong>FDA / DailyMed Approved Drug Labels (Rank 4)</strong> — Regulatory safety warnings, black-box warnings, contraindications.</li>
-                    </ol>
+                    <p style={{ margin: "4px 0", fontSize: "0.84rem", color: "#607371" }}>
+                      The precedence hierarchy could not be loaded from the system. It is not
+                      reproduced here from memory, because a hierarchy shown from memory is the
+                      one thing that cannot be checked against what is actually ingested.
+                    </p>
                   </article>
                 ) : (
-                  precedence.map((p: any, idx: number) => (
-                    <article key={idx} style={{ background: "#fbfcf9", border: "1px solid #cbd9d4", padding: "16px", borderRadius: "6px" }}>
-                      <strong style={{ color: "#173c3d" }}>Rank {p.rank || idx + 1}: {p.authority_name || p.document_title}</strong>
-                      <p style={{ margin: "4px 0", fontSize: "0.84rem" }}>{p.description || p.precedence_rule}</p>
-                    </article>
-                  ))
+                  <>
+                    {authorities.length > 1 && (
+                      <article style={{ background: "#f0f6f1", border: "1px solid #c8dcd2", padding: "16px", borderRadius: "6px" }}>
+                        <strong style={{ color: "#173c3d" }}>
+                          {authorities.length} national antimicrobial guidelines are held
+                        </strong>
+                        <ul style={{ paddingLeft: "18px", margin: "6px 0", fontSize: "0.84rem", lineHeight: 1.55 }}>
+                          {authorities.map((a: any) => (
+                            <li key={a.document_id}>
+                              <strong>{a.title}</strong> — {a.version}
+                            </li>
+                          ))}
+                        </ul>
+                        <p style={{ margin: "4px 0 0", fontSize: "0.8rem", color: "#607371" }}>
+                          Neither supersedes the other in this system and no adjudication between
+                          them is performed. Where they differ, both are shown and the clinical
+                          resolution belongs to the reader.
+                        </p>
+                      </article>
+                    )}
+                    {precedence.map((p: any, idx: number) => (
+                      <article key={idx} style={{ background: "#fbfcf9", border: "1px solid #cbd9d4", padding: "16px", borderRadius: "6px" }}>
+                        <strong style={{ color: "#173c3d" }}>Rank {p.rank ?? idx + 1}: {p.authority_name || p.document_title || p.category}</strong>
+                        <p style={{ margin: "4px 0", fontSize: "0.84rem" }}>{p.description || p.precedence_rule}</p>
+                        {p.issuing_org && (
+                          <p style={{ margin: "2px 0", fontSize: "0.78rem", color: "#607371" }}>{p.issuing_org}</p>
+                        )}
+                        {p.second_national_antimicrobial_authority && (
+                          <p style={{ margin: "6px 0 0", fontSize: "0.78rem", color: "#607371" }}>
+                            {p.second_national_antimicrobial_authority}
+                          </p>
+                        )}
+                        {p.also_held_at_this_rank && (
+                          <p style={{ margin: "6px 0 0", fontSize: "0.78rem", color: "#607371" }}>
+                            {p.also_held_at_this_rank}
+                          </p>
+                        )}
+                      </article>
+                    ))}
+                  </>
                 )}
               </div>
             )}

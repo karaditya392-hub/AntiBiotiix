@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { BookOpenCheck, Calendar, CheckCircle2, Download, History, X } from "lucide-react";
 import { Link, useLocation, useParams } from "wouter";
 import UnifiedHeader from "@/components/UnifiedHeader";
+import { patientName } from "@/lib/patient";
 import "@/styles/patient-dashboard.css";
 
 export default function VisitSummary() {
@@ -9,19 +10,31 @@ export default function VisitSummary() {
   const [, setLocation] = useLocation();
 
   const [visit, setVisit] = useState<any>(null);
-  const [_patient, setPatient] = useState<any>(null);
+  const [patient, setPatient] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   // Follow-up modal state
   const [showFollowupModal, setShowFollowupModal] = useState(false);
   const [followupDate, setFollowupDate] = useState("");
   const [followupReason, setFollowupReason] = useState("Routine post-antimicrobial clinical follow-up");
-  const [doctorEmail, setDoctorEmail] = useState("doctor@hospital.org");
-  const [patientEmail, setPatientEmail] = useState("patient@de-identified.org");
-  const [patientPhone, setPatientPhone] = useState("+91-9876543210");
+  // Blank, not placeholder addresses. These fields used to ship
+  // "patient@de-identified.org" as a default, so a clinician who did not edit them
+  // booked a reminder to an address that does not exist -- and the record said it
+  // had been sent. They are prefilled below from the patient's own record instead.
+  const [doctorEmail, setDoctorEmail] = useState("");
+  const [patientEmail, setPatientEmail] = useState("");
+  const [patientPhone, setPatientPhone] = useState("");
   const [followupMsg, setFollowupMsg] = useState("");
   const [followupError, setFollowupError] = useState("");
   const [followupSubmitting, setFollowupSubmitting] = useState(false);
+
+  // A returning patient who gave an address at registration or at a previous
+  // booking is not asked for it again.
+  useEffect(() => {
+    if (!patient) return;
+    if (patient.contact_email) setPatientEmail((v) => v || patient.contact_email);
+    if (patient.contact_phone) setPatientPhone((v) => v || patient.contact_phone);
+  }, [patient]);
 
   useEffect(() => {
     async function loadSummary() {
@@ -81,9 +94,37 @@ export default function VisitSummary() {
 
       if (res.ok) {
         const appData = await res.json();
-        const msg = appData.same_day_alert_triggered
-          ? "Check-up scheduled for TODAY! Multi-channel alerts (Email, SMS, In-App) triggered immediately in IST."
-          : `Check-up scheduled for ${appData.formatted_date_ist || "selected date"}. Automated IST notifications configured across Email, SMS, and In-App Console.`;
+        // Say what the system can actually do for THIS appointment. The old copy
+        // asserted that email and SMS alerts had gone out regardless of whether any
+        // channel was configured or any address was on file.
+        const contacts = appData.reminder_contacts || {};
+        const channels = appData.channels || {};
+        const reachable: string[] = [];
+        const unreachable: string[] = [];
+
+        if (contacts.patient_email) {
+          (channels.email?.configured ? reachable : unreachable).push("patient email");
+        } else {
+          unreachable.push("patient email (none on file)");
+        }
+        if (contacts.patient_phone) {
+          (channels.sms?.configured ? reachable : unreachable).push("patient SMS");
+        } else {
+          unreachable.push("patient SMS (no number on file)");
+        }
+        if (contacts.doctor_email) {
+          (channels.email?.configured ? reachable : unreachable).push("clinician email");
+        } else {
+          unreachable.push("clinician email (none on file)");
+        }
+        reachable.push("in-app console");
+
+        const when = appData.same_day_alert_triggered
+          ? "today, and the same-day alert has run"
+          : `for ${appData.formatted_date_ist || "the selected date"}`;
+        const msg =
+          `Check-up scheduled ${when}. Reminders will reach: ${reachable.join(", ")}.` +
+          (unreachable.length ? ` Not sent: ${unreachable.join(", ")}.` : "");
         setFollowupMsg(msg);
         setTimeout(() => setShowFollowupModal(false), 2500);
       } else {
@@ -141,7 +182,7 @@ export default function VisitSummary() {
           <p className="dashboard-kicker">PATIENT WORKFLOW STEP 7</p>
           <h1>Visit Summary & Confirmation</h1>
           <p className="dashboard-subtitle">
-            Visit <strong>{visit_id}</strong> for Patient <strong>{patient_id}</strong>
+            Visit <strong>{visit_id}</strong> for <strong>{patientName(patient?.display_name, patient_id)}</strong>
           </p>
         </div>
         <Link href={`/patients/${patient_id}`} className="dashboard-button secondary">
@@ -268,7 +309,7 @@ export default function VisitSummary() {
               </div>
 
               <div>
-                <label className="field-label">Clinician Email (Notification 2 days before)</label>
+                <label className="field-label">Clinician Email &mdash; where &ldquo;your patient is coming&rdquo; reminders go</label>
                 <input
                   type="email"
                   value={doctorEmail}
@@ -278,17 +319,18 @@ export default function VisitSummary() {
               </div>
 
               <div>
-                <label className="field-label">Patient Email (Same-day & advance notification)</label>
+                <label className="field-label">Patient Email &mdash; advance and same-day reminder</label>
                 <input
                   type="email"
                   value={patientEmail}
                   onChange={(e) => setPatientEmail(e.target.value)}
+                  placeholder={patient?.contact_email ? "" : "No email on file - add one to send reminders"}
                   className="dashboard-select"
                 />
               </div>
 
               <div>
-                <label className="field-label">Patient Mobile / WhatsApp Number (Same-day SMS alert)</label>
+                <label className="field-label">Patient Mobile &mdash; reminder SMS (optional)</label>
                 <input
                   type="tel"
                   value={patientPhone}

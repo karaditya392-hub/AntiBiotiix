@@ -45,6 +45,16 @@ PAGE_OFFICIAL = "OFFICIAL_DOCUMENT_PAGE"
 PAGE_TRANSCRIPT = "TRANSCRIPT_PAGE_NOT_OFFICIAL"
 PAGE_NONE = "NO_PAGINATION"
 
+# Precedence rank reserved for documents that are held and retrievable but are not
+# clinical guidelines: public information sheets, community programme leaflets, and
+# files whose issuing body cannot be established from the document itself. See
+# backend.config.GUIDELINE_PRECEDENCE_HIERARCHY rank 4.
+#
+# The rank is on the document, so it is the one structured signal a caller can use
+# to tell "the corpus says this" from "a leaflet in the corpus says this" without
+# parsing a prose provenance note.
+NOT_A_CLINICAL_GUIDELINE_RANK = 4
+
 
 @dataclass
 class RetrievedChunk:
@@ -63,6 +73,13 @@ class RetrievedChunk:
     source_type: str = "OFFICIAL_PDF"
     page_reference_kind: str = PAGE_OFFICIAL
     provenance_basis: str = "HASH_VERIFIED_PDF"
+    # Documents ingested before rank 4 existed are clinical guidelines, so the
+    # default must not mark them as anything else.
+    precedence_rank: Optional[int] = 2
+
+    @property
+    def is_clinical_guideline(self) -> bool:
+        return self.precedence_rank != NOT_A_CLINICAL_GUIDELINE_RANK
 
     def location_label(self) -> str:
         """Render the location so it cannot be mistaken for an official page."""
@@ -89,6 +106,18 @@ class RetrievedChunk:
             "verbatim_passage": self.text,
             "retrieval_score": round(float(self.score), 4),
             "provenance_note": self.notes or None,
+            "precedence_rank": self.precedence_rank,
+            "is_clinical_guideline": self.is_clinical_guideline,
+            # Spelled out rather than left for the reader to infer from a rank
+            # number, because this is the caveat that matters most about a passage.
+            "clinical_standing": (
+                None if self.is_clinical_guideline else
+                "NOT A CLINICAL GUIDELINE. This passage comes from a document held for "
+                "reference only - public information material, a community programme "
+                "leaflet, or a file whose issuing body could not be established. It "
+                "carries no clinical authority and is never a basis for a prescribing "
+                "or antimicrobial decision."
+            ),
         }
 
 
@@ -306,6 +335,7 @@ class GuidelineVectorStore:
                     source_type=doc.get("source_type", "OFFICIAL_PDF"),
                     page_reference_kind=doc.get("page_reference_kind", PAGE_OFFICIAL),
                     provenance_basis=doc.get("provenance_basis", "HASH_VERIFIED_PDF"),
+                    precedence_rank=doc.get("precedence_rank", 2),
                 )
             )
             if len(out) >= k:

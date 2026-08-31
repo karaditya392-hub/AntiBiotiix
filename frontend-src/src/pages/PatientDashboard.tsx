@@ -255,8 +255,8 @@ export default function PatientDashboard() {
   async function registerPatient(event: React.FormEvent) {
     event.preventDefault();
     setFormError("");
-    if (!regForm.age || regForm.sex === "UNKNOWN" || !regForm.diagnosis.trim()) {
-      setFormError("Age, sex, and a diagnosis or reason for visit are required to create the initial record.");
+    if (!regForm.name.trim() || !regForm.age || regForm.sex === "UNKNOWN" || !regForm.diagnosis.trim()) {
+      setFormError("Full name, age, sex, and a diagnosis or reason for visit are required to create the initial record.");
       return;
     }
     const login = await fetch("/api/auth/login", {
@@ -266,7 +266,7 @@ export default function PatientDashboard() {
     });
     const auth = await login.json();
     const payload = {
-      display_name: regForm.name.trim() || undefined,
+      display_name: regForm.name.trim(),
       age: Number(regForm.age),
       age_category: Number(regForm.age) >= 18 ? "ADULT" : "CHILD",
       sex: regForm.sex,
@@ -619,7 +619,7 @@ export default function PatientDashboard() {
             </>
           ) : (
             <form className="registration-form" onSubmit={registerPatient}>
-              <label className="field-label">Patient Full Name (e.g. Rajesh Sharma)</label>
+              <label className="field-label">Patient Full Name (e.g. Rajesh Sharma) *</label>
               <input type="text" placeholder="Enter patient name..." value={regForm.name} onChange={(e) => setRegForm({ ...regForm, name: e.target.value })} />
 
               <label className="field-label">Age *</label>
