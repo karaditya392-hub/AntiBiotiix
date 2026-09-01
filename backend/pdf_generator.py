@@ -4,12 +4,37 @@ Generates official prescription PDFs from database visit/prescription records.
 """
 
 import io
-from datetime import datetime, timezone
+# timedelta is used to build the IST offset on the fallback path below. It was
+# missing from this import, so generating a prescription for a visit with no
+# recorded date raised NameError instead of stamping the current time -- the branch
+# only runs when visit_date is absent, which is why it survived.
+from datetime import datetime, timedelta, timezone
 from typing import Dict, Any, List, Optional
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, HRFlowable
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+
+
+def _patient_label(patient: Dict[str, Any]) -> str:
+    """
+    "Rajesh Sharma (PATIENT-001)", or the bare id when no name is recorded.
+
+    Records seeded before display_name held a bare name carry it as
+    "PATIENT-001 (Rajesh Sharma)", so the parenthesised form is unwrapped rather
+    than printed back with the id twice. A display_name that is just the id again,
+    or the registration placeholder, is treated as no name at all.
+    """
+    import re as _re
+
+    patient_id = str(patient.get("patient_id") or "N/A")
+    name = (patient.get("display_name") or "").strip()
+    wrapped = _re.match(r"^\s*\S+\s*\((.+)\)\s*$", name)
+    if wrapped:
+        name = wrapped.group(1).strip()
+    if not name or name == patient_id or name == "Patient Record":
+        return patient_id
+    return f"{name} ({patient_id})"
 
 
 def generate_prescription_pdf(
@@ -121,7 +146,11 @@ def generate_prescription_pdf(
             Paragraph("<b>Visit ID:</b> " + str(visit.get("visit_id", "N/A")), body_style)
         ],
         [
-            Paragraph("<b>Patient ID:</b> " + str(patient.get("patient_id", "N/A")), body_style),
+            # The name AND the id. A prescription identifying its patient only by
+            # "PATIENT-014" is not a record a clinician can check at the bedside, and
+            # the id alone is what this document carried. The id stays because it is
+            # what the audit trail and every other record key on.
+            Paragraph("<b>Patient:</b> " + _patient_label(patient), body_style),
             Paragraph("<b>Visit Date:</b> " + v_date_str, body_style)
         ],
         [

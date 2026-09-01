@@ -274,7 +274,16 @@ STG_DRUGS = [
 
 
 def test_all_referenced_medications_were_added():
-    assert len(knowledge_base.drugs_db) == 69
+    # Counts the drugs THIS batch contributed, not the size of the whole knowledge
+    # base. The global total was pinned at 69 here, which meant adding a drug from
+    # any other source failed this test for a reason that had nothing to do with the
+    # 2022-23 syndromes it exists to guard -- the hepatitis antivirals from
+    # MOHFW-NVHCP-VIRAL-HEPATITIS-2018 broke it that way.
+    from_this_authority = [
+        key for key, info in knowledge_base.drugs_db.items()
+        if (info.get("dosing_from_held_sources") or {}).get("source_document_id") == AUTHORITY
+    ]
+    assert len(from_this_authority) == 40
     for key in STG_DRUGS:
         info = knowledge_base.drugs_db[key]
         assert info["knowledge_coverage"] == "PARTIAL"

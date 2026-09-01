@@ -4,6 +4,7 @@ import { Link, useLocation, useParams } from "wouter";
 import UnifiedHeader from "@/components/UnifiedHeader";
 import { patientName } from "@/lib/patient";
 import "@/styles/patient-dashboard.css";
+import { useRuleCount, ruleEngineLabel } from "@/hooks/useRuleCount";
 
 type PrescriptionItem = {
   medication_name: string;
@@ -16,6 +17,8 @@ type PrescriptionItem = {
 };
 
 export default function PrescriptionEntry() {
+  // Read from the engine rather than restated from memory; see useRuleCount.
+  const ruleCount = useRuleCount();
   const { patient_id, visit_id } = useParams<{ patient_id: string; visit_id: string }>();
   const [, setLocation] = useLocation();
 
@@ -243,7 +246,7 @@ export default function PrescriptionEntry() {
 
           <div style={{ marginTop: "14px", display: "flex", gap: "10px" }}>
             <button className="dashboard-button warning" type="submit" style={{ padding: "12px 20px" }}>
-              <ShieldCheck size={16} /> Analyze Prescription (24-Rule Engine) <ArrowRight size={16} />
+              <ShieldCheck size={16} /> Analyze Prescription ({ruleEngineLabel(ruleCount)}) <ArrowRight size={16} />
             </button>
           </div>
         </form>

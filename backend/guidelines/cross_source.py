@@ -22,8 +22,15 @@ from __future__ import annotations
 import re
 from typing import Any, Dict, List, Optional
 
-from backend.config import GUIDELINE_PRECEDENCE_HIERARCHY
-from backend.rag.store import NOT_A_CLINICAL_GUIDELINE_RANK
+from backend.config import (
+    ANTIMICROBIAL_CONTENT_DOCUMENT_IDS,
+    GUIDELINE_PRECEDENCE_HIERARCHY,
+)
+from backend.rag.store import (
+    DOMAIN_ANTIMICROBIAL,
+    DOMAIN_READING_CONTRACT,
+    NOT_A_CLINICAL_GUIDELINE_RANK,
+)
 
 # Passages per document. Small on purpose: this is a reading aid, not a dump.
 PASSAGES_PER_DOCUMENT = 3
@@ -139,6 +146,8 @@ def compare_sources(
     for doc_id, doc in vector_store.docs.items():
         hits = [h for h in raw.get(doc_id, []) if h.score >= threshold]
         rank = doc.get("precedence_rank")
+        domain = doc.get("clinical_domain", DOMAIN_ANTIMICROBIAL)
+        is_guideline = rank != NOT_A_CLINICAL_GUIDELINE_RANK
         base = {
             "document_id": doc_id,
             "title": doc.get("title"),
@@ -149,9 +158,15 @@ def compare_sources(
             # A reader comparing sources side by side has to be able to see, without
             # opening the provenance note, that one of these columns is a public
             # information sheet rather than a guideline.
-            "is_clinical_guideline": rank != NOT_A_CLINICAL_GUIDELINE_RANK,
+            "is_clinical_guideline": is_guideline,
+            "clinical_domain": domain,
+            # Shown per column because the side-by-side layout is exactly where a
+            # reader infers that everything on screen is comparable evidence.
+            "carries_antimicrobial_authority": is_guideline and domain == DOMAIN_ANTIMICROBIAL,
+            "carries_antimicrobial_content": doc_id in ANTIMICROBIAL_CONTENT_DOCUMENT_IDS,
+            "domain_caveat": DOMAIN_READING_CONTRACT.get(domain),
             "clinical_standing": (
-                None if rank != NOT_A_CLINICAL_GUIDELINE_RANK else
+                None if is_guideline else
                 "Held for reference only - not a clinical guideline and never a basis "
                 "for a prescribing or antimicrobial decision."
             ),
@@ -190,12 +205,29 @@ def compare_sources(
 
     with_guidance = [d for d in documents if d["has_guidance"]]
 
-    # Agent differences are computed across GUIDELINES only. A public information
-    # sheet or a community programme leaflet not naming ceftriaxone is not a
-    # guideline declining to recommend it, and letting rank-4 documents into this
-    # set would report an absence of authority as a difference of opinion. They are
-    # still shown as columns above; they just do not vote here.
-    comparable = [d for d in with_guidance if d.get("is_clinical_guideline", True)]
+    # Agent differences are computed across documents that CARRY ANTIBACTERIAL
+    # RECOMMENDATIONS only. A public information sheet or a community programme
+    # leaflet not naming ceftriaxone is not a guideline declining to recommend it,
+    # and letting rank-4 documents into this set would report an absence of authority
+    # as a difference of opinion.
+    #
+    # The same argument reaches further than rank 4, and the ICMR national corpus is
+    # what made that visible. An ICMR cancer consensus document is a clinical
+    # guideline at rank 2, so the old `is_clinical_guideline` filter admitted it --
+    # and a gallbladder cancer document that does not mention piperacillin would have
+    # been counted as a national guideline omitting it, on an intra-abdominal topic it
+    # was never about. Twenty-two such documents joined the corpus at once, which
+    # would have turned a genuine two-source comparison into a manufactured
+    # twenty-three-source disagreement.
+    #
+    # The filter is the explicit set in config rather than the domain, because domain
+    # alone is too coarse in the other direction: it would drop NCDC-LEPTOSPIROSIS-2015
+    # from a leptospirosis comparison, which is the one source that actually covers it.
+    # Everything else is still shown as a column above; it just does not vote here.
+    comparable = [
+        d for d in with_guidance
+        if d["document_id"] in ANTIMICROBIAL_CONTENT_DOCUMENT_IDS
+    ]
     all_named = sorted({drug for d in comparable for drug in d["named_drugs"]})
 
     # Objective, checkable difference: which on-topic documents name each agent,
@@ -223,6 +255,10 @@ def compare_sources(
         "documents_searched": len(documents),
         "documents_with_guidance": len(with_guidance),
         "documents_compared_for_agent_differences": len(comparable),
+        "documents_shown_but_not_compared": [
+            d["document_id"] for d in with_guidance
+            if not d.get("carries_antimicrobial_content", True)
+        ],
         "precedence_hierarchy": GUIDELINE_PRECEDENCE_HIERARCHY,
         "agents_named_anywhere": all_named,
         "differing_agents": divergent,
@@ -233,7 +269,10 @@ def compare_sources(
             "by matching formulary drug names against the retrieved text: they are a fact "
             "about the wording, NOT a finding that the sources clinically conflict. A "
             "document may omit an agent because it is out of that document's scope. "
-            "Clinical interpretation remains with the reader."
+            "Clinical interpretation remains with the reader. Only documents that carry "
+            "antibacterial recommendations are compared for agent differences; any other "
+            "document that matched this topic is shown as a column, carries its own domain "
+            "caveat, and is listed under documents_shown_but_not_compared."
         ),
         "documents": documents,
     }

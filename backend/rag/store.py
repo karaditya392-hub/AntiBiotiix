@@ -46,14 +46,85 @@ PAGE_TRANSCRIPT = "TRANSCRIPT_PAGE_NOT_OFFICIAL"
 PAGE_NONE = "NO_PAGINATION"
 
 # Precedence rank reserved for documents that are held and retrievable but are not
-# clinical guidelines: public information sheets, community programme leaflets, and
-# files whose issuing body cannot be established from the document itself. See
-# backend.config.GUIDELINE_PRECEDENCE_HIERARCHY rank 4.
+# clinical guidelines: public information sheets, community programme leaflets,
+# files whose issuing body cannot be established from the document itself, and --
+# since the ICMR national corpus was added -- authoritative documents that simply
+# do not govern patient care, such as research-ethics guidelines and laboratory
+# biosafety manuals. See backend.config.GUIDELINE_PRECEDENCE_HIERARCHY rank 4.
 #
 # The rank is on the document, so it is the one structured signal a caller can use
 # to tell "the corpus says this" from "a leaflet in the corpus says this" without
 # parsing a prose provenance note.
 NOT_A_CLINICAL_GUIDELINE_RANK = 4
+
+# Score window within which two chunks are treated as equally relevant, so that
+# precedence rank rather than float noise decides which a reader sees first. See
+# the tie-break in GuidelineVectorStore.search(). Kept well below the 0.041 margin
+# between legitimate and off-domain queries measured in backend.rag.retrieve, so
+# reordering inside it can never move a passage across the relevance floor.
+RANK_TIEBREAK_EPSILON = 0.01
+
+# What a document is authoritative ABOUT.
+#
+# Precedence rank answers "how much weight in a clinical conflict". It cannot
+# answer "weight about what", and once the corpus held research-ethics guidelines,
+# biosafety manuals and oncology consensus documents alongside the antimicrobial
+# guidelines, that second question became the one that decides whether a passage
+# may be shown as prescribing evidence at all.
+#
+# Rank alone would have flattened the distinction: the ICMR National Ethical
+# Guidelines are a national authority and an oncology consensus document is
+# national clinical guidance, yet neither says anything about antimicrobial choice,
+# and a retrieval result that presented either as guideline evidence for a
+# prescribing question would be making a claim the document does not support.
+DOMAIN_ANTIMICROBIAL = "ANTIMICROBIAL_TREATMENT"
+DOMAIN_CLINICAL_OTHER = "CLINICAL_CONDITION_SPECIFIC"
+DOMAIN_RESEARCH_ETHICS = "RESEARCH_ETHICS_GOVERNANCE"
+DOMAIN_LABORATORY = "LABORATORY_PROCEDURE_BIOSAFETY"
+DOMAIN_PROGRAMME_POLICY = "PROGRAMME_AND_INSTITUTIONAL_POLICY"
+DOMAIN_RESEARCH_REPORT = "RESEARCH_ACTIVITY_REPORT"
+DOMAIN_PUBLIC_INFORMATION = "PUBLIC_INFORMATION_OR_UNATTRIBUTED"
+
+# Domains that describe patient care at all. Outside these, a passage is not
+# clinical guidance in any form, however authoritative its issuer.
+CLINICAL_DOMAINS = frozenset({DOMAIN_ANTIMICROBIAL, DOMAIN_CLINICAL_OTHER})
+
+# How each domain must be read. Spelled out per domain rather than derived from the
+# rank, because "this is not an antimicrobial source" and "this is not about
+# patient care at all" are different warnings and the reader needs the right one.
+DOMAIN_READING_CONTRACT = {
+    DOMAIN_ANTIMICROBIAL: None,  # the corpus's own subject; no caveat needed
+    DOMAIN_CLINICAL_OTHER: (
+        "CONDITION-SPECIFIC CLINICAL GUIDANCE, NOT AN ANTIMICROBIAL SOURCE. This "
+        "document governs the condition it names. Any antimicrobial wording in it is "
+        "incidental to that condition and does not override the national antimicrobial "
+        "guidelines or the local antibiogram."
+    ),
+    DOMAIN_RESEARCH_ETHICS: (
+        "RESEARCH ETHICS AND GOVERNANCE DOCUMENT. It governs how research is proposed, "
+        "reviewed and conducted - not how a patient is treated. It is never evidence "
+        "for a diagnostic, prescribing or antimicrobial decision."
+    ),
+    DOMAIN_LABORATORY: (
+        "LABORATORY PROCEDURE OR BIOSAFETY DOCUMENT. It governs facilities, containment "
+        "and laboratory method. It is never evidence for a prescribing or treatment "
+        "decision."
+    ),
+    DOMAIN_PROGRAMME_POLICY: (
+        "PROGRAMME OR INSTITUTIONAL POLICY DOCUMENT. It governs how a programme or "
+        "institution operates. It carries no clinical recommendation and is never "
+        "evidence for a treatment decision."
+    ),
+    DOMAIN_RESEARCH_REPORT: (
+        "RESEARCH ACTIVITY REPORT, NOT GUIDANCE OF ANY KIND. It describes research that "
+        "was carried out. It recommends nothing, and nothing in it may be read as advice."
+    ),
+    DOMAIN_PUBLIC_INFORMATION: (
+        "PUBLIC INFORMATION MATERIAL, A COMMUNITY PROGRAMME LEAFLET, OR A DOCUMENT WHOSE "
+        "ISSUING BODY COULD NOT BE ESTABLISHED. It carries no clinical authority and is "
+        "never a basis for a prescribing or antimicrobial decision."
+    ),
+}
 
 
 @dataclass
@@ -76,10 +147,30 @@ class RetrievedChunk:
     # Documents ingested before rank 4 existed are clinical guidelines, so the
     # default must not mark them as anything else.
     precedence_rank: Optional[int] = 2
+    # Likewise: every document ingested before the domain field existed was an
+    # antimicrobial source, which is what this default says.
+    clinical_domain: str = DOMAIN_ANTIMICROBIAL
 
     @property
     def is_clinical_guideline(self) -> bool:
         return self.precedence_rank != NOT_A_CLINICAL_GUIDELINE_RANK
+
+    @property
+    def carries_antimicrobial_authority(self) -> bool:
+        """
+        Whether this passage may be offered as evidence about antimicrobial choice.
+
+        Separate from is_clinical_guideline: an oncology consensus document is a
+        clinical guideline and still has no standing on antimicrobial selection.
+        """
+        return (
+            self.clinical_domain == DOMAIN_ANTIMICROBIAL
+            and self.precedence_rank != NOT_A_CLINICAL_GUIDELINE_RANK
+        )
+
+    @property
+    def domain_caveat(self) -> Optional[str]:
+        return DOMAIN_READING_CONTRACT.get(self.clinical_domain)
 
     def location_label(self) -> str:
         """Render the location so it cannot be mistaken for an official page."""
@@ -108,6 +199,11 @@ class RetrievedChunk:
             "provenance_note": self.notes or None,
             "precedence_rank": self.precedence_rank,
             "is_clinical_guideline": self.is_clinical_guideline,
+            "clinical_domain": self.clinical_domain,
+            "carries_antimicrobial_authority": self.carries_antimicrobial_authority,
+            # The domain warning travels with the passage. A caveat the caller has
+            # to look up by domain name is a caveat that will not reach the reader.
+            "domain_caveat": self.domain_caveat,
             # Spelled out rather than left for the reader to infer from a rank
             # number, because this is the caveat that matters most about a passage.
             "clinical_standing": (
@@ -309,9 +405,32 @@ class GuidelineVectorStore:
         qv = be.encode([query])[0]
         sims = self.matrix @ qv
 
-        idx = np.argsort(-sims)
+        # Order by score, breaking NEAR-TIES in favour of clinical standing.
+        #
+        # Cosine scores this close carry no information about which passage is more
+        # relevant, but the ordering they impose decides what a clinician reads
+        # first. On "syndromic management of vaginal discharge" the ICMR cancer
+        # research compendium -- a document that recommends nothing -- outscored the
+        # NACO RTI/STI guideline by 0.0009, on a passage describing a Phase-I trial
+        # of a product for that symptom. The guideline is the document that answers
+        # the question; the float said otherwise by less than a tenth of a percent.
+        #
+        # So within RANK_TIEBREAK_EPSILON, precedence rank decides instead of noise.
+        # This suppresses nothing and changes nothing about what clears the relevance
+        # floor: every chunk above the floor is still returned, still labelled with
+        # its own domain, and a genuinely better match more than epsilon ahead still
+        # wins. It only replaces an arbitrary tie-break with a documented one.
+        order = sorted(
+            range(len(sims)),
+            key=lambda i: (
+                -int(sims[i] / RANK_TIEBREAK_EPSILON),
+                self.docs.get(self.chunks[i]["document_id"], {}).get("precedence_rank", 2),
+                -float(sims[i]),
+            ),
+        )
+
         out: List[RetrievedChunk] = []
-        for i in idx:
+        for i in order:
             c = self.chunks[int(i)]
             if document_ids and c["document_id"] not in document_ids:
                 continue
@@ -336,6 +455,7 @@ class GuidelineVectorStore:
                     page_reference_kind=doc.get("page_reference_kind", PAGE_OFFICIAL),
                     provenance_basis=doc.get("provenance_basis", "HASH_VERIFIED_PDF"),
                     precedence_rank=doc.get("precedence_rank", 2),
+                    clinical_domain=doc.get("clinical_domain", DOMAIN_ANTIMICROBIAL),
                 )
             )
             if len(out) >= k:

@@ -3,6 +3,7 @@ import { ArrowLeft, BookOpenCheck, FileWarning, Pill, Plus } from "lucide-react"
 import { Link, useLocation, useParams } from "wouter";
 import UnifiedHeader from "@/components/UnifiedHeader";
 import "@/styles/patient-dashboard.css";
+import { patientName } from "@/lib/patient";
 
 type Patient = {
   patient_id: string;
@@ -117,7 +118,7 @@ export default function PatientProfile() {
       <div className="dashboard-header" style={{ marginBottom: "16px" }}>
         <div>
           <p className="dashboard-kicker">PATIENT PROFILE & LONGITUDINAL RECORD</p>
-          <h1>{patient.display_name || patient.patient_id}</h1>
+          <h1>{patientName(patient.display_name, patient.patient_id)}</h1>
           <p className="dashboard-subtitle">
             {patient.age ?? "Unknown"} years · {patient.sex || "Sex unrecorded"} · {patient.weight_kg ?? "Unrecorded"} kg · eGFR {patient.egfr_ml_min ?? "Not assessed"} mL/min
           </p>

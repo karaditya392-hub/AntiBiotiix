@@ -9,7 +9,7 @@ from datetime import datetime
 from backend.models.schemas import (
     SafetyWarning, SeverityLevel, RuleCategory, EvidenceCitation,
     PatientCreate, PrescriptionCreate, PrescriptionItem, PregnancyStatus,
-    AgeCategory
+    AgeCategory, LactationStatus
 )
 from backend.guidelines.knowledge_base import knowledge_base
 from backend.guidelines.label_evidence import label_evidence_store
@@ -246,7 +246,19 @@ class ClinicalRuleEngine:
                 continue
 
             threshold = renal_data.get("egfr_threshold_ml_min", 0)
-            if threshold == 0:
+            # None means the held source says renal function MATTERS for this drug but
+            # states no number to compare against -- the hepatitis guideline names
+            # tenofovir alafenamide as the choice "in patients with reduced renal
+            # function" and gives no eGFR, and doses ribavirin partly on renal function
+            # without a threshold. That is a different thing from threshold 0 ("no renal
+            # restriction"), but it has the same consequence here: no automatic
+            # comparison is possible, and inventing a cut-off to make one possible is
+            # exactly the fabrication this knowledge base refuses. The recommendation
+            # text still reaches the clinician through the drug's evidence record.
+            #
+            # Without this guard the comparison below raised TypeError and took down
+            # the whole analysis for any prescription containing such a drug.
+            if threshold is None or threshold == 0:
                 continue
 
             # Check missing renal info guard (Rule RENAL-003)
@@ -480,7 +492,16 @@ class ClinicalRuleEngine:
 
                     if match_found:
                         rule_id = "DDI-001"
-                        if "qt" in inter.get("mechanism", "").lower() or "amiodarone" in target or "ondansetron" in target:
+                        # A combination the guideline states outright as
+                        # CONTRAINDICATED is checked first and routed to its own
+                        # rule. Falling through to the mechanism heuristics below
+                        # would grade it by whichever keyword happened to match --
+                        # a contraindicated pairing with no QT or serotonin wording
+                        # would land on DDI-001 and be reported as an ordinary
+                        # interaction, which is a weaker claim than the source makes.
+                        if str(inter.get("severity", "")).upper() == "CONTRAINDICATED":
+                            rule_id = "DDI-005"
+                        elif "qt" in inter.get("mechanism", "").lower() or "amiodarone" in target or "ondansetron" in target:
                             rule_id = "DDI-002"
                         elif "serotonin" in inter.get("mechanism", "").lower() or norm_drug == "linezolid":
                             rule_id = "DDI-003"
@@ -550,6 +571,39 @@ class ClinicalRuleEngine:
                             citation_text="ICMR Guidelines 2022 / FDA Category D: Tetracyclines cause permanent fetal tooth discoloration, enamel hypoplasia, and skeletal growth restriction when administered during pregnancy."
                         ))
 
+                # Recorded pregnancy contraindication with no drug-specific rule
+                # (Rule VULN-008).
+                #
+                # The branches above name four drugs. Twelve carry a recorded
+                # pregnancy contraindication, so eight were recorded and never
+                # evaluated -- gentamicin's own entry cites irreversible fetal
+                # ototoxicity and nothing read it.
+                #
+                # Gated on an explicit per-drug flag, not on the prose: the recorded
+                # wording is not uniform, and nitrofurantoin's contraindication
+                # applies at 38-42 weeks while this system records only a trimester.
+                # See scripts/add_pregnancy_contraindication_rule.py.
+                elif drug_info.get("pregnancy_contraindicated") is True:
+                    rule = self.kb.get_rule_by_id("VULN-008")
+                    if rule:
+                        recorded = drug_info.get("pregnancy_category") or "Contraindicated in pregnancy."
+                        warnings.append(self._create_warning(
+                            prescription_id=prescription_id,
+                            rule=rule,
+                            prescribed_drug=drug_name,
+                            norm_drug=norm_drug,
+                            interacting_factor=f"Pregnancy Status: {patient.pregnancy_status}",
+                            recommendation_override=(
+                                f"Recorded pregnancy position for {drug_name}: {recorded} "
+                                f"Review and select an alternative where one exists."
+                            ),
+                            evidence_probes=["pregnan", "fetal", "teratogen"],
+                            citation_text=(
+                                f"Drug knowledge base pregnancy record for {drug_name}: {recorded} "
+                                f"Basis: {drug_info.get('pregnancy_contraindication_basis', 'not recorded')}"
+                            )
+                        ))
+
             # Pregnancy Unknown Guard (Rule VULN-004)
             elif patient.pregnancy_status in [PregnancyStatus.UNKNOWN, "UNKNOWN"]:
                 if patient.sex and patient.sex.upper() == "FEMALE" and patient.age and 12 <= patient.age <= 50:
@@ -596,7 +650,115 @@ class ClinicalRuleEngine:
                             citation_text=f"IAP / ICMR Pediatric Stewardship 2022: Standard pediatric dose is {std_dose}."
                         ))
 
+            # 3. Lactation Safety (Rule VULN-005)
+            #
+            # `lactation_status` has been collected on every patient and
+            # `lactation_safety` recorded on every drug since both were added, and
+            # until this branch existed neither was read by any rule. The system was
+            # asking clinicians for lactation status and discarding the answer.
+            #
+            # The drug's own recorded statement is surfaced verbatim rather than
+            # restated here, so this branch carries no clinical claim of its own: if
+            # the knowledge base says nothing about a drug in lactation, nothing is
+            # asserted about it.
+            is_lactating = patient.lactation_status in [LactationStatus.LACTATING, "LACTATING"]
+            lactation_note = (drug_info.get("lactation_safety") or "").strip()
+            if is_lactating and lactation_note:
+                rule = self.kb.get_rule_by_id("VULN-005")
+                if rule:
+                    warnings.append(self._create_warning(
+                        prescription_id=prescription_id,
+                        rule=rule,
+                        prescribed_drug=drug_name,
+                        norm_drug=norm_drug,
+                        interacting_factor="Patient documented as lactating",
+                        recommendation_override=(
+                            f"Recorded lactation position for {drug_name}: {lactation_note} "
+                            f"Review against the expected duration of therapy and the age of the "
+                            f"infant. Interrupting breastfeeding is rarely necessary and should "
+                            f"not be advised reflexively."
+                        ),
+                        evidence_probes=["lactation", "nursing", "breast", "milk"],
+                        citation_text=(
+                            f"Drug knowledge base lactation record for {drug_name}: {lactation_note} "
+                            f"NCDC National Treatment Guidelines for Antimicrobial Use (2016), Section G: "
+                            f"\"Doxycycline is not recommended in nursing mothers. If need to administer "
+                            f"doxycycline discontinuation of nursing may be contemplated.\""
+                        )
+                    ))
+
+            # 4. Primaquine exclusions (Rules VULN-006, VULN-007)
+            #
+            # ICMR-STG-2019-ED2 states the primaquine recommendation and its
+            # exclusions in one sentence. Holding the recommendation without the
+            # exclusion would be holding half the guideline.
+            if norm_drug == "primaquine":
+                if is_pregnant or is_lactating:
+                    rule = self.kb.get_rule_by_id("VULN-006")
+                    if rule:
+                        # The source excludes women breastfeeding infants UNDER 6
+                        # MONTHS. This system does not record the infant's age, so
+                        # the alert is raised for any documented lactation and the
+                        # gap is stated rather than silently assumed either way.
+                        which = "Pregnancy" if is_pregnant else "Lactation"
+                        extra = "" if is_pregnant else (
+                            " The guideline's exclusion applies to infants aged under 6 months; "
+                            "this system does not record the infant's age, so confirm it."
+                        )
+                        warnings.append(self._create_warning(
+                            prescription_id=prescription_id,
+                            rule=rule,
+                            prescribed_drug=drug_name,
+                            norm_drug=norm_drug,
+                            interacting_factor=f"{which} documented",
+                            recommendation_override=(rule.get("recommendation", "") + extra).strip(),
+                            evidence_probes=["pregnan", "breastfeed", "lactat"],
+                            citation_text=(
+                                "ICMR Treatment Guidelines for Antimicrobial Use in Common Syndromes, "
+                                "2nd edition (2019), pp. 19-20: \"(except pregnant women, infants aged "
+                                "< 6 months and women breastfeeding infants aged < 6 months)\""
+                            )
+                        ))
+
+                # G6PD status is not a structured field on the patient record, so
+                # the free-text history is searched. A recorded status of EITHER
+                # kind satisfies this: the rule asks whether the status is known,
+                # not what it is.
+                history_blob = " ".join(
+                    list(patient.medical_history or []) + [patient.clinical_notes or ""]
+                ).lower()
+                if not re.search(r"g6pd|glucose[- ]6[- ]phosphate", history_blob):
+                    rule = self.kb.get_rule_by_id("VULN-007")
+                    if rule:
+                        warnings.append(self._create_warning(
+                            prescription_id=prescription_id,
+                            rule=rule,
+                            prescribed_drug=drug_name,
+                            norm_drug=norm_drug,
+                            interacting_factor="No G6PD status recorded in patient history",
+                            evidence_probes=["g6pd", "glucose-6-phosphate", "haemolysis", "hemolysis"],
+                            citation_text=(
+                                "ICMR Treatment Guidelines for Antimicrobial Use in Common Syndromes, "
+                                "2nd edition (2019), p. 20: \"The G6PD status of patients should be "
+                                "used to guide administration of primaquine for preventing relapse.\" "
+                                "The same source states that for single low-dose transmission-blocking "
+                                "use, G6PD testing is not required."
+                            )
+                        ))
+
         return warnings
+
+    # Agent lists a syndrome entry may carry. Every one of them is a list of agents
+    # the guideline NAMES for the syndrome; a drug absent from all of them is absent
+    # from the guideline's options, which is the only claim DIAG-002 makes.
+    _SYNDROME_AGENT_FIELDS = (
+        "first_line_preferred",
+        "alternative_atypical",
+        "alternative_penicillin_allergic",
+        "second_line",
+        "inpatient_severe",
+        "mrsa_suspected",
+    )
 
     def _check_diagnosis_guideline(
         self, prescription_id: str, diagnosis: Optional[str], items: List[PrescriptionItem]
@@ -633,6 +795,60 @@ class ClinicalRuleEngine:
                         recommendation_override=rec,
                         citation_text=notes
                     ))
+                continue
+
+            # DIAG-002: the agent is not on the avoid list, and is not among the
+            # agents this guideline names either.
+            #
+            # Four of the nine syndromes held here carry no avoid_empirical list,
+            # because their source documents state none. Without this branch those
+            # syndromes matched a diagnosis and then changed nothing about the
+            # review. The claim made here is deliberately weak and checkable: the
+            # drug is absent from every named-agent list on the entry. It is NOT a
+            # finding that the prescription is wrong, and the severity is LOW to say
+            # so -- guidelines name common options, not every acceptable one.
+            named = []
+            for field in self._SYNDROME_AGENT_FIELDS:
+                named.extend(syndrome.get(field) or [])
+            if not named:
+                continue
+            norm_named = {self.kb.normalize_drug_name(n) for n in named}
+            if norm_drug in norm_named:
+                continue
+            # Only assess agents the knowledge base recognises. An unrecognised drug
+            # is already reported by COVERAGE-001, and saying it is also absent from
+            # a guideline's list would be a second warning about the same fact.
+            if not self.kb.get_drug_info(norm_drug):
+                continue
+            if self.kb.is_known_non_antimicrobial(norm_drug):
+                continue
+
+            rule = self.kb.get_rule_by_id("DIAG-002")
+            if rule:
+                source_doc = syndrome.get("source_document_id") or "the matched syndrome guideline"
+                source_loc = syndrome.get("source_location")
+                where = f"{source_doc}" + (f", {source_loc}" if source_loc and source_loc != "NOT RECORDED" else "")
+                warnings.append(self._create_warning(
+                    prescription_id=prescription_id,
+                    rule=rule,
+                    prescribed_drug=item.medication_name,
+                    norm_drug=norm_drug,
+                    interacting_factor=(
+                        f"Diagnosis: {diagnosis} ({syndrome.get('syndrome_name', diagnosis)})"
+                    ),
+                    recommendation_override=(
+                        f"{item.medication_name} is not among the agents named for "
+                        f"{syndrome.get('syndrome_name', diagnosis)} by {where}. Named agents: "
+                        f"{', '.join(sorted(set(named)))}. Confirm the clinical reason for "
+                        f"selecting an agent outside that list - culture and susceptibility, "
+                        f"documented allergy, local resistance or prior therapy are all valid "
+                        f"reasons."
+                    ),
+                    citation_text=(
+                        f"Source: {where}. "
+                        + (syndrome.get("source_quote") or syndrome.get("clinical_notes") or "")
+                    )
+                ))
 
         return warnings
 

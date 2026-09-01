@@ -276,6 +276,13 @@ COMMON = {
     "source_type": "OFFICIAL_PDF",
     "page_reference_kind": "OFFICIAL_DOCUMENT_PAGE",
     "provenance_basis": "HASH_VERIFIED_PDF",
+    # Every document in this batch is condition-specific clinical guidance. None is
+    # an antimicrobial guideline, including the three that carry antibiotic
+    # recommendations for their own condition -- those are listed in
+    # backend.config.ANTIMICROBIAL_CONTENT_DOCUMENT_IDS, which is a separate claim.
+    # Set here rather than left to the default: the default is
+    # ANTIMICROBIAL_TREATMENT, which for this batch would be false.
+    "clinical_domain": "CLINICAL_CONDITION_SPECIFIC",
 }
 
 

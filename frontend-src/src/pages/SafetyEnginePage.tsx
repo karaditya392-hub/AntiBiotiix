@@ -2,8 +2,12 @@ import { useEffect, useState } from "react";
 import { ShieldCheck, Plus, X, ShieldAlert } from "lucide-react";
 import ClinicalToolsLayout from "@/components/ClinicalToolsLayout";
 import "@/styles/patient-dashboard.css";
+import { useRuleCount } from "@/hooks/useRuleCount";
+import { patientName } from "@/lib/patient";
 
 export default function SafetyEnginePage() {
+  // Read from the engine rather than restated from memory; see useRuleCount.
+  const ruleCount = useRuleCount();
   const [presets, setPresets] = useState<any[]>([]);
   const [patients, setPatients] = useState<any[]>([]);
   const [selectedPatientId, setSelectedPatientId] = useState("");
@@ -86,7 +90,9 @@ export default function SafetyEnginePage() {
         setSelectedPatient(p || null);
         setDiagnosis(firstPreset.diagnosis || "");
         setRawText(firstPreset.text || "");
-        await extractItemsForText(firstPreset.text || "");
+        // Deliberately not extracted. The page opening with a medication already
+        // queued for evaluation invites the clinician to analyse an order they
+        // never placed.
       } else if (loadedPatients.length > 0) {
         const firstPat = loadedPatients[0];
         setSelectedPatientId(firstPat.patient_id);
@@ -104,7 +110,7 @@ export default function SafetyEnginePage() {
     void loadInitialData();
   }, []);
 
-  async function handleSelectPatient(pid: string) {
+  function handleSelectPatient(pid: string) {
     setSelectedPatientId(pid);
     const p = patients.find((pat) => pat.patient_id === pid);
     setSelectedPatient(p || null);
@@ -116,15 +122,17 @@ export default function SafetyEnginePage() {
     if (preset) {
       setDiagnosis(preset.diagnosis || "");
       setRawText(preset.text || "");
-      await extractItemsForText(preset.text || "");
     } else {
       setDiagnosis("Clinical Safety Review");
       setRawText("");
-      setItems([]);
     }
+    // Always cleared, preset or not. Items carried over from the previous patient
+    // would otherwise be evaluated against this one's allergies and renal function,
+    // and the result would look like a finding about a prescription nobody wrote.
+    setItems([]);
   }
 
-  async function handleSelectPreset(preset: any) {
+  function handleSelectPreset(preset: any) {
     setSelectedPatientId(preset.patient_id);
     const p = patients.find((pat) => pat.patient_id === preset.patient_id);
     setSelectedPatient(p || null);
@@ -132,7 +140,13 @@ export default function SafetyEnginePage() {
     setRawText(preset.text || "");
     setAnalysis(null);
     setError("");
-    await extractItemsForText(preset.text || "");
+    // The scenario loads the patient, the diagnosis and the order NOTE. It does not
+    // put anything into the evaluation list: choosing a teaching scenario is not the
+    // same act as ordering a medication, and a drug appearing in "Order Items for
+    // Evaluation" without the clinician having entered it is exactly the kind of
+    // silent addition a prescribing tool must never make. The note is parsed only
+    // when "Parse & Extract Order Items" is pressed.
+    setItems([]);
   }
 
   function addMedication() {
@@ -174,6 +188,16 @@ export default function SafetyEnginePage() {
   async function runSafetyAnalysis() {
     if (!selectedPatientId) {
       setError("Please select a patient scenario.");
+      return;
+    }
+    // Nothing to evaluate is not the same as nothing wrong. Submitting an empty
+    // order returns a clean analysis, and a clean result on a prescription that was
+    // never entered reads as an all-clear the engine did not give.
+    if (items.length === 0) {
+      setError(
+        "No order items to evaluate. Add a medication, or parse them from the "
+        + "free-text order note, before running the safety analysis."
+      );
       return;
     }
     setAnalyzing(true);
@@ -284,9 +308,12 @@ export default function SafetyEnginePage() {
             value={selectedPatientId}
             onChange={(e) => handleSelectPatient(e.target.value)}
           >
+            {/* Name first, then the record key. Picking a patient from a list of
+                twenty ids means matching "PATIENT-014" against nothing a clinician
+                holds in their head. */}
             {patients.map((p) => (
               <option key={p.patient_id} value={p.patient_id}>
-                {p.patient_id} · {p.age} yrs · {p.sex} · Allergies: {p.allergies?.join(", ") || "None"}
+                {patientName(p.display_name, p.patient_id)} · {p.patient_id} · {p.age} yrs · {p.sex} · Allergies: {p.allergies?.join(", ") || "None"}
               </option>
             ))}
           </select>
@@ -302,7 +329,10 @@ export default function SafetyEnginePage() {
                     className="example-chip"
                     onClick={() => handleSelectPreset(pr)}
                   >
-                    {pr.patient_id}: {pr.diagnosis}
+                    {patientName(
+                      patients.find((p) => p.patient_id === pr.patient_id)?.display_name,
+                      pr.patient_id,
+                    )}: {pr.diagnosis}
                   </button>
                 ))}
               </div>
@@ -311,7 +341,9 @@ export default function SafetyEnginePage() {
 
           {selectedPatient && (
             <div style={{ marginTop: "12px", background: "#ffffff", padding: "12px", borderRadius: "4px", fontSize: "0.8rem" }}>
-              <b>Selected Profile:</b> {selectedPatient.patient_id} ({selectedPatient.age} yrs, {selectedPatient.sex}) · eGFR: {selectedPatient.egfr_ml_min ?? "Not assessed"} mL/min · Allergies: <strong>{selectedPatient.allergies?.join(", ") || "None documented"}</strong> · Active Meds: {selectedPatient.active_medications?.join(", ") || "None"}
+              <b>Selected Profile:</b>{" "}
+              <strong>{patientName(selectedPatient.display_name, selectedPatient.patient_id)}</strong>{" "}
+              <span className="muted">{selectedPatient.patient_id}</span> ({selectedPatient.age} yrs, {selectedPatient.sex}) · eGFR: {selectedPatient.egfr_ml_min ?? "Not assessed"} mL/min · Allergies: <strong>{selectedPatient.allergies?.join(", ") || "None documented"}</strong> · Active Meds: {selectedPatient.active_medications?.join(", ") || "None"}
             </div>
           )}
         </div>
@@ -345,7 +377,10 @@ export default function SafetyEnginePage() {
               type="text"
               value={rawText}
               onChange={(e) => setRawText(e.target.value)}
-              onBlur={() => extractItemsForText(rawText)}
+              /* No onBlur extraction. Tabbing out of a text field is not a decision
+                 to order a drug, and it put items into the evaluation list without
+                 the clinician asking. The button above is the explicit way to parse
+                 this note. */
               className="dashboard-select"
             />
           </div>
@@ -377,6 +412,18 @@ export default function SafetyEnginePage() {
             </div>
           </div>
 
+          {/* An empty list is a state worth naming. The evaluation list used to be
+              populated for the clinician, so it was never empty and never needed to
+              explain itself; now that nothing is added without an explicit action,
+              silence here would read as a broken page. */}
+          {items.length === 0 && (
+            <p className="muted" style={{ fontSize: "0.8rem", margin: "4px 0" }}>
+              No order items yet. Add a medication above, or press
+              {" "}<b>Parse &amp; Extract Order Items</b>{" "}
+              to read them from the free-text order note.
+            </p>
+          )}
+
           {items.length > 0 && (
             <div>
               <strong>Order Items for Evaluation:</strong>
@@ -393,7 +440,7 @@ export default function SafetyEnginePage() {
 
           <div>
             <button className="dashboard-button warning" onClick={runSafetyAnalysis} disabled={analyzing} style={{ padding: "12px 24px" }}>
-              <ShieldCheck size={16} /> {analyzing ? "Evaluating 24 Rules..." : "Analyze Prescription Safety"}
+              <ShieldCheck size={16} /> {analyzing ? `Evaluating ${ruleCount ?? ""} Rules...`.replace("  ", " ") : "Analyze Prescription Safety"}
             </button>
           </div>
         </div>

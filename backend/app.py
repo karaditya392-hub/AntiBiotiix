@@ -180,36 +180,69 @@ def _corpus_summary() -> Dict[str, Any]:
     """
     What the corpus holds, in a shape a caller can act on.
 
-    The flat edition list above is still returned for continuity, but at 39
-    documents it is a wall of prose that hides the two facts that actually change
-    how a passage should be read: which documents carry national antimicrobial
-    authority, and which are held for reference without being guidelines at all.
+    The flat edition list above is still returned for continuity, but at 94
+    documents it is a wall of prose that hides the facts that actually change how a
+    passage should be read: which documents carry national antimicrobial authority,
+    which are held for reference without being guidelines at all, and -- since the
+    ICMR national corpus was ingested -- what each document is authoritative ABOUT.
+
+    That last one is now the largest single fact about this corpus. Only three of
+    its documents are antimicrobial sources; the rest are condition-specific clinical
+    guidance, research-ethics governance, laboratory and programme policy, and two
+    research-activity reports. A caller that reads only the document count will
+    badly overestimate what this system can answer about antimicrobial choice, so
+    the count is reported next to the breakdown rather than on its own.
     """
     try:
-        from backend.rag.store import NOT_A_CLINICAL_GUIDELINE_RANK, vector_store
+        from backend.rag.store import (
+            CLINICAL_DOMAINS,
+            DOMAIN_ANTIMICROBIAL,
+            NOT_A_CLINICAL_GUIDELINE_RANK,
+            vector_store,
+        )
         from backend.config import NATIONAL_ANTIMICROBIAL_AUTHORITY_DOCUMENT_IDS
 
         docs = vector_store.docs
         by_rank: Dict[str, int] = {}
         by_provenance: Dict[str, int] = {}
+        by_domain: Dict[str, int] = {}
         not_guidelines: List[str] = []
+        antimicrobial_ids: List[str] = []
+        clinical_count = 0
         for doc_id, d in docs.items():
             rank = d.get("precedence_rank")
             by_rank[f"rank_{rank}"] = by_rank.get(f"rank_{rank}", 0) + 1
             basis = d.get("provenance_basis", "HASH_VERIFIED_PDF")
             by_provenance[basis] = by_provenance.get(basis, 0) + 1
+            domain = d.get("clinical_domain", DOMAIN_ANTIMICROBIAL)
+            by_domain[domain] = by_domain.get(domain, 0) + 1
             if rank == NOT_A_CLINICAL_GUIDELINE_RANK:
                 not_guidelines.append(doc_id)
+            if domain in CLINICAL_DOMAINS:
+                clinical_count += 1
+            if domain == DOMAIN_ANTIMICROBIAL and rank != NOT_A_CLINICAL_GUIDELINE_RANK:
+                antimicrobial_ids.append(doc_id)
         return {
             "documents": len(docs),
             "chunks": len(vector_store.chunks),
             "documents_by_precedence_rank": dict(sorted(by_rank.items())),
             "documents_by_provenance_basis": by_provenance,
+            "documents_by_clinical_domain": dict(sorted(by_domain.items())),
+            "clinical_documents": clinical_count,
+            "documents_carrying_antimicrobial_authority": sorted(antimicrobial_ids),
             "national_antimicrobial_authorities": [
                 doc_id for doc_id in NATIONAL_ANTIMICROBIAL_AUTHORITY_DOCUMENT_IDS
                 if doc_id in docs
             ],
             "held_for_reference_not_clinical_guidelines": sorted(not_guidelines),
+            "corpus_scope_note": (
+                f"{len(docs)} documents are held, of which {len(antimicrobial_ids)} carry "
+                f"antimicrobial authority and {clinical_count} are clinical documents of "
+                f"any kind. The remainder are research ethics, laboratory and biosafety, "
+                f"programme policy and research activity reports: they are retrievable and "
+                f"are never evidence for a clinical decision. Document count alone is not a "
+                f"measure of what this system can answer about antimicrobial choice."
+            ),
             "retrieval": vector_store.backend_description(),
         }
     except Exception as exc:  # pragma: no cover - never fail a health check on this
@@ -2131,6 +2164,292 @@ def list_clinical_rules():
         "catalog_version": catalog_version,
         "total_rules": len(knowledge_base.rules_catalog),
         "rules": knowledge_base.rules_catalog
+    }
+
+
+@app.get("/api/guidelines/documents")
+def list_ingested_documents(domain: Optional[str] = None):
+    """
+    The documents this system actually holds, optionally filtered by clinical domain.
+
+    The corpus summary on /api/system/health reports HOW MANY documents sit in each
+    domain and never reported WHICH, so a reader could see that 14 research-ethics
+    documents were held and had no way to find out what they were. Counts without a
+    listing also make the corpus unauditable: "94 documents" is a claim nobody
+    outside this process could check.
+
+    Every field returned is read from the ingested corpus. Nothing is restated from
+    memory, and each document carries the provenance it was ingested with -- source
+    type, provenance basis, and the page-reference kind that governs whether its
+    page numbers are real pages of a real edition.
+    """
+    from backend.rag.store import (
+        DOMAIN_ANTIMICROBIAL,
+        DOMAIN_READING_CONTRACT,
+        NOT_A_CLINICAL_GUIDELINE_RANK,
+        vector_store,
+    )
+    from backend.config import ANTIMICROBIAL_CONTENT_DOCUMENT_IDS
+
+    import re as _re
+
+    # Headings that describe the publication rather than its subject. A coverage
+    # list made of "CONTENTS", "Foreword" and the document's own title tells a
+    # reader nothing about what the document is for.
+    _NOISE = _re.compile(
+        r"^(contents|table of contents|index|foreword|preface|message|disclaimer|"
+        r"acknowledgements?|abbreviations?|references?|annexures?.*|appendix.*|"
+        r"list of experts|indian council of medical research|consensus document.*|"
+        r"guidelines? for.*|dhr-icmr|ministry of health.*|national guidelines?.*|"
+        r"world health organization)$",
+        _re.I,
+    )
+
+    # Front matter and tables of contents. A "what this says" excerpt drawn from the
+    # publisher block or the contents page says nothing about the subject.
+    _FRONT = _re.compile(
+        r"(designed & printed|printed at m/s|published by|all rights reserved|isbn|"
+        r"production controller|compiled & edited|ansari nagar|^disclaimer|"
+        r"^foreword|^preface|^message\b|^acknowledgement)", _re.I,
+    )
+    # A contents page is mostly headings and page numbers.
+    _TOC = _re.compile(r"(foreword\s+i+\b|contents\s+foreword|\.{4,}|\s\d+\s+\d+\s+\d+\s)", _re.I)
+    # ...but a contents page without dot leaders interleaves its numbers with the
+    # headings -- "Procedures after the consent process 54 5.10 Special situations 55
+    # 5.11 Consent for studies using deception 55" -- which no fixed pattern catches.
+    # Standalone-number density does: prose cites few bare numbers, a contents page is
+    # built from them.
+    _BARE_NUMBER = _re.compile(r"(?<![\w.])\d{1,3}(?![\w.%])")
+
+    chunk_counts: Dict[str, int] = {}
+    sections: Dict[str, List[str]] = {}
+    # doc_id -> heading -> (page, verbatim excerpt)
+    topic_text: Dict[str, Dict[str, tuple]] = {}
+    # doc_id -> [(page, excerpt)] for documents whose headings were never detected.
+    #
+    # The heading matcher in backend.rag.ingest fires on numbered or mostly-uppercase
+    # lines, and eight of the 54 condition-specific documents have none it recognises
+    # -- the type 1 diabetes guideline has 604 chunks and zero detected sections, and
+    # the neonatal jaundice guideline 71 chunks and zero. Anchoring every excerpt to a
+    # heading therefore left those documents showing nothing at all, and because the
+    # list sorts by title the blank ones landed at the top.
+    #
+    # A document with no headings still has an opening. Quoting it is no weaker a
+    # claim than quoting a passage that happens to sit under a heading.
+    opening_text: Dict[str, List[tuple]] = {}
+    seen_per_doc: Dict[str, int] = {}
+    for chunk in vector_store.chunks:
+        doc_id = chunk.get("document_id")
+        chunk_counts[doc_id] = chunk_counts.get(doc_id, 0) + 1
+        seen_per_doc[doc_id] = seen_per_doc.get(doc_id, 0) + 1
+
+        # What the document covers, taken from its OWN section headings as captured
+        # at ingestion. The provenance note says how a citation from the document
+        # must be treated; it deliberately says almost nothing about the subject
+        # matter, and for the 22 oncology consensus documents it is near-identical
+        # boilerplate, so the panel showing only that note could not distinguish the
+        # gallbladder document from the retinoblastoma one.
+        #
+        # This is a list of headings DETECTED, not a table of contents: the heading
+        # matcher in backend.rag.ingest is deliberately conservative and misses many,
+        # so the field is labelled as detected and never presented as complete.
+        raw = (chunk.get("section") or "").strip()
+        heading_ok = bool(raw) and 6 <= len(raw) <= 70
+        # Collect an opening passage for documents that will end up with no headed
+        # topic at all. Bounded to the first 60 chunks so this stays cheap on a
+        # 600-chunk document; front matter is rejected by the quality gates anyway.
+        want_opening = (
+            len(opening_text.get(doc_id, [])) < 3 and seen_per_doc[doc_id] <= 60
+        )
+        if not heading_ok and not want_opening:
+            continue
+        flat = _re.sub(r"\s+", " ", raw) if heading_ok else ""
+        # Drop the residue of PDF extraction damage. Matching the literal U+FFFD is
+        # not enough: the same damage also arrives as other unmapped codepoints, so
+        # anything outside ordinary heading punctuation is stripped by class.
+        if heading_ok:
+            flat = _re.sub(r"[^\w\s()/&,'.\-]", "", flat, flags=_re.UNICODE).strip(" :.-")
+            flat = _re.sub(r"^\d+(?:\.\d+)*\s+", "", flat)
+            if (_NOISE.match(flat.lower()) or not _re.search(r"[A-Za-z]{4,}", flat)
+                    or len(flat) < 5):
+                heading_ok, flat = False, ""
+        if heading_ok:
+            bucket = sections.setdefault(doc_id, [])
+            if flat not in bucket:
+                bucket.append(flat)
+        elif not want_opening:
+            continue
+
+        # WHAT THE SECTION ACTUALLY SAYS, verbatim from the document.
+        #
+        # A heading tells a reader the topic exists. It does not tell them what the
+        # document says about it, which is the only thing that distinguishes this
+        # guideline from the next one with the same chapter names. The first
+        # substantive passage under each heading is kept, and nothing is summarised
+        # or paraphrased: the text below is the document's own, cut at a sentence
+        # boundary.
+        store = topic_text.setdefault(doc_id, {})
+        if heading_ok and flat in store:
+            continue
+        body = " ".join((chunk.get("text") or "").split())
+        if len(body) < 220 or _FRONT.search(body[:200]) or _TOC.search(body[:400]):
+            continue
+
+        # Prose only. Reporting forms, flowcharts and staging tables extract as runs
+        # of dots, blank fields and isolated abbreviations -- the cervix document's
+        # cone-biopsy reporting form yields "Dimensions ...x... x...mm Resection
+        # margins : Number of sections studied :". That is faithfully what the page
+        # holds and it tells a reader nothing, so it is skipped rather than quoted.
+        letters = sum(ch.isalpha() or ch.isspace() for ch in body)
+        if letters / len(body) < 0.82:
+            continue
+        if _re.search(r"\.{3,}|_{3,}|(?:\s[:;]\s){3,}", body):
+            continue
+        # One bare number per ~45 characters of prose is already generous; a contents
+        # page runs far denser.
+        if len(_BARE_NUMBER.findall(body[:460])) > 10:
+            continue
+        # Reference lists survive every check above -- they are prose-dense, carry few
+        # short bare numbers because their numbers are years and page ranges, and read
+        # as "7. ICCN India 2005. Guidelines for Head & Neck Cancers 8. Head and Neck
+        # Guidelines. Downloaded from ... 9. ESMO Minimum Clinical Recommendations".
+        # A bibliography is not what the document says about its subject.
+        if "http" in body.lower() or len(_re.findall(r"\b\d{1,2}\.\s+[A-Z]", body[:460])) >= 3:
+            continue
+        # Strip the running header PDFs repeat at the top of every page, the
+        # chapter/section furniture, and the heading itself, so the excerpt opens on
+        # the substance rather than on navigation.
+        doc_title = (vector_store.docs.get(doc_id, {}) or {}).get("title") or ""
+
+        # Invisible formatting residue first, so it cannot break the pattern matches
+        # below. U+00AD is a soft hyphen the encoder left behind; U+FFFD is an
+        # unmapped glyph. An en dash (U+2013) is NOT damage and is left alone -- it is
+        # the document's own punctuation in ranges like "90 - 95%".
+        body = body.replace("­", "").replace("�", "")
+        # Bullet glyphs the encoder rendered as stray "z" characters.
+        body = _re.sub(r"(?:\bz\s+){2,}", "• ", body)
+
+        # Running headers repeat the title on every page and reappear mid-chunk, in
+        # wording that drifts from the recorded title ("Consensus Document for the
+        # Management of Cancer Cervix" against a title of "...for Management of..."),
+        # so they are matched loosely on the distinctive words rather than exactly.
+        #
+        # This runs BEFORE the furniture loop, not after: removing a leading running
+        # header exposes the chapter marker behind it, and a loop that has already
+        # finished cannot strip what the removal just revealed. That ordering left
+        # "CHAPTER9 APPENDIX Appendix - A BIOMARKERS..." as an excerpt opening.
+        title_words = [w for w in _re.findall(r"[A-Za-z]{4,}", doc_title)
+                       if w.lower() not in {"document", "guidelines", "guideline", "for", "the"}]
+        if len(title_words) >= 2:
+            loose = r"\b" + r"\W+(?:\w+\W+){0,3}?".join(_re.escape(w) for w in title_words[:5]) + r"\b"
+            body = _re.sub(loose, "", body, flags=_re.I)
+            body = _re.sub(r"\s{2,}", " ", body).strip(" -–—:.")
+
+        # Page furniture, applied until the text stops changing. Order alone is not
+        # enough: "ICMR Guidelines ... 2018  1  SECTION 1 INTRODUCTION 1.1 Definition"
+        # needs the page number removed before the SECTION pattern can match, and the
+        # heading removed after both.
+        furniture = [
+            # The operator-attested 2022-23 chapters mark headings with "#", so their
+            # passages open "#CLASSIFICATION Based on the duration of illness". Left
+            # in place, the capital-letter check below rejected every chunk of the
+            # bone and joint infection chapter and it showed nothing at all.
+            r"^\s*#+\s*",
+            r"^\s*(APPENDIX|ANNEXURE)\s*[-–—]?\s*[A-Z0-9]?\s*",
+            r"^\s*" + _re.escape(doc_title[:60]) + r"\s*",
+            r"^\s*(CHAPTER|SECTION)\s*\d*\s*",
+            r"^\s*\d{1,4}(?:\.\d+)*\s+",
+            r"^\s*[ivxlc]{1,5}\s+(?=[A-Z])",
+            r"^\s*" + _re.escape(flat) + r"\s*",
+            r"^\s*" + _re.escape(raw) + r"\s*",
+        ]
+        for _ in range(6):
+            before = body
+            for pattern in furniture:
+                body = _re.sub(pattern, "", body, flags=_re.I)
+            body = body.strip()
+            if body == before:
+                break
+
+        # A chunk that begins mid-word or mid-sentence makes a poor opening quote:
+        # the reader is dropped into the middle of something. Skip rather than
+        # present it as though it were the start of a statement.
+        if not body[:1].isupper() and not body[:1].isdigit():
+            continue
+        if len(body) < 180:
+            continue
+        cut = body[:460]
+        if len(body) > 460:
+            stop = max(cut.rfind(". "), cut.rfind("; "))
+            cut = cut[: stop + 1] if stop > 220 else cut.rsplit(" ", 1)[0]
+            # Trailing punctuation first: a cut ending on a full stop plus an appended
+            # ellipsis reads as "India...." and looks like dot leaders.
+            cut = cut.rstrip(" .;") + "..."
+        cut = cut.strip()
+        # Re-checked after trimming: the gate above judged the whole chunk, and the
+        # first 460 characters of a mostly-prose chunk can still be its table.
+        if sum(ch.isalpha() or ch.isspace() for ch in cut) / max(len(cut), 1) < 0.82:
+            continue
+        if heading_ok:
+            store[flat] = (chunk.get("page"), cut)
+        else:
+            opening_text.setdefault(doc_id, []).append((chunk.get("page"), cut))
+
+    out: List[Dict[str, Any]] = []
+    for doc_id, d in vector_store.docs.items():
+        doc_domain = d.get("clinical_domain", DOMAIN_ANTIMICROBIAL)
+        if domain and doc_domain != domain:
+            continue
+        rank = d.get("precedence_rank")
+        out.append({
+            "document_id": doc_id,
+            "title": d.get("title"),
+            "issuing_org": d.get("issuing_org"),
+            "version": d.get("version"),
+            "publication_date": d.get("publication_date"),
+            "geographic_scope": d.get("geographic_scope"),
+            "source_url": d.get("source_url"),
+            "clinical_domain": doc_domain,
+            "precedence_rank": rank,
+            "is_clinical_guideline": rank != NOT_A_CLINICAL_GUIDELINE_RANK,
+            "carries_antimicrobial_authority": (
+                doc_domain == DOMAIN_ANTIMICROBIAL and rank != NOT_A_CLINICAL_GUIDELINE_RANK
+            ),
+            # Distinct from authority: a condition-specific guideline can name
+            # antibacterial regimens for its own condition without being an
+            # antimicrobial guideline. See config.ANTIMICROBIAL_CONTENT_DOCUMENT_IDS.
+            "carries_antimicrobial_content": doc_id in ANTIMICROBIAL_CONTENT_DOCUMENT_IDS,
+            "domain_caveat": DOMAIN_READING_CONTRACT.get(doc_domain),
+            "source_type": d.get("source_type", "OFFICIAL_PDF"),
+            "provenance_basis": d.get("provenance_basis", "HASH_VERIFIED_PDF"),
+            "page_reference_kind": d.get("page_reference_kind", "OFFICIAL_DOCUMENT_PAGE"),
+            "page_count": d.get("page_count"),
+            "chunks": chunk_counts.get(doc_id, 0),
+            "file_sha256": d.get("file_sha256"),
+            "provenance_note": d.get("notes") or None,
+            # What the document says, by topic, in its own words. Capped because
+            # this is an orientation aid: the type 2 diabetes guideline alone yields
+            # 37 headings and a card is not a reader.
+            "topics": [
+                {"heading": heading, "page": page, "excerpt": excerpt}
+                for heading, (page, excerpt) in list(topic_text.get(doc_id, {}).items())[:8]
+            ] or [
+                # No heading was detected anywhere in this document, so there is
+                # nothing to label the passage with. The heading is left empty rather
+                # than invented, and the excerpt is still the document's own text.
+                {"heading": "", "page": page, "excerpt": excerpt}
+                for page, excerpt in opening_text.get(doc_id, [])[:2]
+            ],
+        })
+
+    # Precedence first, then title, so the ordering a reader sees is the documented
+    # hierarchy rather than dictionary order.
+    out.sort(key=lambda x: (x["precedence_rank"] or 99, (x["title"] or "").lower()))
+    return {
+        "total_documents": len(vector_store.docs),
+        "returned": len(out),
+        "domain_filter": domain,
+        "documents": out,
     }
 
 

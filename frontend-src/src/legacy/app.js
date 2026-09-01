@@ -22,6 +22,27 @@ function escapeHtml(str) {
     .replace(/'/g, "&#039;");
 }
 
+/**
+ * "Rajesh Sharma (PATIENT-001)", or the bare id when no name is recorded.
+ *
+ * The clinical summary report identified its patient as "PATIENT-014" and nothing
+ * else. That is a usable database key and it is not a patient: a clinician reading
+ * or signing the report cannot check it against the person in front of them. The id
+ * stays alongside the name because the audit trail and every other record key on it.
+ *
+ * Records seeded before display_name held a bare name carry it as
+ * "PATIENT-001 (Rajesh Sharma)", so the parenthesised form is unwrapped rather than
+ * printed back with the id twice.
+ */
+function patientLabel(patient, patientId) {
+  const id = (patientId || patient?.patient_id || "").trim();
+  let name = (patient?.display_name || "").trim();
+  const wrapped = name.match(/^\s*\S+\s*\((.+)\)\s*$/);
+  if (wrapped) name = wrapped[1].trim();
+  if (!name || name === id || name === "Patient Record") return id || "Unknown patient";
+  return id ? `${name} (${id})` : name;
+}
+
 // Safe DOM Element Helper
 const $ = (id) => document.getElementById(id);
 
@@ -692,9 +713,37 @@ function renderClinicalReport(data) {
         ? data.retrieved_guideline_evidence.retrieved
         : []);
 
-  const evidence = rawEvidence.map(item =>
-    `<li><strong>${escapeHtml(item.document_title || 'Authorised source')}</strong> · ${escapeHtml(item.guideline_version || '')}${item.section_page ? ` · ${escapeHtml(item.section_page)}` : ''}<br><q>${escapeHtml(item.verbatim_passage || '')}</q></li>`
-  ).join("") || "<li>No retrieved guideline passage recorded.</li>";
+  // Caveats travel with the passages and must be printed with them.
+  //
+  // This section is headed "Evidence Reviewed" in a report a clinician signs and
+  // files, which is the strongest possible framing for whatever appears under it.
+  // Once the corpus grew past antimicrobial guidelines, a passage here could come
+  // from an oncology consensus document, a research-ethics guideline, or the ICMR
+  // cancer research compendium -- which recommends nothing at all. Printing the
+  // title and the quote alone would present all three as reviewed clinical
+  // evidence. The retrieval layer already labels every passage; the report simply
+  // was not reading the labels.
+  const retrievalCaveats = Array.isArray(data.retrieved_guideline_evidence?.caveats)
+    ? data.retrieved_guideline_evidence.caveats
+    : [];
+
+  const evidence = rawEvidence.map(item => {
+    const standing = item.clinical_standing || item.domain_caveat;
+    const notAntimicrobial = item.carries_antimicrobial_authority === false;
+    return `<li><strong>${escapeHtml(item.document_title || 'Authorised source')}</strong> · ${escapeHtml(item.guideline_version || '')}${item.section_page ? ` · ${escapeHtml(item.section_page)}` : ''}`
+      + (notAntimicrobial ? ` <span class="report-severity">NOT AN ANTIMICROBIAL SOURCE</span>` : '')
+      + `<br><q>${escapeHtml(item.verbatim_passage || '')}</q>`
+      + (standing ? `<br><small><b>Standing:</b> ${escapeHtml(standing)}</small>` : '')
+      + `</li>`;
+  }).join("") || "<li>No retrieved guideline passage recorded.</li>";
+
+  const evidenceCaveats = retrievalCaveats.length
+    ? `<div class="recommendation-box" style="margin-top:0.5rem; border-left-color: var(--high-border);">`
+      + `<strong style="display:block; margin-bottom:0.25rem;">How this evidence must be read</strong>`
+      + `<ul style="margin:0; padding-left:1.1rem;">`
+      + retrievalCaveats.map(c => `<li><small>${escapeHtml(c)}</small></li>`).join("")
+      + `</ul></div>`
+    : "";
 
   const warnings = Array.isArray(data.warnings) ? data.warnings : [];
   const findings = warnings.map(w =>
@@ -705,10 +754,10 @@ function renderClinicalReport(data) {
   report.innerHTML = `
     <div class="report-header"><div><span class="report-label">ANTIBIOTIX</span><h5>Clinical Decision Support Summary Report</h5></div><dl><dt>Report date</dt><dd>${escapeHtml(new Date().toLocaleString())}</dd><dt>Report ID</dt><dd>${escapeHtml(data.prescription_id || '')}</dd><dt>Reviewing role</dt><dd>Authorized clinician</dd></dl></div>
     <div class="report-grid">
-      <section><h6>1. Patient Summary</h6><p><b>Patient:</b> ${escapeHtml(data.patient_id || '')} · <b>Demographics:</b> ${escapeHtml(patient.age ?? 'Unknown')} yrs · ${escapeHtml(patient.sex || 'Unknown')}</p><p><b>Allergies:</b> ${escapeHtml((patient.allergies || []).join(', ') || 'None documented')}<br><b>Current medications:</b> ${escapeHtml((patient.active_medications || []).join(', ') || 'None recorded')}<br><b>Renal:</b> ${escapeHtml(patient.egfr_ml_min ?? 'Not recorded')} mL/min · <b>Hepatic:</b> ${escapeHtml(patient.child_pugh_class || 'Not recorded')} · <b>Pregnancy:</b> ${escapeHtml(patient.pregnancy_status || 'Unknown')}</p></section>
+      <section><h6>1. Patient Summary</h6><p><b>Patient:</b> ${escapeHtml(patientLabel(patient, data.patient_id))} · <b>Demographics:</b> ${escapeHtml(patient.age ?? 'Unknown')} yrs · ${escapeHtml(patient.sex || 'Unknown')}</p><p><b>Allergies:</b> ${escapeHtml((patient.allergies || []).join(', ') || 'None documented')}<br><b>Current medications:</b> ${escapeHtml((patient.active_medications || []).join(', ') || 'None recorded')}<br><b>Renal:</b> ${escapeHtml(patient.egfr_ml_min ?? 'Not recorded')} mL/min · <b>Hepatic:</b> ${escapeHtml(patient.child_pugh_class || 'Not recorded')} · <b>Pregnancy:</b> ${escapeHtml(patient.pregnancy_status || 'Unknown')}</p></section>
       <section><h6>2. Visit Information</h6><p><b>Visit date:</b> ${escapeHtml(new Date().toLocaleString())}<br><b>Diagnosis / indication:</b> ${escapeHtml(data.diagnosis || 'Not recorded')}</p></section>
       <section><h6>3. Medication or Prescription Under Review</h6><p>${prescription}</p></section>
-      <section><h6>4. Evidence Reviewed</h6><ul>${evidence}</ul></section>
+      <section><h6>4. Evidence Reviewed</h6><ul>${evidence}</ul>${evidenceCaveats}</section>
     </div>
     <section class="report-findings"><h6>5. Clinical Decision Support Findings</h6><p><b>Stewardship classification:</b> ${escapeHtml(priority.tier || 'Not recorded')} · <b>Warnings:</b> ${escapeHtml(data.total_warnings ?? warnings.length)}</p><div class="table-responsive"><table class="data-table"><thead><tr><th>Severity</th><th>Concern</th><th>Clinical detail</th><th>System recommendation</th></tr></thead><tbody>${findings}</tbody></table></div></section>
     <div class="report-grid"><section><h6>6. Clinical Recommendation</h6><p>System advice is represented by the findings and recommendations above. The final decision remains the clinician's judgment.</p></section><section><h6>7. Clinician Decision</h6><p>Status: Pending clinician decision<br>Clinician rationale: To be documented in the clinical record.</p></section><section><h6>8. Governance and Audit Information</h6><p>Review status: ${escapeHtml((data.total_warnings || warnings.length) ? 'Safety review required' : 'No findings recorded')}<br>Immutable prescription metadata: ${escapeHtml(data.model_version_info?.engine_build || 'Versioned engine metadata attached')}</p></section></div>`;

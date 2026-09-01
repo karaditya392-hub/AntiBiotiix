@@ -23,7 +23,10 @@
         "Piperacillin-Tazobactam"
       ],
       "recommended_duration_days": "5 to 7 days",
-      "clinical_notes": "ICMR Guidelines Section 1.1: For outpatient mild CAP, oral Amoxicillin (500mg TID or 1g TID) is first-line. In patients with comorbidities or recent antibiotic exposure, Amoxicillin-Clavulanate plus Azithromycin or Doxycycline is advised. Reserve Fluoroquinolones (Levofloxacin) only for patients with documented beta-lactam anaphylaxis due to high background resistance in India and risk of masking tuberculosis."
+      "clinical_notes": "ICMR Guidelines Section 1.1: For outpatient mild CAP, oral Amoxicillin (500mg TID or 1g TID) is first-line. In patients with comorbidities or recent antibiotic exposure, Amoxicillin-Clavulanate plus Azithromycin or Doxycycline is advised. Reserve Fluoroquinolones (Levofloxacin) only for patients with documented beta-lactam anaphylaxis due to high background resistance in India and risk of masking tuberculosis.",
+      "source_document_id": "ICMR-AMR-GUIDELINES-2022",
+      "source_location": "NOT RECORDED",
+      "source_quote": "Inherited from this file's document-level attribution. No per-passage citation was recorded when this entry was written, and none is claimed here."
     },
     "uncomplicated_urinary_tract_infection": {
       "syndrome_name": "Uncomplicated Acute Cystitis (UTI)",
@@ -41,7 +44,10 @@
         "Co-trimoxazole"
       ],
       "recommended_duration_days": "5 days for Nitrofurantoin, single dose for Fosfomycin",
-      "clinical_notes": "ICMR Guidelines Section 2.1: Nitrofurantoin (100mg BID x 5 days) and Fosfomycin (3g single dose) remain the preferred empirical oral agents in India due to high (>70%) fluoroquinolone and co-trimoxazole resistance among uropathogenic E. coli. Nitrofurantoin is contraindicated if eGFR < 30 mL/min."
+      "clinical_notes": "ICMR Guidelines Section 2.1: Nitrofurantoin (100mg BID x 5 days) and Fosfomycin (3g single dose) remain the preferred empirical oral agents in India due to high (>70%) fluoroquinolone and co-trimoxazole resistance among uropathogenic E. coli. Nitrofurantoin is contraindicated if eGFR < 30 mL/min.",
+      "source_document_id": "ICMR-AMR-GUIDELINES-2022",
+      "source_location": "NOT RECORDED",
+      "source_quote": "Inherited from this file's document-level attribution. No per-passage citation was recorded when this entry was written, and none is claimed here."
     },
     "skin_and_soft_tissue_infection": {
       "syndrome_name": "Skin and Soft Tissue Infection (Cellulitis / Erysipelas)",
@@ -55,7 +61,10 @@
         "Linezolid"
       ],
       "recommended_duration_days": "5 to 7 days",
-      "clinical_notes": "ICMR Guidelines Section 3.2: For mild non-purulent cellulitis, beta-lactam active against Streptococcus pyogenes and MSSA is recommended. If CA-MRSA is suspected in purulent infections, Doxycycline or Co-trimoxazole is preferred. Linezolid is restricted as Reserve therapy for confirmed resistant MRSA."
+      "clinical_notes": "ICMR Guidelines Section 3.2: For mild non-purulent cellulitis, beta-lactam active against Streptococcus pyogenes and MSSA is recommended. If CA-MRSA is suspected in purulent infections, Doxycycline or Co-trimoxazole is preferred. Linezolid is restricted as Reserve therapy for confirmed resistant MRSA.",
+      "source_document_id": "ICMR-AMR-GUIDELINES-2022",
+      "source_location": "NOT RECORDED",
+      "source_quote": "Inherited from this file's document-level attribution. No per-passage citation was recorded when this entry was written, and none is claimed here."
     },
     "acute_gastroenteritis": {
       "syndrome_name": "Acute Infectious Diarrhea / Gastroenteritis",
@@ -63,7 +72,10 @@
         "Oral Rehydration Salts (ORS) + Zinc"
       ],
       "antimicrobial_restricted": "Antimicrobial therapy is NOT recommended for routine acute watery diarrhea. Reserve for culture-proven Shigellosis, severe cholera, or severe dysentery.",
-      "clinical_notes": "ICMR Guidelines Section 4.3: Routine use of antimicrobials (especially Norfloxacin/Metronidazole combinations) for acute gastroenteritis is strongly discouraged due to high resistance and self-limiting nature."
+      "clinical_notes": "ICMR Guidelines Section 4.3: Routine use of antimicrobials (especially Norfloxacin/Metronidazole combinations) for acute gastroenteritis is strongly discouraged due to high resistance and self-limiting nature.",
+      "source_document_id": "ICMR-AMR-GUIDELINES-2022",
+      "source_location": "NOT RECORDED",
+      "source_quote": "Inherited from this file's document-level attribution. No per-passage citation was recorded when this entry was written, and none is claimed here."
     },
     "acute_bacterial_sinusitis": {
       "syndrome_name": "Acute Bacterial Rhinosinusitis",
@@ -74,7 +86,69 @@
         "Doxycycline"
       ],
       "recommended_duration_days": "5 to 7 days",
-      "clinical_notes": "ICMR Guidelines Section 1.4: Most acute sinusitis cases are viral. Antimicrobial therapy is indicated only if symptoms persist >= 10 days or 'double sickening'. Amoxicillin-Clavulanate is first-line."
+      "clinical_notes": "ICMR Guidelines Section 1.4: Most acute sinusitis cases are viral. Antimicrobial therapy is indicated only if symptoms persist >= 10 days or 'double sickening'. Amoxicillin-Clavulanate is first-line.",
+      "source_document_id": "ICMR-AMR-GUIDELINES-2022",
+      "source_location": "NOT RECORDED",
+      "source_quote": "Inherited from this file's document-level attribution. No per-passage citation was recorded when this entry was written, and none is claimed here."
+    },
+    "scrub_typhus": {
+      "syndrome_name": "Scrub Typhus / Rickettsial Illness",
+      "first_line_preferred": [
+        "Doxycycline"
+      ],
+      "alternative_atypical": [
+        "Azithromycin"
+      ],
+      "avoid_empirical": [],
+      "recommended_duration_days": "7 days",
+      "clinical_notes": "DHR-ICMR Guidelines for Diagnosis and Management of Rickettsial Diseases in India (2015): in fever of 5 days or more where malaria, dengue and typhoid have been ruled out, doxycycline is to be administered when scrub typhus is considered likely. Doxycycline is first-line INCLUDING in children, where the usual under-8 tetracycline restriction is set aside because the infection is life-threatening -- see rule VULN-005, which states that exception rather than blocking the prescription.",
+      "source_document_id": "DHR-ICMR-RICKETTSIAL-2015",
+      "source_location": "p. 17",
+      "source_quote": "Doxycycline 200 mg/day in two divided doses for individuals above 45 kg for duration of 7 days."
+    },
+    "leptospirosis": {
+      "syndrome_name": "Leptospirosis",
+      "first_line_preferred": [
+        "Doxycycline"
+      ],
+      "alternative_penicillin_allergic": [],
+      "avoid_empirical": [],
+      "recommended_duration_days": "7 days",
+      "clinical_notes": "NCDC National Guidelines on Leptospirosis (2015): doxycycline 100 mg twice a day for seven days in adults. The source names DIFFERENT agents for the groups in whom doxycycline is restricted: ampicillin 500 mg six-hourly for pregnant and lactating women, and amoxycillin or ampicillin 30-50 mg/kg/day for children under 8 years. Severe disease is treated with intravenous penicillin after a negative test dose.",
+      "source_document_id": "NCDC-LEPTOSPIROSIS-2015",
+      "source_location": "p. 11",
+      "source_quote": "Adults: Doxycycline 100 mg twice a day for seven days. Pregnant & lactating mothers should be given capsule ampicillin 500 mg every 6 hourly. Children< 8 years: Amoxycillin/ Ampicillin 30-50 mg/kg/day in divided doses for 7 days."
+    },
+    "acute_bacterial_meningitis": {
+      "syndrome_name": "Acute Bacterial Meningitis",
+      "first_line_preferred": [
+        "Ceftriaxone",
+        "Cefotaxime"
+      ],
+      "inpatient_severe": [
+        "Ceftriaxone",
+        "Vancomycin"
+      ],
+      "avoid_empirical": [],
+      "recommended_duration_days": "10 to 14 days",
+      "clinical_notes": "NCDC National Treatment Guidelines for Antimicrobial Use in Infectious Diseases (2016), central nervous system infections: empirical ceftriaxone 2 g IV 12-hourly or cefotaxime 2 g IV 4-6 hourly for 10-14 days, against S. pneumoniae, H. influenzae and N. meningitidis. The same source gives pathogen-specific durations once confirmed: 7 days for meningococcal, 10 for H. influenzae type b, 14 for S. pneumoniae.",
+      "source_document_id": "NCDC-NTG-AMR-2016",
+      "source_location": "Section B, Central Nervous System Infections",
+      "source_quote": "Acute bacterial Meningitis - S. pneumoniae, H.influenzae, Neisseria meningititdis - Ceftriaxone 2 g IV 12hourly/ Cefotaxime 2 g IV 4-6hourly - 10-14 days treatment"
+    },
+    "enteric_fever": {
+      "syndrome_name": "Enteric Fever (Typhoid / Paratyphoid)",
+      "first_line_preferred": [
+        "Ceftriaxone",
+        "Azithromycin"
+      ],
+      "avoid_empirical": [],
+      "recommended_duration_days": "Source-dependent; see clinical notes",
+      "clinical_notes": "WHO AWaRe antibiotic book (2022): empirical treatment should be chosen on severity of presentation and on LOCAL PREVALENCE OF FLUOROQUINOLONE RESISTANCE among Salmonella Typhi and Paratyphi, and treatment should start as soon as the diagnosis is suspected. Where ceftriaxone resistance is increasing, azithromycin should be prioritized. No agent is listed as one to avoid empirically, because the source makes the choice conditional on local resistance rather than fixed - which is why this entry carries no avoid_empirical list and DIAG-001 does not fire on it. The local antibiogram governs.",
+      "source_document_id": "WHO-AWARE-BOOK-2022",
+      "source_location": "Primary health care, ch. 15 (Enteric fever), pp. 202-208",
+      "source_quote": "Empiric treatment should be chosen based on - Severity of presentation - Local prevalence of fluoroquinolone resistance among serotypes Typhi or Paratyphi Salmonella"
     }
-  }
+  },
+  "syndrome_attribution_note": "Each syndrome entry carries its own source_document_id, source_location and source_quote. This file's document-level fields describe the file, NOT every entry in it: entries added from the DHR-ICMR rickettsial guidelines, the NCDC leptospirosis and national treatment guidelines, and the WHO AWaRe book are attributed to those documents and must never be cited as ICMR Edition 3. Entries whose source_quote says the attribution is inherited predate this field and carry no verified per-passage citation."
 }

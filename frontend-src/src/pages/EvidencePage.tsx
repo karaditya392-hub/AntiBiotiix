@@ -164,11 +164,22 @@ export default function EvidencePage() {
                       <span style={{ color: "#2d7064", fontWeight: 600 }}>Score: {p.retrieval_score ?? "N/A"}</span>
                     </div>
 
-                    {p.clinical_standing && (
+                    {/*
+                      Standing, per passage.
+
+                      clinical_standing only fires for precedence rank 4, so before
+                      the corpus expansion it covered every passage that needed a
+                      warning. It no longer does: an ICMR oncology consensus document
+                      is a rank-2 clinical guideline with no standing whatsoever on
+                      antimicrobial choice, and would otherwise appear here with the
+                      same styling as the ICMR antimicrobial guidelines. The domain
+                      caveat is the per-passage warning for that case.
+                    */}
+                    {(p.clinical_standing || p.domain_caveat) && (
                       <p style={{ fontSize: "0.74rem", color: "#8a4b1f", background: "#fdf3e3",
                                   border: "1px solid #e0c9a0", borderRadius: "4px",
                                   padding: "6px 8px", margin: "0 0 8px" }}>
-                        {p.clinical_standing}
+                        {p.clinical_standing || p.domain_caveat}
                       </p>
                     )}
 

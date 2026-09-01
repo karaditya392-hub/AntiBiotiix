@@ -224,8 +224,13 @@ export default function ClinicalSafetyAnalysis() {
         </div>
         <div className="context-grid" style={{ gridTemplateColumns: "repeat(4, minmax(0, 1fr))" }}>
           <div>
-            <span>Patient ID</span>
-            <strong>{patient_id}</strong>
+            {/* The name leads; the id follows it. This panel labelled the field
+                "Patient ID" and showed only the id, which is correct as an
+                identifier and tells a clinician nothing about who they are
+                reviewing. */}
+            <span>Patient</span>
+            <strong>{patientName(patient?.display_name, patient_id)}</strong>
+            <span className="muted" style={{ fontSize: "0.7rem" }}>{patient_id}</span>
           </div>
           <div>
             <span>Diagnosis</span>

@@ -3,6 +3,7 @@ import { ArrowLeft, ArrowRight, UserRound } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import UnifiedHeader from "@/components/UnifiedHeader";
 import "@/styles/patient-dashboard.css";
+import { patientName } from "@/lib/patient";
 
 type Patient = {
   patient_id: string;
@@ -95,10 +96,10 @@ export default function SelectReturningPatient() {
               >
                 <div>
                   <h3 style={{ margin: "0 0 4px", color: "#173c3d", fontSize: "1.1rem" }}>
-                    {p.display_name && p.display_name.includes("(") ? p.display_name : `${p.patient_id} (${p.display_name || "Patient Record"})`}
+                    {patientName(p.display_name, p.patient_id)}
                   </h3>
                   <p style={{ margin: "2px 0", fontSize: "0.82rem", color: "#405453" }}>
-                    <strong>{p.age ?? "Unknown"} years</strong> · {p.sex || "Sex not specified"} · Allergies: {p.allergies?.join(", ") || "None documented"}
+                    <span style={{ color: "#718281" }}>{p.patient_id}</span> · <strong>{p.age ?? "Unknown"} years</strong> · {p.sex || "Sex not specified"} · Allergies: {p.allergies?.join(", ") || "None documented"}
                   </p>
                   <p style={{ margin: "4px 0 0", fontSize: "0.8rem", color: "#718281" }}>
                     Last Visit: <strong>{p.last_visit || "No visits recorded"}</strong> · Last Diagnosis: <strong>{p.last_diagnosis || "None"}</strong>

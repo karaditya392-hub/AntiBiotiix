@@ -59,6 +59,11 @@ class DocumentMeta:
     source_type: str = "OFFICIAL_PDF"
     page_reference_kind: str = "OFFICIAL_DOCUMENT_PAGE"
     provenance_basis: str = "HASH_VERIFIED_PDF"
+    # What the document is authoritative ABOUT. Defaults to the antimicrobial
+    # domain because every document ingested before this field existed is an
+    # antimicrobial source; see backend.rag.store.DOMAIN_* for the full set and
+    # the reading contract attached to each.
+    clinical_domain: str = "ANTIMICROBIAL_TREATMENT"
 
 
 def sha256_file(path: Path) -> str:
@@ -190,6 +195,7 @@ def ingest_pdf(pdf_path: Path, meta: dict) -> tuple[DocumentMeta, List[Chunk]]:
         source_type=meta.get("source_type", "OFFICIAL_PDF"),
         page_reference_kind=meta.get("page_reference_kind", "OFFICIAL_DOCUMENT_PAGE"),
         provenance_basis=meta.get("provenance_basis", "HASH_VERIFIED_PDF"),
+        clinical_domain=meta.get("clinical_domain", "ANTIMICROBIAL_TREATMENT"),
     )
 
     chunks: List[Chunk] = []
@@ -232,6 +238,7 @@ def ingest_text(txt_path: Path, meta: dict) -> tuple[DocumentMeta, List[Chunk]]:
         source_type=meta.get("source_type", "PLAIN_TEXT_TRANSCRIPTION"),
         page_reference_kind=meta.get("page_reference_kind", "NO_PAGINATION"),
         provenance_basis=meta.get("provenance_basis", "OPERATOR_ATTESTATION"),
+        clinical_domain=meta.get("clinical_domain", "ANTIMICROBIAL_TREATMENT"),
     )
 
     chunks, _ = chunk_page(doc.document_id, doc.version, None, text, None)

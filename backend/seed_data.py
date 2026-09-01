@@ -25,7 +25,7 @@ from backend.auth.security import hash_password, DOCTOR_CREDENTIALS
 SEED_ROSTER = [
     {
         "patient_id": "PATIENT-001",
-        "display_name": "PATIENT-001 (Rajesh Sharma)",
+        "display_name": "Rajesh Sharma",
         "age": 45, "age_category": "ADULT", "weight_kg": 72.0, "sex": "MALE",
         "allergies": ["Penicillin", "Amoxicillin"], "allergy_status_known": True,
         "egfr_ml_min": 92.0, "serum_creatinine_mg_dl": 0.9, "renal_status_known": True,
@@ -44,7 +44,7 @@ SEED_ROSTER = [
     },
     {
         "patient_id": "PATIENT-002",
-        "display_name": "PATIENT-002 (Sunita Devi)",
+        "display_name": "Sunita Devi",
         "age": 68, "age_category": "GERIATRIC", "weight_kg": 64.0, "sex": "FEMALE",
         "allergies": ["Sulfonamides"], "allergy_status_known": True,
         "egfr_ml_min": 22.0, "serum_creatinine_mg_dl": 2.8, "renal_status_known": True,
@@ -63,7 +63,7 @@ SEED_ROSTER = [
     },
     {
         "patient_id": "PATIENT-003",
-        "display_name": "PATIENT-003 (Amitabh Verma)",
+        "display_name": "Amitabh Verma",
         "age": 54, "age_category": "ADULT", "weight_kg": 78.0, "sex": "MALE",
         "allergies": ["Meropenem"], "allergy_status_known": True,
         "egfr_ml_min": 75.0, "serum_creatinine_mg_dl": 1.1, "renal_status_known": True,
@@ -82,7 +82,7 @@ SEED_ROSTER = [
     },
     {
         "patient_id": "PATIENT-004",
-        "display_name": "PATIENT-004 (Priya Patel)",
+        "display_name": "Priya Patel",
         "age": 28, "age_category": "ADULT", "weight_kg": 62.0, "sex": "FEMALE",
         "allergies": ["Tetracycline"], "allergy_status_known": True,
         "egfr_ml_min": 110.0, "serum_creatinine_mg_dl": 0.6, "renal_status_known": True,
@@ -101,7 +101,7 @@ SEED_ROSTER = [
     },
     {
         "patient_id": "PATIENT-005",
-        "display_name": "PATIENT-005 (Suresh Kumar)",
+        "display_name": "Suresh Kumar",
         "age": 62, "age_category": "ADULT", "weight_kg": 85.0, "sex": "MALE",
         "allergies": ["Clarithromycin"], "allergy_status_known": True,
         "egfr_ml_min": 82.0, "serum_creatinine_mg_dl": 1.0, "renal_status_known": True,
@@ -120,7 +120,7 @@ SEED_ROSTER = [
     },
     {
         "patient_id": "PATIENT-006",
-        "display_name": "PATIENT-006 (Aarav Gupta)",
+        "display_name": "Aarav Gupta",
         "age": 4, "age_category": "PEDIATRIC", "weight_kg": 16.0, "sex": "MALE",
         "allergies": ["Cefaclor"], "allergy_status_known": True,
         "egfr_ml_min": 115.0, "serum_creatinine_mg_dl": 0.4, "renal_status_known": True,
@@ -139,7 +139,7 @@ SEED_ROSTER = [
     },
     {
         "patient_id": "PATIENT-007",
-        "display_name": "PATIENT-007 (Kamla Rao)",
+        "display_name": "Kamla Rao",
         "age": 72, "age_category": "GERIATRIC", "weight_kg": 58.0, "sex": "FEMALE",
         "allergies": ["Ciprofloxacin"], "allergy_status_known": True,
         "egfr_ml_min": 55.0, "serum_creatinine_mg_dl": 1.1, "renal_status_known": True,
@@ -158,7 +158,7 @@ SEED_ROSTER = [
     },
     {
         "patient_id": "PATIENT-008",
-        "display_name": "PATIENT-008 (Vikram Singh)",
+        "display_name": "Vikram Singh",
         "age": 35, "age_category": "ADULT", "weight_kg": 70.0, "sex": "MALE",
         "allergies": ["Trimethoprim"], "allergy_status_known": True,
         "egfr_ml_min": 98.0, "serum_creatinine_mg_dl": 0.8, "renal_status_known": True,
@@ -177,7 +177,7 @@ SEED_ROSTER = [
     },
     {
         "patient_id": "PATIENT-009",
-        "display_name": "PATIENT-009 (Ramesh Iyer)",
+        "display_name": "Ramesh Iyer",
         "age": 50, "age_category": "ADULT", "weight_kg": 75.0, "sex": "MALE",
         "allergies": ["Erythromycin"], "allergy_status_known": True,
         "egfr_ml_min": 90.0, "serum_creatinine_mg_dl": 1.0, "renal_status_known": True,
@@ -196,7 +196,7 @@ SEED_ROSTER = [
     },
     {
         "patient_id": "PATIENT-010",
-        "display_name": "PATIENT-010 (Ananya Reddy)",
+        "display_name": "Ananya Reddy",
         "age": 29, "age_category": "ADULT", "weight_kg": 55.0, "sex": "FEMALE",
         "allergies": ["Flucloxacillin"], "allergy_status_known": True,
         "egfr_ml_min": 95.0, "serum_creatinine_mg_dl": 0.7, "renal_status_known": True,
@@ -215,7 +215,7 @@ SEED_ROSTER = [
     },
     {
         "patient_id": "PATIENT-011",
-        "display_name": "PATIENT-011 (Meena Joshi)",
+        "display_name": "Meena Joshi",
         "age": 39, "age_category": "ADULT", "weight_kg": 68.0, "sex": "FEMALE",
         "allergies": ["Vancomycin"], "allergy_status_known": True,
         "egfr_ml_min": 96.0, "serum_creatinine_mg_dl": 0.8, "renal_status_known": True,
@@ -234,7 +234,7 @@ SEED_ROSTER = [
     },
     {
         "patient_id": "PATIENT-012",
-        "display_name": "PATIENT-012 (Dinesh Deshmukh)",
+        "display_name": "Dinesh Deshmukh",
         "age": 57, "age_category": "ADULT", "weight_kg": 76.0, "sex": "MALE",
         "allergies": ["Ceftriaxone"], "allergy_status_known": True,
         "egfr_ml_min": 71.0, "serum_creatinine_mg_dl": 1.1, "renal_status_known": True,
@@ -253,7 +253,7 @@ SEED_ROSTER = [
     },
     {
         "patient_id": "PATIENT-013",
-        "display_name": "PATIENT-013 (Lakshmi Nair)",
+        "display_name": "Lakshmi Nair",
         "age": 66, "age_category": "GERIATRIC", "weight_kg": 59.0, "sex": "FEMALE",
         "allergies": ["Doxycycline"], "allergy_status_known": True,
         "egfr_ml_min": 48.0, "serum_creatinine_mg_dl": 1.3, "renal_status_known": True,
@@ -272,7 +272,7 @@ SEED_ROSTER = [
     },
     {
         "patient_id": "PATIENT-014",
-        "display_name": "PATIENT-014 (Rohan Banerjee)",
+        "display_name": "Rohan Banerjee",
         "age": 31, "age_category": "ADULT", "weight_kg": 64.0, "sex": "MALE",
         "allergies": ["Nitrofurantoin"], "allergy_status_known": True,
         "egfr_ml_min": 108.0, "serum_creatinine_mg_dl": 0.7, "renal_status_known": True,
@@ -291,7 +291,7 @@ SEED_ROSTER = [
     },
     {
         "patient_id": "PATIENT-015",
-        "display_name": "PATIENT-015 (Kavya Kulkarni)",
+        "display_name": "Kavya Kulkarni",
         "age": 19, "age_category": "ADULT", "weight_kg": 61.0, "sex": "FEMALE",
         "allergies": ["Azithromycin"], "allergy_status_known": True,
         "egfr_ml_min": 112.0, "serum_creatinine_mg_dl": 0.6, "renal_status_known": True,
@@ -310,7 +310,7 @@ SEED_ROSTER = [
     },
     {
         "patient_id": "PATIENT-016",
-        "display_name": "PATIENT-016 (Harishchandra Prasad)",
+        "display_name": "Harishchandra Prasad",
         "age": 73, "age_category": "GERIATRIC", "weight_kg": 70.0, "sex": "MALE",
         "allergies": ["Gentamicin"], "allergy_status_known": True,
         "egfr_ml_min": 58.0, "serum_creatinine_mg_dl": 1.2, "renal_status_known": True,
@@ -329,7 +329,7 @@ SEED_ROSTER = [
     },
     {
         "patient_id": "PATIENT-017",
-        "display_name": "PATIENT-017 (Diya Bhatt)",
+        "display_name": "Diya Bhatt",
         "age": 11, "age_category": "PEDIATRIC", "weight_kg": 37.0, "sex": "FEMALE",
         "allergies": ["Clindamycin"], "allergy_status_known": True,
         "egfr_ml_min": 120.0, "serum_creatinine_mg_dl": 0.5, "renal_status_known": True,
@@ -348,7 +348,7 @@ SEED_ROSTER = [
     },
     {
         "patient_id": "PATIENT-018",
-        "display_name": "PATIENT-018 (Manoj Chatterjee)",
+        "display_name": "Manoj Chatterjee",
         "age": 47, "age_category": "ADULT", "weight_kg": 82.0, "sex": "MALE",
         "allergies": ["Colistin"], "allergy_status_known": True,
         "egfr_ml_min": 88.0, "serum_creatinine_mg_dl": 0.9, "renal_status_known": True,
@@ -367,7 +367,7 @@ SEED_ROSTER = [
     },
     {
         "patient_id": "PATIENT-019",
-        "display_name": "PATIENT-019 (Shalini Agarwal)",
+        "display_name": "Shalini Agarwal",
         "age": 58, "age_category": "ADULT", "weight_kg": 74.0, "sex": "FEMALE",
         "allergies": ["Levofloxacin"], "allergy_status_known": True,
         "egfr_ml_min": 67.0, "serum_creatinine_mg_dl": 1.0, "renal_status_known": True,
@@ -386,7 +386,7 @@ SEED_ROSTER = [
     },
     {
         "patient_id": "PATIENT-020",
-        "display_name": "PATIENT-020 (Aditya Menon)",
+        "display_name": "Aditya Menon",
         "age": 24, "age_category": "ADULT", "weight_kg": 66.0, "sex": "MALE",
         "allergies": ["Cefixime"], "allergy_status_known": True,
         "egfr_ml_min": 102.0, "serum_creatinine_mg_dl": 0.8, "renal_status_known": True,

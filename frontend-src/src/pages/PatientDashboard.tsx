@@ -5,6 +5,8 @@ import {
 } from "lucide-react";
 import { Link } from "wouter";
 import "@/styles/patient-dashboard.css";
+import { useRuleCount, ruleEngineLabel } from "@/hooks/useRuleCount";
+import { patientName } from "@/lib/patient";
 
 type Patient = {
   id?: number;
@@ -127,6 +129,8 @@ function formatDate(value?: string): string {
 }
 
 export default function PatientDashboard() {
+  // Read from the engine rather than restated from memory; see useRuleCount.
+  const ruleCount = useRuleCount();
   const [activeTab, setActiveTab] = useState<"dashboard" | "patient" | "new_visit" | "medications" | "audit">("dashboard");
   const [patients, setPatients] = useState<Patient[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -590,7 +594,7 @@ export default function PatientDashboard() {
                 <option value="">Select a patient</option>
                 {patients.map((item) => (
                   <option key={item.patient_id} value={item.patient_id}>
-                    {item.patient_id} · {display(item.age)} yrs · {display(item.sex)}
+                    {patientName(item.display_name, item.patient_id)} · {item.patient_id} · {display(item.age)} yrs · {display(item.sex)}
                   </option>
                 ))}
               </select>
@@ -609,7 +613,15 @@ export default function PatientDashboard() {
                           void loadHistory(p.patient_id);
                         }}
                       >
-                        <span className="preset-chip-id">{p.patient_id}</span>
+                        {/* The scenario endpoint carries no name of its own, so it
+                            is looked up from the roster loaded alongside it; a miss
+                            falls back to the id rather than rendering blank. */}
+                        <span className="preset-chip-id">
+                          {patientName(
+                            patients.find((pat) => pat.patient_id === p.patient_id)?.display_name,
+                            p.patient_id,
+                          )}
+                        </span>
                         <span className="preset-chip-title">{p.diagnosis}</span>
                       </button>
                     ))}
@@ -684,7 +696,7 @@ export default function PatientDashboard() {
                   <span className="stat-value" style={{ color: stats?.critical_warnings_count ? "#a33d31" : "#173c3d" }}>
                     {stats?.total_active_warnings || 0}
                   </span>
-                  <span className="stat-sub">24-Rule Engine Alerts</span>
+                  <span className="stat-sub">{ruleEngineLabel(ruleCount)} Alerts</span>
                 </div>
               </div>
 
@@ -714,7 +726,10 @@ export default function PatientDashboard() {
                     {patients.map((p) => (
                       <tr key={p.patient_id} onClick={() => selectPatient(p.patient_id, "patient")}>
                         <td><strong>{p.patient_id}</strong></td>
-                        <td>{p.display_name || `Patient ${p.patient_id}`}</td>
+                        {/* Through the helper, not raw: a record seeded before
+                            display_name held a bare name carries "PATIENT-001
+                            (Rajesh Sharma)", which printed the id twice on this row. */}
+                        <td>{patientName(p.display_name, p.patient_id)}</td>
                         <td>{display(p.age)} yrs · {display(p.sex)}</td>
                         <td>{p.last_visit || "No visits"}</td>
                         <td>{p.last_diagnosis || "None recorded"}</td>
@@ -748,7 +763,7 @@ export default function PatientDashboard() {
                   <section className="current-banner">
                     <div>
                       <p className="dashboard-kicker">PATIENT PROFILE</p>
-                      <h2>{patient.display_name || patient.patient_id} ({patient.patient_id})</h2>
+                      <h2>{patientName(patient.display_name, patient.patient_id)} ({patient.patient_id})</h2>
                       <p>
                         {display(patient.age)} years · {display(patient.sex)} · {display(patient.weight_kg)} kg · eGFR {display(patient.egfr_ml_min)} mL/min
                       </p>
@@ -903,7 +918,7 @@ export default function PatientDashboard() {
                       <BookOpenCheck size={20} color="#2d7064" />
                     </div>
                     <p style={{ fontSize: "0.78rem", color: "#607371", margin: "4px 0 10px" }}>
-                      Ask natural language questions. Answers are grounded EXCLUSIVELY in <strong>{patient.patient_id}</strong>'s stored records with strict patient isolation.
+                      Ask natural language questions. Answers are grounded EXCLUSIVELY in <strong>{patientName(patient.display_name, patient.patient_id)}</strong>'s stored records with strict patient isolation.
                     </p>
 
                     <div className="example-chips">
@@ -1096,7 +1111,7 @@ export default function PatientDashboard() {
 
                     <div style={{ marginTop: "12px" }}>
                       <button type="button" className="dashboard-button warning" onClick={runSafetyAnalysis}>
-                        <ShieldCheck size={16} /> Run AntiBioTix 24-Rule Safety Analysis
+                        <ShieldCheck size={16} /> Run AntiBioTix {ruleEngineLabel(ruleCount)} Safety Analysis
                       </button>
                     </div>
 

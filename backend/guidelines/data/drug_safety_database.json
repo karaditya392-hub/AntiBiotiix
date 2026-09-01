@@ -61,7 +61,9 @@
         "Cephalosporins_1st_Gen": 0.05,
         "Cephalosporins_3rd_Gen": 0.01,
         "Carbapenems": 0.005
-      }
+      },
+      "pregnancy_contraindicated": false,
+      "pregnancy_contraindication_basis": "NOT flagged for VULN-008. Recorded as Category B with caution near term, which is a caution rather than a contraindication."
     },
     "ciprofloxacin": {
       "name": "Ciprofloxacin",
@@ -244,7 +246,9 @@
           "recommendation": "Monitor INR closely.",
           "evidence_source": "ICMR 2022"
         }
-      ]
+      ],
+      "pregnancy_contraindicated": false,
+      "pregnancy_contraindication_basis": "NOT flagged for VULN-008. Recorded as Category C, to be avoided unless no alternative exists, which is a preference rather than a contraindication."
     },
     "metronidazole": {
       "name": "Metronidazole",
@@ -430,7 +434,9 @@
         "standard_dose": "5-7 mg/kg/day in 4 divided doses for cystitis in children > 1 month",
         "contraindication_neonates": "Contraindicated in neonates < 1 month old.",
         "evidence_source": "ICMR Pediatric UTI Guidelines 2022"
-      }
+      },
+      "pregnancy_contraindicated": false,
+      "pregnancy_contraindication_basis": "NOT flagged for VULN-008. Its recorded contraindication applies at term (38-42 weeks gestation); this system records a trimester, not a gestational week, so a trimester-level alert would fire outside the window the source describes."
     },
     "linezolid": {
       "name": "Linezolid",
@@ -481,7 +487,9 @@
         "weight_based": true,
         "standard_dose": "5-7.5 mg/kg/day once daily IV/IM with level monitoring",
         "evidence_source": "ICMR Pediatric Guidelines 2022"
-      }
+      },
+      "pregnancy_contraindicated": true,
+      "pregnancy_contraindication_basis": "Recorded as \"Category D / HIGH RISK\" with irreversible fetal ototoxicity."
     },
     "cloxacillin": {
       "name": "Cloxacillin",
@@ -1904,13 +1912,10 @@
       "aware_category_source": "The WHO AWaRe classification covers antibacterials. This agent is not an antibacterial and is not assigned an AWaRe group by any source held here.",
       "knowledge_coverage": "PARTIAL",
       "coverage_gaps": [
-        "renal_dosing",
-        "hepatic_dosing",
         "pregnancy_category",
-        "lactation_safety",
-        "interactions"
+        "lactation_safety"
       ],
-      "coverage_note": "Added from the ICMR Treatment Guidelines 2022-23 edition (operator-attested), which states the indication and dose only. The fields listed in coverage_gaps are not stated in any document held by this repository and have NOT been supplied from memory. COVERAGE-001 continues to fire for this drug.",
+      "coverage_note": "Originally added from the ICMR 2022-23 edition, which states indication and dose only, and recorded as having no held evidence for the fields above. That was incorrect: ICMR-STG-2019-ED2, a hash-verified PDF held in this repository, states them. The fields closed above carry that document's own wording and its page. Any field still listed in coverage_gaps remains unstated in every held document and has NOT been supplied from memory.",
       "indications_from_held_sources": [
         "Invasive pulmonary aspergillosis - first choice",
         "CLABSI due to C. glabrata, C. auris, C. haemulonii or C. krusei"
@@ -1932,7 +1937,61 @@
       },
       "unverified_sources": [],
       "aware_classification_status": "NOT_AN_ANTIBACTERIAL",
-      "clinical_notes_from_held_sources": "Consider voriconazole therapeutic drug level monitoring (TDM) wherever feasible. Duration in invasive pulmonary aspergillosis is approximately 6 weeks."
+      "clinical_notes_from_held_sources": "Consider voriconazole therapeutic drug level monitoring (TDM) wherever feasible. Duration in invasive pulmonary aspergillosis is approximately 6 weeks.",
+      "interactions": [
+        {
+          "interacting_drug_or_class": "rifampicin",
+          "severity": "CONTRAINDICATED",
+          "mechanism": "Stated as a contraindication by the source; the pharmacological basis is not given in the held text and is not supplied here.",
+          "recommendation": "The guideline lists this combination as contraindicated. Select an alternative antifungal or an alternative to the interacting agent, or seek specialist advice.",
+          "evidence_source": "ICMR Treatment Guidelines for Antimicrobial Use in Common Syndromes, 2nd edition (2019) [ICMR-STG-2019-ED2], p. 184",
+          "verbatim_passage": "Contraindicated with rifampicin, carbamazepine, long acting barbiturates, phenytoin, Ivabradine. Interactions with warfarin, Tacrolimus and cyclosporine"
+        },
+        {
+          "interacting_drug_or_class": "carbamazepine",
+          "severity": "CONTRAINDICATED",
+          "mechanism": "Stated as a contraindication by the source; the pharmacological basis is not given in the held text and is not supplied here.",
+          "recommendation": "The guideline lists this combination as contraindicated. Select an alternative antifungal or an alternative to the interacting agent, or seek specialist advice.",
+          "evidence_source": "ICMR Treatment Guidelines for Antimicrobial Use in Common Syndromes, 2nd edition (2019) [ICMR-STG-2019-ED2], p. 184",
+          "verbatim_passage": "Contraindicated with rifampicin, carbamazepine, long acting barbiturates, phenytoin, Ivabradine. Interactions with warfarin, Tacrolimus and cyclosporine"
+        },
+        {
+          "interacting_drug_or_class": "phenytoin",
+          "severity": "CONTRAINDICATED",
+          "mechanism": "Stated as a contraindication by the source; the pharmacological basis is not given in the held text and is not supplied here.",
+          "recommendation": "The guideline lists this combination as contraindicated. Select an alternative antifungal or an alternative to the interacting agent, or seek specialist advice.",
+          "evidence_source": "ICMR Treatment Guidelines for Antimicrobial Use in Common Syndromes, 2nd edition (2019) [ICMR-STG-2019-ED2], p. 184",
+          "verbatim_passage": "Contraindicated with rifampicin, carbamazepine, long acting barbiturates, phenytoin, Ivabradine. Interactions with warfarin, Tacrolimus and cyclosporine"
+        },
+        {
+          "interacting_drug_or_class": "barbiturate",
+          "severity": "CONTRAINDICATED",
+          "mechanism": "Stated as a contraindication by the source; the pharmacological basis is not given in the held text and is not supplied here.",
+          "recommendation": "The guideline lists this combination as contraindicated. Select an alternative antifungal or an alternative to the interacting agent, or seek specialist advice.",
+          "evidence_source": "ICMR Treatment Guidelines for Antimicrobial Use in Common Syndromes, 2nd edition (2019) [ICMR-STG-2019-ED2], p. 184",
+          "verbatim_passage": "Contraindicated with rifampicin, carbamazepine, long acting barbiturates, phenytoin, Ivabradine. Interactions with warfarin, Tacrolimus and cyclosporine"
+        },
+        {
+          "interacting_drug_or_class": "ivabradine",
+          "severity": "CONTRAINDICATED",
+          "mechanism": "Stated as a contraindication by the source; the pharmacological basis is not given in the held text and is not supplied here.",
+          "recommendation": "The guideline lists this combination as contraindicated. Select an alternative antifungal or an alternative to the interacting agent, or seek specialist advice.",
+          "evidence_source": "ICMR Treatment Guidelines for Antimicrobial Use in Common Syndromes, 2nd edition (2019) [ICMR-STG-2019-ED2], p. 184",
+          "verbatim_passage": "Contraindicated with rifampicin, carbamazepine, long acting barbiturates, phenytoin, Ivabradine. Interactions with warfarin, Tacrolimus and cyclosporine"
+        }
+      ],
+      "hepatic_dosing": {
+        "requires_adjustment": true,
+        "recommendation": "Reduce to 50% of dose in Child-Pugh Class A or B.",
+        "evidence_source": "ICMR Treatment Guidelines for Antimicrobial Use in Common Syndromes, 2nd edition (2019) [ICMR-STG-2019-ED2], p. 184",
+        "evidence_passage": "Dose reduction : 50 % of dose in Child-pugh Class A/B"
+      },
+      "renal_dosing": {
+        "egfr_threshold_ml_min": 50,
+        "recommendation": "The intravenous preparation contains cyclodextrin and is restricted below CrCl 50 mL/min. The oral route is not subject to this restriction.",
+        "evidence_source": "ICMR Treatment Guidelines for Antimicrobial Use in Common Syndromes, 2nd edition (2019) [ICMR-STG-2019-ED2], p. 184",
+        "evidence_passage": "IV preparation containing cyclodextrin should not be administered in Patients with CrCL < 50"
+      }
     },
     "micafungin": {
       "name": "Micafungin",
@@ -2442,11 +2501,9 @@
       "coverage_gaps": [
         "renal_dosing",
         "hepatic_dosing",
-        "pregnancy_category",
-        "lactation_safety",
         "interactions"
       ],
-      "coverage_note": "Added from the ICMR Treatment Guidelines 2022-23 edition (operator-attested), which states the indication and dose only. The fields listed in coverage_gaps are not stated in any document held by this repository and have NOT been supplied from memory. COVERAGE-001 continues to fire for this drug.",
+      "coverage_note": "Originally added from the ICMR 2022-23 edition, which states indication and dose only, and recorded as having no held evidence for the fields above. That was incorrect: ICMR-STG-2019-ED2, a hash-verified PDF held in this repository, states them. The fields closed above carry that document's own wording and its page. Any field still listed in coverage_gaps remains unstated in every held document and has NOT been supplied from memory.",
       "indications_from_held_sources": [
         "Pneumocystis jirovecii pneumonia with clindamycin, in sulpha allergy"
       ],
@@ -2466,14 +2523,351 @@
         }
       },
       "unverified_sources": [],
-      "aware_classification_status": "NOT_AN_ANTIBACTERIAL"
+      "aware_classification_status": "NOT_AN_ANTIBACTERIAL",
+      "pregnancy_category": "EXCLUDED IN PREGNANCY by the held guideline, which excepts pregnant women from primaquine administration. No FDA pregnancy category is stated in any document held here and none is supplied.",
+      "lactation_safety": "Excluded in women breastfeeding infants aged under 6 months, and in infants aged under 6 months, by the held guideline."
+    },
+    "tenofovir": {
+      "name": "Tenofovir Disoproxil Fumarate (TDF)",
+      "class": "Nucleotide Analogue",
+      "super_class": "Nucleotide Reverse Transcriptase Inhibitors",
+      "route": "Oral",
+      "aware_category": "NOT_APPLICABLE",
+      "aware_category_source": "The WHO AWaRe classification covers antibacterials. This agent is an antiviral and is not assigned an AWaRe group by any source held here.",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "hepatic_dosing",
+        "lactation_safety",
+        "interactions"
+      ],
+      "coverage_note": "Added from MOHFW-NVHCP-VIRAL-HEPATITIS-2018, a hash-verified PDF held in this repository, which states indication, dose and a small number of explicit contraindications. It is a national treatment guideline rather than a pharmacology reference, so the fields listed in coverage_gaps are NOT stated in any document held here and have NOT been supplied from memory. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "Chronic hepatitis B in adults, adolescents and children aged 12 years or older"
+      ],
+      "dosing_from_held_sources": {
+        "stated_dose": "300 mg once daily",
+        "source_document_id": "MOHFW-NVHCP-VIRAL-HEPATITIS-2018",
+        "verbatim_passage": "Tenofovir disoproxil fumarate (TDF) 300 mg once daily"
+      },
+      "unverified_sources": [],
+      "pregnancy_category": "PREFERRED where pregnancy is a possibility. The guideline states tenofovir may be preferred as the drug of choice in women of childbearing age in the eventuality of a pregnancy. This is a statement of preference over entecavir, not a full pregnancy safety category, and none is stated in any held document.",
+      "pediatric_dosing": {
+        "restricted": false,
+        "weight_based": false,
+        "standard_dose": "300 mg once daily in children 12 years or older weighing at least 35 kg",
+        "recommendation": "Indicated from 12 years of age and 35 kg. For children aged 2-11 years the guideline recommends entecavir instead.",
+        "evidence_source": "National Guidelines for Diagnosis & Management of Viral Hepatitis, National Viral Hepatitis Control Programme, Ministry of Health & Family Welfare, Government of India (2018) [MOHFW-NVHCP-VIRAL-HEPATITIS-2018], Table 4, p. 25"
+      }
+    },
+    "tenofovir_alafenamide": {
+      "name": "Tenofovir Alafenamide Fumarate (TAF)",
+      "class": "Nucleotide Analogue",
+      "super_class": "Nucleotide Reverse Transcriptase Inhibitors",
+      "route": "Oral",
+      "aware_category": "NOT_APPLICABLE",
+      "aware_category_source": "The WHO AWaRe classification covers antibacterials. This agent is an antiviral and is not assigned an AWaRe group by any source held here.",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "hepatic_dosing",
+        "pregnancy_category",
+        "lactation_safety",
+        "interactions",
+        "pediatric_dosing"
+      ],
+      "coverage_note": "Added from MOHFW-NVHCP-VIRAL-HEPATITIS-2018, a hash-verified PDF held in this repository, which states indication, dose and a small number of explicit contraindications. It is a national treatment guideline rather than a pharmacology reference, so the fields listed in coverage_gaps are NOT stated in any document held here and have NOT been supplied from memory. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "Chronic hepatitis B, including where renal function or bone disease limits other agents"
+      ],
+      "dosing_from_held_sources": {
+        "stated_dose": "25 mg once daily",
+        "source_document_id": "MOHFW-NVHCP-VIRAL-HEPATITIS-2018",
+        "verbatim_passage": "Tenofovir alafenamide fumarate ( TAF) 25 mg once daily"
+      },
+      "unverified_sources": [],
+      "renal_dosing": {
+        "egfr_threshold_ml_min": null,
+        "recommendation": "Named by the guideline as the drug of choice in patients with reduced renal function or bone disease. NO eGFR THRESHOLD IS STATED in any held document, so none is asserted here and no automatic threshold check is possible.",
+        "evidence_source": "National Guidelines for Diagnosis & Management of Viral Hepatitis, National Viral Hepatitis Control Programme, Ministry of Health & Family Welfare, Government of India (2018) [MOHFW-NVHCP-VIRAL-HEPATITIS-2018], p. 26",
+        "evidence_passage": "Tenofovir alafenamide fumarate ( TAF) is the drug of choice in patients with reduced renal function or bone disease bone toxicities, where entecavir is contraindicated"
+      }
+    },
+    "entecavir": {
+      "name": "Entecavir",
+      "class": "Nucleoside Analogue",
+      "super_class": "Nucleoside Analogue HBV Polymerase Inhibitors",
+      "route": "Oral",
+      "aware_category": "NOT_APPLICABLE",
+      "aware_category_source": "The WHO AWaRe classification covers antibacterials. This agent is an antiviral and is not assigned an AWaRe group by any source held here.",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "lactation_safety",
+        "interactions"
+      ],
+      "coverage_note": "Added from MOHFW-NVHCP-VIRAL-HEPATITIS-2018, a hash-verified PDF held in this repository, which states indication, dose and a small number of explicit contraindications. It is a national treatment guideline rather than a pharmacology reference, so the fields listed in coverage_gaps are NOT stated in any document held here and have NOT been supplied from memory. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "Chronic hepatitis B in lamivudine-naive adults, and in children aged 2-11 years"
+      ],
+      "dosing_from_held_sources": {
+        "stated_dose": "0.5 mg once daily in compensated liver disease; 1 mg once daily in decompensated liver disease",
+        "source_document_id": "MOHFW-NVHCP-VIRAL-HEPATITIS-2018",
+        "verbatim_passage": "Entecavir ( adult with compensated liver disease and lamivudine naive) 0.5 mg once daily 3 Entecavir ( adult with decompensated liver disease) 1 mg once daily"
+      },
+      "unverified_sources": [],
+      "pregnancy_category": "NOT RECOMMENDED IN PREGNANCY. The guideline states this directly and names tenofovir as the preferred agent where pregnancy is a possibility.",
+      "hepatic_dosing": {
+        "requires_adjustment": true,
+        "recommendation": "Dose differs by hepatic status: 0.5 mg once daily in compensated liver disease, 1 mg once daily in decompensated liver disease. This is a dose selection stated by the guideline, not a Child-Pugh reduction schedule; no Child-Pugh banding is stated in any held document.",
+        "evidence_source": "National Guidelines for Diagnosis & Management of Viral Hepatitis, National Viral Hepatitis Control Programme, Ministry of Health & Family Welfare, Government of India (2018) [MOHFW-NVHCP-VIRAL-HEPATITIS-2018], Table 3, p. 25"
+      },
+      "pediatric_dosing": {
+        "restricted": false,
+        "weight_based": true,
+        "standard_dose": "Children 2 years of age or older weighing at least 10 kg; the oral solution is used. The per-kg schedule is not reproduced in the held text.",
+        "recommendation": "Recommended agent for chronic hepatitis B in children aged 2-11 years.",
+        "evidence_source": "National Guidelines for Diagnosis & Management of Viral Hepatitis, National Viral Hepatitis Control Programme, Ministry of Health & Family Welfare, Government of India (2018) [MOHFW-NVHCP-VIRAL-HEPATITIS-2018], Table 4, p. 25"
+      },
+      "pregnancy_contraindicated": true,
+      "pregnancy_contraindication_basis": "Recorded as \"NOT RECOMMENDED IN PREGNANCY\" by the held hepatitis guideline."
+    },
+    "lamivudine": {
+      "name": "Lamivudine",
+      "class": "Nucleoside Analogue",
+      "super_class": "Nucleoside Analogue HBV Polymerase Inhibitors",
+      "route": "Oral",
+      "aware_category": "NOT_APPLICABLE",
+      "aware_category_source": "The WHO AWaRe classification covers antibacterials. This agent is an antiviral and is not assigned an AWaRe group by any source held here.",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "hepatic_dosing",
+        "pregnancy_category",
+        "lactation_safety",
+        "interactions",
+        "pediatric_dosing"
+      ],
+      "coverage_note": "Added from MOHFW-NVHCP-VIRAL-HEPATITIS-2018, a hash-verified PDF held in this repository, which states indication, dose and a small number of explicit contraindications. It is a national treatment guideline rather than a pharmacology reference, so the fields listed in coverage_gaps are NOT stated in any document held here and have NOT been supplied from memory. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "Chronic hepatitis B. NOT RECOMMENDED as a preferred agent: the guideline groups it with adefovir and telbivudine as drugs with a low barrier to resistance"
+      ],
+      "dosing_from_held_sources": {
+        "stated_dose": "NOT STATED for hepatitis B in the held document",
+        "source_document_id": "MOHFW-NVHCP-VIRAL-HEPATITIS-2018",
+        "verbatim_passage": "Drugs with a low barrier to resistance (lamivudine, adefovir or telbivudine) are available but not recommended as they lead to drug resistance"
+      },
+      "unverified_sources": [],
+      "clinical_notes_from_held_sources": [
+        "Low barrier to resistance; the guideline recommends tenofovir or entecavir instead. Where a patient has prior lamivudine exposure, the guideline prefers tenofovir over entecavir because of the potential for entecavir resistance."
+      ]
+    },
+    "sofosbuvir": {
+      "name": "Sofosbuvir",
+      "class": "NS5B Polymerase Inhibitor",
+      "super_class": "NS5B Polymerase Inhibitors",
+      "route": "Oral",
+      "aware_category": "NOT_APPLICABLE",
+      "aware_category_source": "The WHO AWaRe classification covers antibacterials. This agent is an antiviral and is not assigned an AWaRe group by any source held here.",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "hepatic_dosing",
+        "lactation_safety",
+        "pediatric_dosing"
+      ],
+      "coverage_note": "Added from MOHFW-NVHCP-VIRAL-HEPATITIS-2018, a hash-verified PDF held in this repository, which states indication, dose and a small number of explicit contraindications. It is a national treatment guideline rather than a pharmacology reference, so the fields listed in coverage_gaps are NOT stated in any document held here and have NOT been supplied from memory. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "Chronic hepatitis C, in combination with daclatasvir or velpatasvir"
+      ],
+      "dosing_from_held_sources": {
+        "stated_dose": "400 mg once a day",
+        "source_document_id": "MOHFW-NVHCP-VIRAL-HEPATITIS-2018",
+        "verbatim_passage": "Sofosbuvir 400 mg once a day"
+      },
+      "unverified_sources": [],
+      "pregnancy_category": "CONTRAINDICATED in pregnancy and in women of childbearing potential unless two forms of effective contraception can be guaranteed during treatment. The guideline states that the safety of DAAs in pregnancy has not been established.",
+      "interactions": [
+        {
+          "interacting_drug_or_class": "amiodarone",
+          "severity": "CONTRAINDICATED",
+          "mechanism": "Significant bradyarrhythmias reported with sofosbuvir and amiodarone together.",
+          "recommendation": "The guideline states this combination is contraindicated. Review the amiodarone with cardiology before starting sofosbuvir.",
+          "evidence_source": "National Guidelines for Diagnosis & Management of Viral Hepatitis, National Viral Hepatitis Control Programme, Ministry of Health & Family Welfare, Government of India (2018) [MOHFW-NVHCP-VIRAL-HEPATITIS-2018], p. 38",
+          "verbatim_passage": "Recent evidence has emerged of significant bradyarrhythmias associated with sofosbuvir in patients also taking amiodarone and therefore it is contraindicated in these patients."
+        },
+        {
+          "interacting_drug_or_class": "carbamazepine",
+          "severity": "CONTRAINDICATED",
+          "mechanism": "Cytochrome P450 (CYP) / P-glycoprotein (P-gp) induction reduces direct-acting antiviral concentrations.",
+          "recommendation": "The guideline lists this combination as contraindicated with all DAA regimens. Review the anticonvulsant with the prescriber before starting antiviral therapy.",
+          "evidence_source": "National Guidelines for Diagnosis & Management of Viral Hepatitis, National Viral Hepatitis Control Programme, Ministry of Health & Family Welfare, Government of India (2018) [MOHFW-NVHCP-VIRAL-HEPATITIS-2018], p. 39",
+          "verbatim_passage": "The cytochrome P450 (CYP)/P-glycoprotein (P-gp) inducing agents, such as carbamazepine and phenytoin, are contraindicated with all regimens. Simultaneous use lead to significantly reduced concentrations of DAAs, which may lead to virological failure."
+        },
+        {
+          "interacting_drug_or_class": "phenytoin",
+          "severity": "CONTRAINDICATED",
+          "mechanism": "Cytochrome P450 (CYP) / P-glycoprotein (P-gp) induction reduces direct-acting antiviral concentrations.",
+          "recommendation": "The guideline lists this combination as contraindicated with all DAA regimens. Review the anticonvulsant with the prescriber before starting antiviral therapy.",
+          "evidence_source": "National Guidelines for Diagnosis & Management of Viral Hepatitis, National Viral Hepatitis Control Programme, Ministry of Health & Family Welfare, Government of India (2018) [MOHFW-NVHCP-VIRAL-HEPATITIS-2018], p. 39",
+          "verbatim_passage": "The cytochrome P450 (CYP)/P-glycoprotein (P-gp) inducing agents, such as carbamazepine and phenytoin, are contraindicated with all regimens. Simultaneous use lead to significantly reduced concentrations of DAAs, which may lead to virological failure."
+        }
+      ],
+      "pregnancy_contraindicated": true,
+      "pregnancy_contraindication_basis": "Recorded as \"CONTRAINDICATED in pregnancy\" per the held hepatitis guideline."
+    },
+    "daclatasvir": {
+      "name": "Daclatasvir",
+      "class": "NS5A Inhibitor",
+      "super_class": "NS5A Inhibitors",
+      "route": "Oral",
+      "aware_category": "NOT_APPLICABLE",
+      "aware_category_source": "The WHO AWaRe classification covers antibacterials. This agent is an antiviral and is not assigned an AWaRe group by any source held here.",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "hepatic_dosing",
+        "lactation_safety",
+        "pediatric_dosing"
+      ],
+      "coverage_note": "Added from MOHFW-NVHCP-VIRAL-HEPATITIS-2018, a hash-verified PDF held in this repository, which states indication, dose and a small number of explicit contraindications. It is a national treatment guideline rather than a pharmacology reference, so the fields listed in coverage_gaps are NOT stated in any document held here and have NOT been supplied from memory. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "Chronic hepatitis C without cirrhosis, with sofosbuvir for 12 weeks"
+      ],
+      "dosing_from_held_sources": {
+        "stated_dose": "60 mg once a day",
+        "source_document_id": "MOHFW-NVHCP-VIRAL-HEPATITIS-2018",
+        "verbatim_passage": "Daclatasvir 60mg once a day"
+      },
+      "unverified_sources": [],
+      "pregnancy_category": "CONTRAINDICATED in pregnancy and in women of childbearing potential unless two forms of effective contraception can be guaranteed during treatment. The guideline states that the safety of DAAs in pregnancy has not been established.",
+      "interactions": [
+        {
+          "interacting_drug_or_class": "carbamazepine",
+          "severity": "CONTRAINDICATED",
+          "mechanism": "Cytochrome P450 (CYP) / P-glycoprotein (P-gp) induction reduces direct-acting antiviral concentrations.",
+          "recommendation": "The guideline lists this combination as contraindicated with all DAA regimens. Review the anticonvulsant with the prescriber before starting antiviral therapy.",
+          "evidence_source": "National Guidelines for Diagnosis & Management of Viral Hepatitis, National Viral Hepatitis Control Programme, Ministry of Health & Family Welfare, Government of India (2018) [MOHFW-NVHCP-VIRAL-HEPATITIS-2018], p. 39",
+          "verbatim_passage": "The cytochrome P450 (CYP)/P-glycoprotein (P-gp) inducing agents, such as carbamazepine and phenytoin, are contraindicated with all regimens. Simultaneous use lead to significantly reduced concentrations of DAAs, which may lead to virological failure."
+        },
+        {
+          "interacting_drug_or_class": "phenytoin",
+          "severity": "CONTRAINDICATED",
+          "mechanism": "Cytochrome P450 (CYP) / P-glycoprotein (P-gp) induction reduces direct-acting antiviral concentrations.",
+          "recommendation": "The guideline lists this combination as contraindicated with all DAA regimens. Review the anticonvulsant with the prescriber before starting antiviral therapy.",
+          "evidence_source": "National Guidelines for Diagnosis & Management of Viral Hepatitis, National Viral Hepatitis Control Programme, Ministry of Health & Family Welfare, Government of India (2018) [MOHFW-NVHCP-VIRAL-HEPATITIS-2018], p. 39",
+          "verbatim_passage": "The cytochrome P450 (CYP)/P-glycoprotein (P-gp) inducing agents, such as carbamazepine and phenytoin, are contraindicated with all regimens. Simultaneous use lead to significantly reduced concentrations of DAAs, which may lead to virological failure."
+        }
+      ],
+      "pregnancy_contraindicated": true,
+      "pregnancy_contraindication_basis": "Recorded as \"CONTRAINDICATED in pregnancy\" per the held hepatitis guideline."
+    },
+    "velpatasvir": {
+      "name": "Velpatasvir",
+      "class": "NS5A Inhibitor",
+      "super_class": "NS5A Inhibitors",
+      "route": "Oral",
+      "aware_category": "NOT_APPLICABLE",
+      "aware_category_source": "The WHO AWaRe classification covers antibacterials. This agent is an antiviral and is not assigned an AWaRe group by any source held here.",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "renal_dosing",
+        "hepatic_dosing",
+        "lactation_safety",
+        "pediatric_dosing"
+      ],
+      "coverage_note": "Added from MOHFW-NVHCP-VIRAL-HEPATITIS-2018, a hash-verified PDF held in this repository, which states indication, dose and a small number of explicit contraindications. It is a national treatment guideline rather than a pharmacology reference, so the fields listed in coverage_gaps are NOT stated in any document held here and have NOT been supplied from memory. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "Chronic hepatitis C with compensated or decompensated cirrhosis, with sofosbuvir"
+      ],
+      "dosing_from_held_sources": {
+        "stated_dose": "100 mg once a day, given with sofosbuvir 400 mg",
+        "source_document_id": "MOHFW-NVHCP-VIRAL-HEPATITIS-2018",
+        "verbatim_passage": "Sofosbuvir + Velpatasvir Sofosbuvir(400mg) + Velpatasvir (100mg) once a day"
+      },
+      "unverified_sources": [],
+      "pregnancy_category": "CONTRAINDICATED in pregnancy and in women of childbearing potential unless two forms of effective contraception can be guaranteed during treatment. The guideline states that the safety of DAAs in pregnancy has not been established.",
+      "interactions": [
+        {
+          "interacting_drug_or_class": "carbamazepine",
+          "severity": "CONTRAINDICATED",
+          "mechanism": "Cytochrome P450 (CYP) / P-glycoprotein (P-gp) induction reduces direct-acting antiviral concentrations.",
+          "recommendation": "The guideline lists this combination as contraindicated with all DAA regimens. Review the anticonvulsant with the prescriber before starting antiviral therapy.",
+          "evidence_source": "National Guidelines for Diagnosis & Management of Viral Hepatitis, National Viral Hepatitis Control Programme, Ministry of Health & Family Welfare, Government of India (2018) [MOHFW-NVHCP-VIRAL-HEPATITIS-2018], p. 39",
+          "verbatim_passage": "The cytochrome P450 (CYP)/P-glycoprotein (P-gp) inducing agents, such as carbamazepine and phenytoin, are contraindicated with all regimens. Simultaneous use lead to significantly reduced concentrations of DAAs, which may lead to virological failure."
+        },
+        {
+          "interacting_drug_or_class": "phenytoin",
+          "severity": "CONTRAINDICATED",
+          "mechanism": "Cytochrome P450 (CYP) / P-glycoprotein (P-gp) induction reduces direct-acting antiviral concentrations.",
+          "recommendation": "The guideline lists this combination as contraindicated with all DAA regimens. Review the anticonvulsant with the prescriber before starting antiviral therapy.",
+          "evidence_source": "National Guidelines for Diagnosis & Management of Viral Hepatitis, National Viral Hepatitis Control Programme, Ministry of Health & Family Welfare, Government of India (2018) [MOHFW-NVHCP-VIRAL-HEPATITIS-2018], p. 39",
+          "verbatim_passage": "The cytochrome P450 (CYP)/P-glycoprotein (P-gp) inducing agents, such as carbamazepine and phenytoin, are contraindicated with all regimens. Simultaneous use lead to significantly reduced concentrations of DAAs, which may lead to virological failure."
+        }
+      ],
+      "pregnancy_contraindicated": true,
+      "pregnancy_contraindication_basis": "Recorded as \"CONTRAINDICATED in pregnancy\" per the held hepatitis guideline."
+    },
+    "ribavirin": {
+      "name": "Ribavirin",
+      "class": "Nucleoside Analogue",
+      "super_class": "Nucleoside Analogue Antivirals (Broad Spectrum)",
+      "route": "Oral",
+      "aware_category": "NOT_APPLICABLE",
+      "aware_category_source": "The WHO AWaRe classification covers antibacterials. This agent is an antiviral and is not assigned an AWaRe group by any source held here.",
+      "knowledge_coverage": "PARTIAL",
+      "coverage_gaps": [
+        "hepatic_dosing",
+        "lactation_safety",
+        "pediatric_dosing"
+      ],
+      "coverage_note": "Added from MOHFW-NVHCP-VIRAL-HEPATITIS-2018, a hash-verified PDF held in this repository, which states indication, dose and a small number of explicit contraindications. It is a national treatment guideline rather than a pharmacology reference, so the fields listed in coverage_gaps are NOT stated in any document held here and have NOT been supplied from memory. COVERAGE-001 continues to fire for this drug.",
+      "indications_from_held_sources": [
+        "Chronic hepatitis C with decompensated cirrhosis, added to sofosbuvir and velpatasvir"
+      ],
+      "dosing_from_held_sources": {
+        "stated_dose": "800-1200 mg, decided on weight, haemoglobin level, renal function and presence of cirrhosis",
+        "source_document_id": "MOHFW-NVHCP-VIRAL-HEPATITIS-2018",
+        "verbatim_passage": "Ribavirin 800-1200 mg (to be decided based on weight, hemoglobin level, renal function and presence of cirrhosis)"
+      },
+      "unverified_sources": [],
+      "pregnancy_category": "CONTRAINDICATED. The guideline states ribavirin is associated with fetal abnormalities, and that women of childbearing potential require effective contraception during treatment and for six months after completing therapy.",
+      "renal_dosing": {
+        "egfr_threshold_ml_min": null,
+        "recommendation": "The guideline states the dose is decided partly on renal function but gives NO eGFR threshold or adjusted dose, so none is asserted here and no automatic threshold check is possible.",
+        "evidence_source": "National Guidelines for Diagnosis & Management of Viral Hepatitis, National Viral Hepatitis Control Programme, Ministry of Health & Family Welfare, Government of India (2018) [MOHFW-NVHCP-VIRAL-HEPATITIS-2018], Table 9, p. 37",
+        "evidence_passage": "Ribavirin 800-1200 mg (to be decided based on weight, hemoglobin level, renal function and presence of cirrhosis)"
+      },
+      "interactions": [
+        {
+          "interacting_drug_or_class": "carbamazepine",
+          "severity": "CONTRAINDICATED",
+          "mechanism": "Cytochrome P450 (CYP) / P-glycoprotein (P-gp) induction reduces direct-acting antiviral concentrations.",
+          "recommendation": "The guideline lists this combination as contraindicated with all DAA regimens. Review the anticonvulsant with the prescriber before starting antiviral therapy.",
+          "evidence_source": "National Guidelines for Diagnosis & Management of Viral Hepatitis, National Viral Hepatitis Control Programme, Ministry of Health & Family Welfare, Government of India (2018) [MOHFW-NVHCP-VIRAL-HEPATITIS-2018], p. 39",
+          "verbatim_passage": "The cytochrome P450 (CYP)/P-glycoprotein (P-gp) inducing agents, such as carbamazepine and phenytoin, are contraindicated with all regimens. Simultaneous use lead to significantly reduced concentrations of DAAs, which may lead to virological failure."
+        },
+        {
+          "interacting_drug_or_class": "phenytoin",
+          "severity": "CONTRAINDICATED",
+          "mechanism": "Cytochrome P450 (CYP) / P-glycoprotein (P-gp) induction reduces direct-acting antiviral concentrations.",
+          "recommendation": "The guideline lists this combination as contraindicated with all DAA regimens. Review the anticonvulsant with the prescriber before starting antiviral therapy.",
+          "evidence_source": "National Guidelines for Diagnosis & Management of Viral Hepatitis, National Viral Hepatitis Control Programme, Ministry of Health & Family Welfare, Government of India (2018) [MOHFW-NVHCP-VIRAL-HEPATITIS-2018], p. 39",
+          "verbatim_passage": "The cytochrome P450 (CYP)/P-glycoprotein (P-gp) inducing agents, such as carbamazepine and phenytoin, are contraindicated with all regimens. Simultaneous use lead to significantly reduced concentrations of DAAs, which may lead to virological failure."
+        }
+      ],
+      "clinical_notes_from_held_sources": [
+        "Anaemia is described by the guideline as a common and predictable side-effect of ribavirin. Safety of DAAs in pregnancy has not been established. Ribavirin is associated with fetal abnormalities. DAAs are thus contraindicated in pregnant women and those with child bearing potential unless effective contraception (i.e. two forms of contraception) can be guaranteed during treatment and, for women taking ribavirin, for 6months after completing therapy."
+      ],
+      "pregnancy_contraindicated": true,
+      "pregnancy_contraindication_basis": "Recorded as \"CONTRAINDICATED\"; the held guideline cites fetal abnormalities."
     }
   },
   "source_documents": {
     "ICMR-STW-VOL3-2022": "Standard Treatment Workflows of India, Vol. 3, 2022 (sha256 38ae15831b78518cb2372785c363a7d061a8a6f5b42592ee2a0dd43cedae6c10)",
     "ICMR-STW-PTB-EPTB-2022": "Standard Treatment Workflows of India on Paediatric and Extrapulmonary Tuberculosis, 2022 (sha256 95f06c22b936875baf358853e598e4425dfc667d1857fae8d64c9d3884490ad2)",
     "ICMR-STG-2019-ED2": "ICMR Treatment Guidelines for Antimicrobial Use in Common Syndromes, 2nd edition (2019) (sha256 74e988ffe0603263ce131d043a187302d5845fbc4ff30aa74f9190ce99ff5016) - held and hash-verified; used only for prior-edition cross-references",
-    "ICMR-STG-2022-23": "ICMR Treatment Guidelines for Antimicrobial Use in Common Syndromes, 2022-23 edition (operator-attested; no official PDF held, so no page-level citation is available)"
+    "ICMR-STG-2022-23": "ICMR Treatment Guidelines for Antimicrobial Use in Common Syndromes, 2022-23 edition (operator-attested; no official PDF held, so no page-level citation is available)",
+    "MOHFW-NVHCP-VIRAL-HEPATITIS-2018": "National Guidelines for Diagnosis & Management of Viral Hepatitis, NVHCP, MoHFW, Government of India (2018) (sha256 167d0852b0202fc2e0617a6358d8068fdc0135fec1f23fc364708eb36b09162c) - held and hash-verified; source of the hepatitis B and C antiviral entries"
   },
   "coverage_policy": "Entries carrying knowledge_coverage='PARTIAL' are sourced from a held guideline document for indication and dose only. The fields named in their coverage_gaps are NOT held by this repository and were not inferred. COVERAGE-001 fires for these drugs so a clinician is told the safety assessment is incomplete rather than being given a silent all-clear."
 }

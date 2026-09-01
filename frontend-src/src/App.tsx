@@ -44,7 +44,7 @@ import Console from "@/pages/Console";
  *   /patients/:patient_id/medications -> PatientMedicationHistory
  *   /patients/:patient_id/history-assistant -> PatientHistoryAssistant
  *   /dashboard -> PatientDashboard
- *   /review/console or /review/safety -> Console (24-Rule Engine / Guidelines Explorer)
+ *   /review/console or /review/safety -> Console (Rule Engine / Guidelines Explorer)
  */
 function Shell() {
   const [location] = useLocation();

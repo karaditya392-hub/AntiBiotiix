@@ -20,6 +20,7 @@ import { Link } from "wouter";
 import SnakeVial from "@/components/ui/snake-vial";
 import logoSrc from "@/assets/antibiotix-logo.jpg";
 import "@/styles/landing.css";
+import { useRuleCount, ruleEngineLabel } from "@/hooks/useRuleCount";
 
 const features = [
   {
@@ -144,6 +145,8 @@ const MotionLink = m.create(
 );
 
 export default function Landing() {
+  // Read from the engine rather than restated from memory; see useRuleCount.
+  const ruleCount = useRuleCount();
   const heroVisualRef = useRef<HTMLDivElement>(null);
 
   /**
@@ -355,7 +358,7 @@ export default function Landing() {
 
               <div className="orbit-node node-audit">
                 <Network size={15} />
-                <span>24-Rule Engine</span>
+                <span>{ruleEngineLabel(ruleCount)}</span>
               </div>
 
               <div className="floating-chip chip-warning">

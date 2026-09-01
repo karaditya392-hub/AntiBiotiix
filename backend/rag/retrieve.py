@@ -12,28 +12,47 @@ still fires with the vector store empty, misaligned, or offline.
 """
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
-from backend.rag.store import RetrievalBackendMismatch, RetrievedChunk, vector_store
+from backend.rag.store import (
+    DOMAIN_READING_CONTRACT,
+    RetrievalBackendMismatch,
+    RetrievedChunk,
+    vector_store,
+)
 
 NO_EVIDENCE = "No sufficiently relevant evidence was retrieved."
 
 # Cosine similarity floor. Below this, a chunk is not offered as evidence.
 #
-# RECALIBRATED for the 39-document corpus (was 0.35, calibrated when 11 documents
-# were held). Measured over 24 legitimate and 15 off-domain queries:
+# 0.45 was set for the 39-document corpus (up from 0.35 at 11 documents). It was
+# RE-MEASURED, and kept, for the 94-document corpus. Over 30 legitimate and 15
+# off-domain queries, counting only those that survive unknown_entities() and
+# therefore actually reach the floor:
 #
-#   lowest legitimate  0.522  ("nitrofurantoin renal impairment")
-#   highest off-domain 0.341  ("how to train a puppy" -> NLEP-DPMR-2012)
+#   lowest legitimate  0.4677  ("WHO AWaRe access watch reserve classification")
+#   highest off-domain 0.4270  ("best pizza recipe" -> ICMR-T1DM-2022)
 #
-# The old 0.35 sat 0.009 above the highest off-domain score. That margin was
-# 0.219 on the smaller corpus and the expansion consumed it: a food composition
-# table in the burns document, rehabilitation training language in the leprosy
-# guideline and cost discussion in the hypertension guideline all raise the score
-# of ordinary English that has nothing to do with any of them. 0.45 sits in the
-# middle of the measured gap, rejecting every off-domain query with room to spare
-# while keeping every legitimate one.
+# 0.45 still separates them cleanly: it rejects no legitimate query and admits no
+# off-domain one.
+#
+# THE MARGIN IS NEARLY GONE, AND THAT IS THE FINDING THAT MATTERS HERE. It was
+# 0.219 at 11 documents, 0.181 at 39, and is 0.041 now -- the floor sits 0.018
+# above the highest off-domain score. Each expansion has eaten roughly the same
+# fraction of it, and for the same reason: more documents mean more ordinary
+# English competing for the nearest neighbour, so an off-domain query's best match
+# keeps rising. "best pizza recipe" now scores 0.427 against the type 1 diabetes
+# guideline, on its dietary content -- the same mechanism as the food composition
+# table in the burns document that forced the last recalibration.
+#
+# So the next batch of documents should NOT be answered by raising this number
+# again. Raising it far enough to restore the old margin would start rejecting
+# legitimate queries, which the 0.4677 above shows are already close. What the
+# next expansion needs is a second signal -- a domain or document-set restriction
+# on the query, in the way unknown_entities() is a second signal for invented
+# names -- not a higher threshold.
 #
 # Invented drug names still score high (0.62 for "flurbamycin dosing in adults"):
 # a nonsense name in a well-formed dosing question matches on sentence FORM, not
@@ -93,6 +112,10 @@ def active_floor() -> float:
 # (drug names, organisms, syndromes) rather than ordinary English.
 _ENTITY_MIN_LEN = 6
 
+# Longest suffix a corpus word may drop and still count as the stem of a query
+# token. See the stem check in unknown_entities().
+_MAX_INFLECTION_SUFFIX = 4
+
 _COMMON = {
     "about", "against", "antibiotic", "antibiotics", "antimicrobial", "adult",
     "adults", "before", "between", "children", "clinical", "different",
@@ -129,10 +152,95 @@ def unknown_entities(query: str) -> List[str]:
         # grounded while leaving invented names such as "zzzzmycin" unmatched.
         if tok in prefixes:
             continue
-        if any(tok[:n] in vocab for n in range(5, len(tok))):
+        # A corpus word is a STEM of this token only if what it drops is short
+        # enough to be an inflection. Without the length bound, any token whose
+        # first five-or-more characters happen to spell a corpus word counts as
+        # grounded, and on a 44,000-word vocabulary that is a large surface.
+        #
+        # This bound was added after the corpus grew to 94 documents and the guard
+        # stopped catching "fictionalcillin": the expanded vocabulary contains
+        # "fiction", so an eight-character suffix -- "alcillin" -- was being treated
+        # as an inflection of it. The invented drug name then reached the relevance
+        # floor, which is the check that cannot separate it, because a nonsense name
+        # in a well-formed dosing question matches on sentence form.
+        #
+        # Four characters covers the inflections this is for (-s, -es, -ed, -ly,
+        # -ing, -ally) and keeps "renally" grounded against "renal". It does not
+        # cover "-alcillin".
+        if any(
+            tok[:n] in vocab
+            for n in range(max(5, len(tok) - _MAX_INFLECTION_SUFFIX), len(tok))
+        ):
             continue
         out.append(tok)
     return out
+
+
+# A reference to a NAMED document: an optional capitalised name, a guideline-ish
+# noun, and an optional year. "the Fictional Guideline 2099", "ICMR Guidelines 2019".
+# The name must be genuinely Capitalised, so case-insensitivity is scoped to the
+# noun alone. Applying re.IGNORECASE to the whole pattern makes [A-Z] match
+# lowercase, which swallowed the question's opening words -- "what do the
+# guidelines recommend for sepsis" was read as a reference to a document named
+# "what do the", and refused.
+_NAMED_DOCUMENT = re.compile(
+    r"\b((?:[A-Z][A-Za-z-]*\s+){0,4})"
+    r"(?i:(Guidelines?|Protocols?|Manuals?|Handbooks?|Formular(?:y|ies)|"
+    r"Consensus\s+Documents?|Standard\s+Treatment\s+\w+))"
+    r"(?:\s*,?\s*(\d{4}))?"
+)
+
+
+def unknown_document_reference(query: str) -> Optional[str]:
+    """
+    A named guideline the corpus does not hold, or None.
+
+    Separate from unknown_entities(), which asks whether a WORD appears in the
+    corpus text. This asks whether a DOCUMENT the question names is actually held,
+    and the two come apart: "Fictional Guideline 2099" is built from ordinary
+    English that appears throughout a 94-document corpus, so the vocabulary check
+    finds nothing wrong with it.
+
+    Answering it anyway is the §23 failure. The retrieved passages would be real,
+    correctly attributed WHO and ICMR text about sepsis, and the reader asked what
+    a specific named guideline recommends -- so a list of passages under that
+    question invites them to believe the named guideline exists and says this. The
+    corpus can only report what it holds, and it holds no such document.
+    """
+    from backend.rag.store import vector_store
+
+    if not vector_store.docs:
+        return None
+
+    held_years = set()
+    held_text = []
+    for doc in vector_store.docs.values():
+        blob = " ".join(
+            str(doc.get(f) or "") for f in ("title", "issuing_org", "version", "publication_date")
+        ).lower()
+        held_text.append(blob)
+        held_years.update(re.findall(r"\b(1[89]\d{2}|20\d{2})\b", blob))
+    corpus_blob = " ".join(held_text)
+
+    for match in _NAMED_DOCUMENT.finditer(query or ""):
+        name, noun, year = match.group(1) or "", match.group(2), match.group(3)
+        reference = f"{name}{noun} {year or ''}".strip()
+
+        # A year no held document carries is decisive on its own: the question asks
+        # about an edition this corpus does not have, whatever it is called.
+        if year and year not in held_years:
+            return reference
+
+        # Otherwise judge the name. Distinctive words only -- the guideline noun and
+        # ordinary qualifiers say nothing about which document is meant.
+        tokens = [
+            t.lower() for t in re.findall(r"[A-Za-z-]{4,}", name)
+            if t.lower() not in {"the", "national", "indian", "clinical", "treatment",
+                                 "standard", "current", "latest", "official", "new"}
+        ]
+        if tokens and not any(t in corpus_blob for t in tokens):
+            return reference
+    return None
 
 
 @dataclass
@@ -151,6 +259,30 @@ class RetrievalResult:
         for c in self.chunks:
             if not c.is_clinical_guideline and c.document_id not in seen:
                 seen.append(c.document_id)
+        return seen
+
+    @property
+    def non_antimicrobial_sources(self) -> List[str]:
+        """
+        Retrieved documents that may not be cited for antimicrobial choice.
+
+        Wider than non_clinical_sources, and the distinction matters: an ICMR cancer
+        consensus document IS a clinical guideline and still has no standing on
+        antimicrobial selection. Reporting only the non-clinical set would let an
+        oncology passage stand as antimicrobial evidence.
+        """
+        seen = []
+        for c in self.chunks:
+            if not c.carries_antimicrobial_authority and c.document_id not in seen:
+                seen.append(c.document_id)
+        return seen
+
+    @property
+    def domains_retrieved(self) -> List[str]:
+        seen = []
+        for c in self.chunks:
+            if c.clinical_domain not in seen:
+                seen.append(c.clinical_domain)
         return seen
 
     def caveats(self) -> List[str]:
@@ -172,6 +304,37 @@ class RetrievalResult:
                 + ". They carry no clinical authority and are never a basis for a "
                 "prescribing or antimicrobial decision."
             )
+
+        # The per-domain reading contract, emitted once per domain actually present.
+        # Repeating it per passage would bury it; omitting it would leave a research
+        # ethics passage looking like any other retrieved evidence.
+        for domain in self.domains_retrieved:
+            contract = DOMAIN_READING_CONTRACT.get(domain)
+            if not contract:
+                continue
+            ids = sorted({c.document_id for c in self.chunks if c.clinical_domain == domain})
+            out.append(f"{contract} Affected passage(s): {', '.join(ids)}.")
+
+        # Said plainly and last, because it is the caveat most likely to matter and
+        # the one a reader skimming a list of citations is most likely to assume away.
+        #
+        # Gated on antimicrobial CONTENT, not on the antimicrobial DOMAIN. Gating on
+        # the domain would fire this caveat on a leptospirosis query answered by
+        # NCDC-LEPTOSPIROSIS-2015 -- a condition-specific document that does carry
+        # doxycycline recommendations -- and tell the reader the corpus had not
+        # answered a question it had just answered. Saying the corpus is silent when
+        # it is not is the same class of false statement as a fabricated citation.
+        from backend.config import ANTIMICROBIAL_CONTENT_DOCUMENT_IDS
+
+        if self.chunks and not any(
+            c.document_id in ANTIMICROBIAL_CONTENT_DOCUMENT_IDS for c in self.chunks
+        ):
+            out.append(
+                "NO PASSAGE RETRIEVED HERE CARRIES ANTIMICROBIAL RECOMMENDATIONS. If this "
+                "question was about antimicrobial choice, the corpus has not answered it: "
+                "consult the national antimicrobial treatment guidelines and the local "
+                "hospital antibiogram."
+            )
         return out
 
     def to_dict(self) -> Dict[str, Any]:
@@ -185,6 +348,8 @@ class RetrievalResult:
             "best_score": round(self.best_score, 4) if self.best_score is not None else None,
             "store": vector_store.backend_description(),
             "non_clinical_sources": self.non_clinical_sources,
+            "non_antimicrobial_sources": self.non_antimicrobial_sources,
+            "domains_retrieved": self.domains_retrieved,
             "caveats": self.caveats(),
         }
 
@@ -207,6 +372,19 @@ def retrieve(
         return RetrievalResult(
             q, [], True,
             f"{NO_EVIDENCE} (guideline index unavailable)",
+            floor, None,
+        )
+
+    # A question about a document the corpus does not hold cannot be answered from
+    # the corpus, however well its other words match. Checked before the vocabulary
+    # floor because the words in such a question are usually perfectly ordinary.
+    missing_doc = unknown_document_reference(q)
+    if missing_doc:
+        return RetrievalResult(
+            q, [], True,
+            f"{NO_EVIDENCE} This corpus holds no document matching {missing_doc!r}. "
+            f"Passages from the documents it does hold are not an answer to a question "
+            f"about that one.",
             floor, None,
         )
 

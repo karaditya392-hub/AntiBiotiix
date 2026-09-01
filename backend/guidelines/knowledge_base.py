@@ -291,7 +291,34 @@ class ClinicalKnowledgeBase:
         # Acute Bacterial Sinusitis
         if re.search(r'\b(?:sinusitis|rhinosinusitis|bacterial\s+sinusitis)\b', d_lower):
             return syndromes.get("acute_bacterial_sinusitis")
-            
+
+        # Syndromes below are derived from documents held in the retrieval corpus
+        # (scripts/add_syndromes_from_corpus.py). Each entry names its own source;
+        # none of them carries an avoid_empirical list, so none makes DIAG-001 fire.
+        # They are matched here so that a prescription for one of these diagnoses
+        # returns the guidance actually held rather than nothing at all.
+
+        # Scrub typhus / rickettsial illness. Matched before enteric fever because
+        # "typhus" and "typhoid" are different diseases with different first-line
+        # agents and are easy to conflate; anchoring both avoids a wrong match.
+        if re.search(r'\b(?:scrub\s+typhus|typhus|rickettsial|rickettsios[ei]s)\b', d_lower):
+            return syndromes.get("scrub_typhus")
+
+        # Leptospirosis
+        if re.search(r'\b(?:leptospirosis|leptospiral|weil\'?s\s+disease)\b', d_lower):
+            return syndromes.get("leptospirosis")
+
+        # Acute bacterial meningitis. Excludes viral/aseptic meningitis, for which
+        # the held antibacterial guidance does not apply.
+        if re.search(r'\b(?:bacterial\s+meningitis|meningitis|meningococcal)\b', d_lower) and not re.search(
+            r'\b(?:viral|aseptic|tubercular|tuberculous|fungal|cryptococcal)\b', d_lower
+        ):
+            return syndromes.get("acute_bacterial_meningitis")
+
+        # Enteric fever (typhoid / paratyphoid)
+        if re.search(r'\b(?:enteric\s+fever|typhoid|paratyphoid|salmonella\s+typhi)\b', d_lower):
+            return syndromes.get("enteric_fever")
+
         return None
 
     # ------------------------------------------------------------------

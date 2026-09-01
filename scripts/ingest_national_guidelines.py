@@ -80,6 +80,8 @@ MANIFESTS = [
         "version": "Version 1.0 (2016)",
         "publication_date": "2016",
         "source_url": NCDC_URL,
+        # The one document in this batch whose own subject is antimicrobial choice.
+        "clinical_domain": "ANTIMICROBIAL_TREATMENT",
         "notes": (
             _HASH_VERIFIED + " PRIMARY ANTIMICROBIAL SOURCE, and the only document in "
             "this batch that is one. Its syndromic empirical therapy chapter covers "
@@ -243,6 +245,7 @@ MANIFESTS = [
         ),
         "source_url": NVBDCP_URL,
         "precedence_rank": 4,
+        "clinical_domain": "PUBLIC_INFORMATION_OR_UNATTRIBUTED",
         "notes": (
             _HASH_VERIFIED + " COMMUNITY MASS-DRUG-ADMINISTRATION LEAFLET FOR NON-CLINICAL "
             "DRUG DISTRIBUTORS, not a clinical treatment guideline: it instructs village "
@@ -270,6 +273,7 @@ MANIFESTS = [
         ),
         "source_url": MOHFW_URL,
         "precedence_rank": 4,
+        "clinical_domain": "PUBLIC_INFORMATION_OR_UNATTRIBUTED",
         "notes": (
             _HASH_VERIFIED + " PUBLIC INFORMATION FACT SHEET, NOT A TREATMENT GUIDELINE, and "
             "the oldest document in this corpus by a wide margin: it is a question-and-answer "
@@ -430,6 +434,7 @@ MANIFESTS = [
         "publication_date": "NOT STATED IN THE DOCUMENT (the PDF was generated October 2017)",
         "source_url": "",
         "precedence_rank": 4,
+        "clinical_domain": "PUBLIC_INFORMATION_OR_UNATTRIBUTED",
         "notes": (
             _HASH_VERIFIED + " TRADITIONAL MEDICINE (AYURVEDA), NOT ALLOPATHIC GUIDANCE: it "
             "sets out classical Ayurvedic management for conditions named in Sanskrit "
@@ -457,6 +462,12 @@ COMMON = {
     "source_type": "OFFICIAL_PDF",
     "page_reference_kind": "OFFICIAL_DOCUMENT_PAGE",
     "provenance_basis": "HASH_VERIFIED_PDF",
+    # Condition-specific by default. NCDC-NTG-AMR-2016 overrides this to the
+    # antimicrobial domain -- it is the one document here whose own subject is
+    # antimicrobial choice -- and the three rank-4 documents override it to the
+    # public-information domain. Set explicitly because the field's default is
+    # ANTIMICROBIAL_TREATMENT, which would be false for all but one of this batch.
+    "clinical_domain": "CLINICAL_CONDITION_SPECIFIC",
 }
 
 

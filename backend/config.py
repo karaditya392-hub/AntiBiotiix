@@ -52,12 +52,18 @@ GUIDELINE_PRECEDENCE_HIERARCHY = [
         # API to describe rank 2 as ICMR-only, which is how a response comes to make a
         # claim the corpus contradicts (Spec 22).
         "also_held_at_this_rank": (
-            "12 MoHFW/NHSRC Standard Treatment Guidelines and 13 national programme "
-            "guidelines (NCDC, NVBDCP, NLEP, NACO/MoHFW, NPCDCS, NPPMBI), all "
-            "condition-specific. Outside their own condition they carry NO antimicrobial "
-            "authority, and where one that does carry antibiotic recommendations differs "
-            "from the national antimicrobial guidelines or the local antibiogram, those "
-            "govern. Each document's provenance notes state its own scope."
+            "12 MoHFW/NHSRC Standard Treatment Guidelines, 13 national programme "
+            "guidelines (NCDC, NVBDCP, NLEP, NACO/MoHFW, NPCDCS, NPPMBI), and 29 ICMR "
+            "national clinical documents -- 22 cancer-site consensus documents, the type 1 "
+            "and type 2 diabetes guidelines, celiac disease, DNAR, haematopoietic cell "
+            "transplantation, the stem cell therapy evidence review, and the DHR-ICMR "
+            "rickettsial diseases guidelines. ALL are condition-specific. Outside their own "
+            "condition they carry NO antimicrobial authority, and where one that does carry "
+            "antibiotic recommendations differs from the national antimicrobial guidelines "
+            "or the local antibiogram, those govern. Of the ICMR batch only the rickettsial "
+            "guidelines carry antimicrobial recommendations as their own subject, and only "
+            "for rickettsial infection. Each document's provenance notes state its own "
+            "scope, and `clinical_domain` states it in a form a caller can filter on."
         )
     },
     {
@@ -73,13 +79,26 @@ GUIDELINE_PRECEDENCE_HIERARCHY = [
         # unattributed Ayurvedic compilation are all legitimately part of the corpus and
         # none of them is a clinical guideline. Ranking them with ICMR and NCDC would be
         # the claim; ranking them here is the absence of one.
+        #
+        # WIDENED for the ICMR national corpus. Rank 4 now also holds documents that are
+        # national authorities in their own right and simply do not govern patient care:
+        # research-ethics guidelines, laboratory biosafety manuals, programme policy and
+        # two research-activity compendia. Rank 4 is not a judgement on their standing --
+        # the ICMR National Ethical Guidelines are authoritative about research ethics.
+        # It records that none of them is clinical guidance, which is the only question
+        # this hierarchy asks. Which kind a document is, is carried separately by
+        # `clinical_domain` (see backend.rag.store.DOMAIN_*), because "not an
+        # antimicrobial source" and "not about patient care at all" are different
+        # warnings and a reader needs the right one.
         "rank": 4,
         "category": "NOT_A_CLINICAL_GUIDELINE",
         "description": (
             "Held for retrieval but carrying no clinical authority: public information "
-            "material, community programme leaflets, and documents whose issuing body "
-            "cannot be established from the document itself. Never a basis for an "
-            "antimicrobial or prescribing decision."
+            "material, community programme leaflets, documents whose issuing body cannot "
+            "be established from the document itself, and authoritative documents that do "
+            "not govern patient care -- research ethics and governance, laboratory "
+            "procedure and biosafety, programme and institutional policy, and research "
+            "activity reports. Never a basis for an antimicrobial or prescribing decision."
         ),
         "issuing_org": "Various; see each document's provenance notes",
         "version": "n/a"
@@ -100,6 +119,60 @@ NATIONAL_ANTIMICROBIAL_AUTHORITY_DOCUMENT_IDS = [
     "ICMR-STG-2019-ED2",
     "NCDC-NTG-AMR-2016",
 ]
+
+# Documents that carry ANTIBACTERIAL recommendations, and may therefore be compared
+# against one another when backend.guidelines.cross_source computes which sources
+# name which agent.
+#
+# EXPLICIT, for the same reason the list above is explicit: nothing in a document's
+# metadata says "this one names antibiotics", and inferring it goes wrong in both
+# directions. Inferring from precedence rank admits every condition-specific
+# guideline in the corpus -- 22 ICMR cancer consensus documents among them -- and a
+# gallbladder cancer document that does not mention piperacillin would then be
+# counted as a national guideline omitting it. Inferring from `clinical_domain ==
+# ANTIMICROBIAL_TREATMENT` errs the other way and drops NCDC-LEPTOSPIROSIS-2015 from
+# a leptospirosis comparison, which is the one source that actually covers it.
+#
+# Membership here is taken from each document's OWN recorded provenance note, not
+# from a fresh reading: a document whose note says it "CONTAINS ANTIMICROBIAL
+# RECOMMENDATIONS" is in, and one whose note says it "must not be cited for
+# antibiotic selection" is out. The excluded infectious-disease documents are
+# excluded on their own say-so -- viral hepatitis (antivirals only), rabies
+# prophylaxis (vaccine and immunoglobulin), malaria (an explicit "NOT AN
+# ANTIBACTERIAL GUIDELINE"), kala-azar (a programme roadmap), leprosy DPMR
+# (rehabilitation) and Standard Treatment Workflows Vol. 3 (an explicit "NOT an
+# antimicrobial stewardship guideline").
+#
+# Being in this set is NOT authority. Precedence still governs that, and a
+# condition-specific document still speaks only about its own condition -- which is
+# enforced upstream by the retrieval relevance threshold, not here.
+ANTIMICROBIAL_CONTENT_DOCUMENT_IDS = frozenset({
+    # Primary antimicrobial sources.
+    "ICMR-STG-2019-ED2",
+    "NCDC-NTG-AMR-2016",
+    "WHO-AWARE-BOOK-2022",
+    "ICMR-STG-2022-23-CH05-IAI",
+    "ICMR-STG-2022-23-CH06-SSTI",
+    "ICMR-STG-2022-23-CH07-BJI",
+    "ICMR-STG-2022-23-CH08-CNS",
+    "ICMR-STG-2022-23-CH09-UTI",
+    "ICMR-STG-2022-23-CH10-HAI",
+    "ICMR-STG-2022-23-CH11-IMM",
+    # Condition-specific documents that carry named antibacterial regimens for
+    # their own condition, per their own provenance notes.
+    "NACO-MOHFW-RTI-STI-2014",
+    "MOHFW-STG-ACUTE-SINUSITIS-UNDATED",
+    "MOHFW-STG-PAED-RESP-INFECTIONS-2016",
+    "MOHFW-STG-DIABETIC-FOOT-2016-DRAFT",
+    "MOHFW-INTRAOCULAR-SURGERY-PRECAUTIONS-UNDATED",
+    "NCDC-LEPTOSPIROSIS-2015",
+    "NLEP-MO-TRAINING-MANUAL-2013",
+    "NPPMBI-BURNS-UNDATED",
+    "NVBDCP-AES-JE-2009",
+    # ICMR national corpus (scripts/ingest_icmr_national_corpus.py). Exactly one of
+    # its 55 documents carries antimicrobial recommendations as its own subject.
+    "DHR-ICMR-RICKETTSIAL-2015",
+})
 
 # Role Authorization Configuration (Section 18A)
 AUTHORIZED_OVERRIDE_ROLES = [
