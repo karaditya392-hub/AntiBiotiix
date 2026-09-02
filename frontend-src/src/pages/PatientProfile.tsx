@@ -4,6 +4,7 @@ import { Link, useLocation, useParams } from "wouter";
 import UnifiedHeader from "@/components/UnifiedHeader";
 import "@/styles/patient-dashboard.css";
 import { patientName } from "@/lib/patient";
+import { useAuth } from "@/context/AuthContext";
 
 type Patient = {
   patient_id: string;
@@ -61,22 +62,44 @@ function formatVisitDate(v: any): string {
   }
 }
 
+// How an adherence answer reads to a clinician.
+//
+// STOPPED and SOME are called out because they change what happens next: a course
+// abandoned halfway is both a treatment failure risk and a resistance driver, and
+// it is invisible everywhere else in this system -- the prescription records what
+// was ordered, never what was swallowed.
+const DOSE_LABELS: Record<string, { text: string; alarming: boolean }> = {
+  ALL: { text: "took every dose", alarming: false },
+  MOST: { text: "missed a few doses", alarming: false },
+  SOME: { text: "took only some doses", alarming: true },
+  STOPPED: { text: "has STOPPED taking it", alarming: true },
+};
+
 export default function PatientProfile() {
   const { patient_id } = useParams<{ patient_id: string }>();
+  const { token } = useAuth();
   const [, setLocation] = useLocation();
   const [data, setData] = useState<HistoryData | null>(null);
   const [nextAppointment, setNextAppointment] = useState<any>(null);
+  // What this patient has reported since their visit. Loaded here because the
+  // post-login alert links straight to this page.
+  const [feedback, setFeedback] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   async function loadPatientProfile() {
     if (!patient_id) return;
     try {
-      const [histRes, apptRes] = await Promise.all([
+      const [histRes, apptRes, fbRes] = await Promise.all([
         fetch(`/api/patients/${encodeURIComponent(patient_id)}/history`),
         fetch(`/api/patients/${encodeURIComponent(patient_id)}/next-appointment`),
+        // Scoped to this patient by the server, not filtered client-side.
+        fetch(`/api/feedback?patient_id=${encodeURIComponent(patient_id)}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
       ]);
       if (histRes.ok) setData(await histRes.json());
       if (apptRes.ok) setNextAppointment(await apptRes.json());
+      if (fbRes.ok) setFeedback((await fbRes.json()).responses || []);
     } catch {
       // Keep state
     } finally {
@@ -147,6 +170,71 @@ export default function PatientProfile() {
           </Link>
         </div>
       </div>
+
+      {/*
+        WHAT THIS PATIENT REPORTED.
+
+        Placed above the appointment banner and the record, because this is where
+        the post-login alert lands: a clinician who clicked "Rajesh Sharma reports
+        feeling worse" is here to read that, and should not have to hunt for it.
+      */}
+      {feedback.length > 0 && (
+        <section className="info-section" style={{ marginBottom: "20px" }}>
+          <div className="section-title-row" style={{ marginBottom: "10px" }}>
+            <div>
+              <p className="dashboard-kicker">PATIENT FOLLOW-UP</p>
+              <h2>What {patientName(patient.display_name, patient.patient_id)} reported</h2>
+            </div>
+          </div>
+          <div style={{ display: "grid", gap: "8px" }}>
+            {feedback.map((f: any) => {
+              const worse = f.feeling === "WORSE";
+              return (
+                <div
+                  key={f.response_id}
+                  style={{
+                    background: worse ? "#fbe9e5" : "#f0f6f1",
+                    border: `1px solid ${worse ? "#e3b9b0" : "#d0e2d8"}`,
+                    borderLeft: `4px solid ${worse ? "#a33d31" : "#2d7064"}`,
+                    borderRadius: "6px", padding: "10px 12px", fontSize: "0.82rem",
+                  }}
+                >
+                  <div style={{ display: "flex", justifyContent: "space-between", gap: "10px" }}>
+                    <strong style={{ color: worse ? "#a33d31" : "#173c3d" }}>
+                      {worse ? "Reported feeling worse"
+                        : f.feeling === "SAME" ? "Reported no change"
+                        : "Reported feeling better"}
+                    </strong>
+                    <span className="muted" style={{ fontSize: "0.72rem" }}>
+                      {f.visit_id} · {f.submitted_at ? new Date(f.submitted_at).toLocaleString() : "date not recorded"}
+                    </span>
+                  </div>
+                  <div style={{ marginTop: "4px", color: "#203236" }}>
+                    Medicines helped: <b>{(f.medicines_helped || "not answered").toLowerCase()}</b>
+                  </div>
+                  {DOSE_LABELS[f.doses_taken] && (
+                    <div style={{
+                      marginTop: "4px",
+                      color: DOSE_LABELS[f.doses_taken].alarming ? "#a33d31" : "#526968",
+                      fontWeight: DOSE_LABELS[f.doses_taken].alarming ? 600 : 400,
+                    }}>
+                      Doses: {DOSE_LABELS[f.doses_taken].text}
+                    </div>
+                  )}
+                  {f.discomfort && (
+                    /* The patient's own words, unedited. */
+                    <div style={{ marginTop: "4px", color: "#526968" }}>“{f.discomfort}”</div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          <p className="muted" style={{ fontSize: "0.72rem", margin: "8px 0 0" }}>
+            Submitted by the patient through the follow-up link. Recorded as given and
+            not clinically assessed by this system.
+          </p>
+        </section>
+      )}
 
       {/* AUTOMATED CHECK-UP NOTIFICATION BANNER */}
       {nextAppointment?.has_appointment && (

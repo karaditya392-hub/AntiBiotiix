@@ -143,7 +143,7 @@ export default function PatientFeedback() {
         </section>
       )}
 
-      {context && !submitted && (
+      {context && context.can_submit && !submitted && (
         <section className="info-section" style={{ background: "#ffffff", padding: "20px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
             <HeartPulse size={18} color="#2d7064" />
@@ -247,13 +247,45 @@ export default function PatientFeedback() {
         </section>
       )}
 
+      {/*
+        ALREADY ANSWERED. Shown INSTEAD of the form, not as an error after it: a
+        patient should not fill in four questions to be told the answer will not be
+        taken. The escalation line is not boilerplate -- a cooldown that leaves
+        someone deteriorating with no route is a worse design than no cooldown.
+      */}
+      {context && !context.can_submit && !submitted && (
+        <section className="info-section" style={{ background: "#ffffff", padding: "24px" }}>
+          <CheckCircle2 size={28} color="#2d7064" />
+          <h2 style={{ color: "#173c3d", margin: "10px 0 6px", fontSize: "1.05rem" }}>
+            Your clinician already has your update
+          </h2>
+          <p className="muted" style={{ fontSize: "0.86rem", margin: "0 0 10px" }}>
+            You sent an update for this visit, and it has already reached your clinician.
+            You can send another one after{" "}
+            <b>
+              {context.next_submission_allowed_at
+                ? new Date(context.next_submission_allowed_at).toLocaleString()
+                : `${context.resubmit_cooldown_hours || 24} hours`}
+            </b>
+            .
+          </p>
+          <p style={{ fontSize: "0.84rem", margin: 0, color: "#a33d31" }}>
+            If you feel seriously unwell before then &mdash; trouble breathing, a spreading
+            rash, a high fever that will not come down, or you cannot keep fluids down &mdash;
+            do not wait for this form. Contact your clinician or emergency services.
+          </p>
+        </section>
+      )}
+
       {submitted && (
         <section className="info-section" style={{ background: "#ffffff", padding: "24px", textAlign: "center" }}>
           <CheckCircle2 size={32} color="#2d7064" />
           <h2 style={{ color: "#173c3d", margin: "10px 0 6px" }}>Thank you</h2>
           <p className="muted" style={{ fontSize: "0.86rem", margin: 0 }}>
-            Your answers have been sent to your clinician and will be reviewed at their
-            next session. You can close this page.
+            Your answers have gone to your clinician now. You can close this page.
+            To let them act on one clear update rather than several, this form accepts
+            another answer for this visit after 24 hours &mdash; but if you feel seriously
+            unwell before then, contact your clinician or emergency services directly.
           </p>
         </section>
       )}

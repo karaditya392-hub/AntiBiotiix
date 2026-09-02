@@ -20,17 +20,33 @@ from backend.models.database import (
 
 client = TestClient(app)
 
+import uuid as _uuid
+from datetime import datetime, timedelta, timezone
+
 
 @pytest.fixture()
 def coded_visit():
+    """
+    A visit of this test's own, not the shared seeded one.
+
+    Submissions are now limited to one per visit per 24 hours, so tests that share
+    a visit would refuse each other depending on the order they happened to run --
+    the second test failing on the first test's answer. Each test gets its own
+    visit; the cooldown itself is exercised deliberately further down.
+    """
     db = SessionLocal()
-    visit = db.query(VisitDB).filter(VisitDB.prescription_id.isnot(None)).first()
-    assert visit, "expected a seeded visit with a prescription"
-    if not visit.feedback_code:
-        visit.feedback_code = _new_feedback_code(db)
-        db.commit()
-    data = {"code": visit.feedback_code, "visit_id": visit.visit_id,
-            "patient_id": visit.patient_id}
+    seeded = db.query(VisitDB).filter(VisitDB.prescription_id.isnot(None)).first()
+    assert seeded, "expected a seeded visit with a prescription"
+
+    visit_id = f"VIS-FB-{_uuid.uuid4().hex[:8].upper()}"
+    code = _new_feedback_code(db)
+    # Carries the seeded prescription so the page still has medicines to show.
+    db.add(VisitDB(visit_id=visit_id, patient_id=seeded.patient_id,
+                   doctor_id=seeded.doctor_id, visit_date=datetime.now(timezone.utc),
+                   diagnosis=seeded.diagnosis, status="COMPLETED",
+                   prescription_id=seeded.prescription_id, feedback_code=code))
+    db.commit()
+    data = {"code": code, "visit_id": visit_id, "patient_id": seeded.patient_id}
     db.close()
     return data
 
@@ -373,11 +389,7 @@ def test_acknowledgement_does_not_alter_the_answer(coded_visit):
 # The 24-hour notification hold, and the fourth question
 # ---------------------------------------------------------------------------
 
-import uuid as _uuid
-from datetime import datetime, timedelta, timezone
-
-from backend.app import FEEDBACK_NOTIFICATION_DELAY_HOURS
-from backend.models.database import SessionLocal, VisitDB
+from backend.app import FEEDBACK_RESUBMIT_COOLDOWN_HOURS
 
 
 def _visit_aged(hours: float, code: str) -> str:
@@ -411,43 +423,119 @@ def _notified(response_id: str, headers) -> bool:
     return any(r["response_id"] == response_id for r in rows)
 
 
-def test_an_answer_from_a_fresh_visit_is_stored_but_not_notified():
+def test_an_answer_reaches_the_clinician_immediately():
     """
-    A patient who answers on the way out of the clinic is reporting the
-    consultation, not the treatment. Paging a clinician minutes after they
-    prescribed teaches them to dismiss the alert.
+    No hold. A patient reporting that they feel worse is the one signal in this
+    system that must not wait: the whole point of asking is to hear about a
+    treatment going wrong sooner than the next appointment would.
     """
-    code = f"HOLD{_uuid.uuid4().hex[:4].upper()}"
-    visit_id = _visit_aged(0.1, code)          # six minutes ago
+    code = f"NOW{_uuid.uuid4().hex[:5].upper()}"
+    _visit_aged(0.1, code)                      # six minutes ago
     headers = _attending_headers()
 
     submitted = client.post(f"/api/feedback/{code}",
                             json={"feeling": "WORSE", "medicines_helped": "NO"})
     assert submitted.status_code == 200
+    assert _notified(submitted.json()["response_id"], headers) is True
+
+
+def test_a_second_answer_for_the_same_visit_is_refused_inside_the_cooldown():
+    """
+    One considered update per visit per day. Four "worse" answers in an hour are
+    four alerts about one deterioration, and the fourth is the one a clinician
+    stops reading.
+    """
+    code = f"CD{_uuid.uuid4().hex[:6].upper()}"
+    _visit_aged(30, code)
+
+    first = client.post(f"/api/feedback/{code}",
+                        json={"feeling": "WORSE", "medicines_helped": "NO"})
+    assert first.status_code == 200
+
+    second = client.post(f"/api/feedback/{code}",
+                         json={"feeling": "BETTER", "medicines_helped": "YES"})
+    assert second.status_code == 429
+    detail = second.json()["detail"]
+    # The refusal must say when they may return, and must not leave someone who is
+    # deteriorating with no route at all.
+    assert "send another after" in detail
+    assert "emergency" in detail.lower()
+
+
+def test_the_cooldown_lapses_and_a_further_answer_is_accepted():
+    code = f"CD{_uuid.uuid4().hex[:6].upper()}"
+    _visit_aged(72, code)
+    first = client.post(f"/api/feedback/{code}",
+                        json={"feeling": "WORSE", "medicines_helped": "NO"})
+    assert first.status_code == 200
+
+    # Age the stored answer past the window rather than waiting a day.
+    db = SessionLocal()
+    from backend.models.database import FeedbackResponseDB
+    row = db.query(FeedbackResponseDB).filter(
+        FeedbackResponseDB.response_id == first.json()["response_id"]).first()
+    row.submitted_at = datetime.now(timezone.utc) - timedelta(
+        hours=FEEDBACK_RESUBMIT_COOLDOWN_HOURS + 1)
+    db.commit()
+    db.close()
+
+    again = client.post(f"/api/feedback/{code}",
+                        json={"feeling": "BETTER", "medicines_helped": "YES"})
+    assert again.status_code == 200
+
+
+def test_the_cooldown_is_scoped_to_the_visit_not_the_patient():
+    """
+    A patient with two open visits must be able to report on each. Scoping the
+    limit to the patient would silence the second infection.
+    """
+    code_a = f"VA{_uuid.uuid4().hex[:6].upper()}"
+    code_b = f"VB{_uuid.uuid4().hex[:6].upper()}"
+    _visit_aged(30, code_a)
+    _visit_aged(30, code_b)
+
+    assert client.post(f"/api/feedback/{code_a}",
+                       json={"feeling": "WORSE", "medicines_helped": "NO"}).status_code == 200
+    assert client.post(f"/api/feedback/{code_b}",
+                       json={"feeling": "WORSE", "medicines_helped": "NO"}).status_code == 200
+
+
+def test_the_form_is_told_up_front_whether_it_may_be_submitted():
+    """
+    The page asks before it renders, so a patient inside the window sees "already
+    sent" instead of filling in four questions and being refused at the end.
+    """
+    code = f"CTX{_uuid.uuid4().hex[:5].upper()}"
+    _visit_aged(30, code)
+
+    fresh = client.get(f"/api/feedback/{code}").json()
+    assert fresh["can_submit"] is True
+    assert fresh["next_submission_allowed_at"] is None
+    assert fresh["resubmit_cooldown_hours"] == FEEDBACK_RESUBMIT_COOLDOWN_HOURS == 24
+
+    client.post(f"/api/feedback/{code}", json={"feeling": "SAME", "medicines_helped": "UNSURE"})
+
+    after = client.get(f"/api/feedback/{code}").json()
+    assert after["can_submit"] is False
+    assert after["next_submission_allowed_at"] is not None
+
+
+def test_adherence_is_visible_to_the_clinician_not_only_stored():
+    """
+    A question asked and never shown is a question asked for nothing. STOPPED is
+    the most actionable answer the form collects; it has to reach the panel.
+    """
+    code = f"ADHV{_uuid.uuid4().hex[:4].upper()}"
+    _visit_aged(30, code)
+    submitted = client.post(f"/api/feedback/{code}", json={
+        "feeling": "WORSE", "medicines_helped": "NO", "doses_taken": "STOPPED"})
     response_id = submitted.json()["response_id"]
 
-    # stored immediately...
-    listed = client.get(f"/api/patients/PATIENT-001/history")
-    assert listed.status_code == 200
-    # ...but not surfaced as an interruption
-    assert _notified(response_id, headers) is False
-
-
-def test_the_same_answer_is_notified_once_the_visit_matures():
-    code = f"HOLD{_uuid.uuid4().hex[:4].upper()}"
-    visit_id = _visit_aged(0.1, code)
     headers = _attending_headers()
-    response_id = client.post(f"/api/feedback/{code}",
-                              json={"feeling": "WORSE", "medicines_helped": "NO"}).json()["response_id"]
-
-    assert _notified(response_id, headers) is False
-    _age_visit(visit_id, FEEDBACK_NOTIFICATION_DELAY_HOURS + 1)
-    assert _notified(response_id, headers) is True
-
-
-def test_the_hold_is_reported_so_a_client_can_explain_the_quiet():
-    body = client.get("/api/feedback/unseen", headers=_attending_headers()).json()
-    assert body["notification_delay_hours"] == FEEDBACK_NOTIFICATION_DELAY_HOURS == 24
+    for endpoint in ("/api/feedback/unseen", "/api/feedback"):
+        rows = client.get(endpoint, headers=headers).json()["responses"]
+        row = next(r for r in rows if r["response_id"] == response_id)
+        assert row["doses_taken"] == "STOPPED", endpoint
 
 
 def test_adherence_is_recorded_when_answered():

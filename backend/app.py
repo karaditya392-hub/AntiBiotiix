@@ -897,6 +897,10 @@ def create_patient_visit(
     return {
         "status": "SAVED",
         "message": "Visit saved successfully.",
+        # The follow-up code, returned so the clinician can read it out or print it.
+        # It is generated at visit creation regardless; without returning it here the
+        # patient has no route to the form and the whole loop is unreachable.
+        "feedback_code": visit_obj.feedback_code,
         "visit_id": visit_id,
         "prescription_id": presc_id,
         "patient_id": patient_id,
@@ -2233,9 +2237,26 @@ def list_clinical_rules():
 # Digits and letters that cannot be misread aloud or in handwriting: no O/0, I/1,
 # S/5. The code is read out or written on a discharge slip, so an ambiguous glyph
 # is a support call.
-# How long after the VISIT an answer waits before it interrupts a clinician.
-# See list_unseen_feedback for why this is not zero.
-FEEDBACK_NOTIFICATION_DELAY_HOURS = 24
+# How long a patient must wait before sending a SECOND update for the same visit.
+#
+# Not a delay on the clinician's notification -- that is immediate. This exists so
+# a follow-up is a considered answer rather than a stream: a patient refreshing
+# the page and sending "worse" four times in an hour produces four alerts about
+# one deterioration, and the fourth is the one a clinician stops reading.
+#
+# Scoped to the visit, so a patient with two open visits can report on each.
+FEEDBACK_RESUBMIT_COOLDOWN_HOURS = 24
+
+def _as_utc(value: datetime) -> datetime:
+    """
+    A stored timestamp as an aware UTC datetime.
+
+    SQLite hands back naive datetimes, and comparing a naive value to an aware
+    `now` raises TypeError -- which in a cooldown check would mean the refusal
+    never fires and the limit silently does not exist.
+    """
+    return value if value.tzinfo else value.replace(tzinfo=timezone.utc)
+
 
 _FEEDBACK_ALPHABET = "ABCDEFGHJKLMNPQRTUVWXY2346789"
 
@@ -2290,31 +2311,18 @@ def list_unseen_feedback(
     acknowledged = (db.query(FeedbackAcknowledgementDB.response_id)
                     .filter(FeedbackAcknowledgementDB.clinician_id == clinician_id))
 
-    # A 24-HOUR HOLD BEFORE AN ANSWER IS NOTIFIED.
-    #
-    # A patient who opens the link on the way out of the clinic is reporting how
-    # they felt during the consultation, not how the treatment is working. Paging
-    # a clinician minutes after they prescribed tells them nothing they did not
-    # just observe, and it trains them to dismiss the alert -- which is how a
-    # genuinely deteriorating patient gets clicked past three days later.
-    #
-    # So an answer is stored immediately and NOTIFIED only once the visit is at
-    # least FEEDBACK_NOTIFICATION_DELAY_HOURS old. Nothing is discarded: the
-    # response is on the patient's record from the moment it arrives, and the
-    # clinician can read it there. Only the interruption waits.
-    cutoff = datetime.now(timezone.utc) - timedelta(hours=FEEDBACK_NOTIFICATION_DELAY_HOURS)
-    mature_visits = (db.query(VisitDB.visit_id)
-                     .filter(VisitDB.visit_date <= cutoff))
-
+    # NO DELAY HERE, deliberately. An answer reaches the clinician as soon as the
+    # patient sends it: a patient reporting that they feel worse is the one signal
+    # in this system that should never wait. The 24 hours applies to how often a
+    # patient may SEND, not to how quickly a clinician is told -- see
+    # submit_feedback.
     rows = (db.query(FeedbackResponseDB)
             .filter(~FeedbackResponseDB.response_id.in_(acknowledged))
-            .filter(FeedbackResponseDB.visit_id.in_(mature_visits))
             .order_by(FeedbackResponseDB.submitted_at.desc())
             .limit(25).all())
     names = {p.patient_id: p.display_name for p in db.query(PatientDB).all()}
     return {
         "unseen": len(rows),
-        "notification_delay_hours": FEEDBACK_NOTIFICATION_DELAY_HOURS,
         "responses": [{
             "response_id": r.response_id,
             "visit_id": r.visit_id,
@@ -2322,6 +2330,10 @@ def list_unseen_feedback(
             "patient_name": names.get(r.patient_id) or r.patient_id,
             "feeling": r.feeling,
             "medicines_helped": r.medicines_helped,
+            # Adherence travels with the answer. An unreported "STOPPED" is the
+            # single most actionable thing this form collects, and a field that is
+            # stored but never serialised is a question asked for nothing.
+            "doses_taken": r.doses_taken,
             "discomfort": r.discomfort,
             "submitted_at": r.submitted_at.isoformat() if r.submitted_at else None,
         } for r in rows],
@@ -2339,6 +2351,17 @@ def get_feedback_context(code: str, db: Session = Depends(get_db)):
     the minimum that makes the question answerable.
     """
     visit = _visit_for_code(db, code)
+    # Whether an update can be sent now. Reported on open so the form can say so
+    # up front instead of accepting answers it is going to refuse.
+    _last = (db.query(FeedbackResponseDB)
+             .filter(FeedbackResponseDB.visit_id == visit.visit_id)
+             .order_by(FeedbackResponseDB.submitted_at.desc())
+             .first())
+    _can_submit, _next_at = True, None
+    if _last and _last.submitted_at:
+        _due = _as_utc(_last.submitted_at) + timedelta(hours=FEEDBACK_RESUBMIT_COOLDOWN_HOURS)
+        if _due > datetime.now(timezone.utc):
+            _can_submit, _next_at = False, _due.isoformat()
     patient = db.query(PatientDB).filter(PatientDB.patient_id == visit.patient_id).first()
 
     medications: List[Dict[str, Any]] = []
@@ -2360,6 +2383,9 @@ def get_feedback_context(code: str, db: Session = Depends(get_db)):
     ).count()
 
     return {
+        "can_submit": _can_submit,
+        "next_submission_allowed_at": _next_at,
+        "resubmit_cooldown_hours": FEEDBACK_RESUBMIT_COOLDOWN_HOURS,
         "visit_id": visit.visit_id,
         "patient_name": (patient.display_name if patient else None) or visit.patient_id,
         "diagnosis": visit.diagnosis,
@@ -2381,6 +2407,28 @@ def submit_feedback(code: str, payload: Dict[str, Any], db: Session = Depends(ge
 
     visit = _visit_for_code(db, code)
     patient = db.query(PatientDB).filter(PatientDB.patient_id == visit.patient_id).first()
+
+    # ONE UPDATE PER VISIT PER COOLDOWN. Checked before anything is validated, so a
+    # patient inside the window is told plainly rather than filling the form in and
+    # being refused at the end.
+    last = (db.query(FeedbackResponseDB)
+            .filter(FeedbackResponseDB.visit_id == visit.visit_id)
+            .order_by(FeedbackResponseDB.submitted_at.desc())
+            .first())
+    if last and last.submitted_at:
+        next_allowed = last.submitted_at + timedelta(hours=FEEDBACK_RESUBMIT_COOLDOWN_HOURS)
+        if _as_utc(last.submitted_at) > datetime.now(timezone.utc) - timedelta(
+                hours=FEEDBACK_RESUBMIT_COOLDOWN_HOURS):
+            raise HTTPException(
+                status_code=429,
+                detail=(
+                    "Thank you - your clinician already has your update from this visit. "
+                    "You can send another after "
+                    f"{next_allowed.strftime('%d %b, %I:%M %p')}. If something feels "
+                    "seriously wrong before then, contact your clinician or emergency "
+                    "services directly rather than waiting."
+                ),
+            )
 
     feeling = str(payload.get("feeling") or "").strip().upper()
     helped = str(payload.get("medicines_helped") or "").strip().upper()
@@ -2505,6 +2553,10 @@ def list_feedback_responses(
             "doctor_id": r.doctor_id,
             "feeling": r.feeling,
             "medicines_helped": r.medicines_helped,
+            # Adherence travels with the answer. An unreported "STOPPED" is the
+            # single most actionable thing this form collects, and a field that is
+            # stored but never serialised is a question asked for nothing.
+            "doses_taken": r.doses_taken,
             "discomfort": r.discomfort,
             "submitted_at": r.submitted_at.isoformat() if r.submitted_at else None,
         } for r in rows],

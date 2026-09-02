@@ -7,6 +7,7 @@ import { Link } from "wouter";
 import "@/styles/patient-dashboard.css";
 import { useRuleCount, ruleEngineLabel } from "@/hooks/useRuleCount";
 import { patientName } from "@/lib/patient";
+import { useAuth } from "@/context/AuthContext";
 
 type Patient = {
   id?: number;
@@ -128,9 +129,26 @@ function formatDate(value?: string): string {
   }
 }
 
+// How an adherence answer reads to a clinician.
+//
+// STOPPED and SOME are called out because they change what happens next: a course
+// abandoned halfway is both a treatment failure risk and a resistance driver, and
+// it is invisible everywhere else in this system -- the prescription records what
+// was ordered, never what was swallowed.
+const DOSE_LABELS: Record<string, { text: string; alarming: boolean }> = {
+  ALL: { text: "took every dose", alarming: false },
+  MOST: { text: "missed a few doses", alarming: false },
+  SOME: { text: "took only some doses", alarming: true },
+  STOPPED: { text: "has STOPPED taking it", alarming: true },
+};
+
 export default function PatientDashboard() {
   // Read from the engine rather than restated from memory; see useRuleCount.
   const ruleCount = useRuleCount();
+  const { token } = useAuth();
+  // What patients have reported. Read here because this is where a clinician
+  // lands after signing in.
+  const [feedback, setFeedback] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<"dashboard" | "patient" | "new_visit" | "medications" | "audit">("dashboard");
   const [patients, setPatients] = useState<Patient[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -164,6 +182,8 @@ export default function PatientDashboard() {
   const [safetyWarnings, setSafetyWarnings] = useState<any[]>([]);
   const [analysisStatus, setAnalysisStatus] = useState<string>("");
   const [visitSavedMsg, setVisitSavedMsg] = useState<string>("");
+  // The follow-up code for the visit just saved, to read out or print for the patient.
+  const [followUpCode, setFollowUpCode] = useState<string>("");
 
   // Ask About Patient state
   const [patientQuestion, setPatientQuestion] = useState("");
@@ -171,6 +191,19 @@ export default function PatientDashboard() {
   const [askLoading, setAskLoading] = useState(false);
 
   const historyRequest = useRef(0);
+
+  async function loadFeedback() {
+    try {
+      // Clinician-only endpoint: reading other people's answers requires a session,
+      // even though submitting one does not.
+      const res = await fetch("/api/feedback", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) setFeedback((await res.json()).responses || []);
+    } catch {
+      // A follow-up panel that cannot load must not take the dashboard with it.
+    }
+  }
 
   async function loadDashboardStats() {
     try {
@@ -238,6 +271,7 @@ export default function PatientDashboard() {
     void loadRoster();
     void loadPresets();
     void loadDashboardStats();
+    void loadFeedback();
   }, []);
 
   useEffect(() => {
@@ -415,6 +449,7 @@ export default function PatientDashboard() {
       return;
     }
     setVisitSavedMsg("");
+    setFollowUpCode("");
     setFormError("");
 
     const login = await fetch("/api/auth/login", {
@@ -445,7 +480,9 @@ export default function PatientDashboard() {
     });
 
     if (res.ok) {
+      const saved = await res.json().catch(() => ({}));
       setVisitSavedMsg("Visit saved successfully and indexed for RAG retrieval.");
+      setFollowUpCode(saved.feedback_code || "");
       setNewVisitDiagnosis("");
       setNewVisitNotes("");
       setSymptomsList([]);
@@ -700,6 +737,67 @@ export default function PatientDashboard() {
                   <span className="stat-sub">{ruleEngineLabel(ruleCount)} Alerts</span>
                 </div>
               </div>
+
+              {/* Patient follow-up answers.
+                  This is the doctor end of the loop: the patient submits from the
+                  public feedback page and the answers land here. Nothing polls for
+                  them yet -- they appear on load and on refresh, not as a toast over
+                  whatever the clinician is doing. See the API notes on /api/feedback. */}
+              {feedback.length > 0 && (
+                <section className="info-section">
+                  <div className="section-title-row">
+                    <div>
+                      <p className="dashboard-kicker">PATIENT FOLLOW-UP</p>
+                      <h2>What patients reported ({feedback.length})</h2>
+                    </div>
+                    <button className="dashboard-button secondary" onClick={() => void loadFeedback()}>
+                      <History size={14} /> Refresh
+                    </button>
+                  </div>
+                  <div style={{ display: "grid", gap: "8px", maxHeight: "320px", overflowY: "auto" }}>
+                    {feedback.map((f) => {
+                      const worse = f.feeling === "WORSE";
+                      return (
+                        <div
+                          key={f.response_id}
+                          style={{
+                            background: worse ? "#fbe9e5" : "#f0f6f1",
+                            border: `1px solid ${worse ? "#e3b9b0" : "#d0e2d8"}`,
+                            borderLeft: `4px solid ${worse ? "#a33d31" : "#2d7064"}`,
+                            borderRadius: "6px", padding: "10px 12px", fontSize: "0.8rem",
+                          }}
+                        >
+                          <div style={{ display: "flex", justifyContent: "space-between", gap: "10px" }}>
+                            <strong style={{ color: "#173c3d" }}>{f.patient_name}</strong>
+                            <span className="muted" style={{ fontSize: "0.72rem" }}>
+                              {f.visit_id} · {formatDate(f.submitted_at)}
+                            </span>
+                          </div>
+                          <div style={{ marginTop: "4px", color: "#203236" }}>
+                            Feeling <b>{(f.feeling || "").toLowerCase()}</b> · medicines helped:{" "}
+                            <b>{(f.medicines_helped || "").toLowerCase()}</b>
+                          </div>
+                          {DOSE_LABELS[f.doses_taken] && (
+                            <div style={{
+                              marginTop: "4px",
+                              color: DOSE_LABELS[f.doses_taken].alarming ? "#a33d31" : "#526968",
+                              fontWeight: DOSE_LABELS[f.doses_taken].alarming ? 600 : 400,
+                            }}>
+                              Doses: {DOSE_LABELS[f.doses_taken].text}
+                            </div>
+                          )}
+                          {f.discomfort && (
+                            <div style={{ marginTop: "4px", color: "#526968" }}>
+                              {/* The patient's own words, unedited. */}
+                              “{f.discomfort}”
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </section>
+              )}
 
               <section className="info-section">
                 <div className="section-title-row">
@@ -1137,6 +1235,32 @@ export default function PatientDashboard() {
 
                   {formError && <p className="form-error">{formError}</p>}
                   {visitSavedMsg && <p className="form-intro" style={{ color: "#2d7064", fontWeight: 700 }}>{visitSavedMsg}</p>}
+                  {/*
+                    THE FOLLOW-UP CODE. Shown here because this is the only moment the
+                    patient is still in the room. A code generated and never displayed
+                    is a follow-up loop nobody can enter.
+                  */}
+                  {followUpCode && (
+                    <div style={{
+                      background: "#f0f6f1", border: "1px solid #d0e2d8",
+                      borderLeft: "4px solid #2d7064", borderRadius: "6px",
+                      padding: "12px 14px", margin: "0 0 14px",
+                    }}>
+                      <p style={{ margin: 0, fontSize: "0.8rem", color: "#173c3d", fontWeight: 600 }}>
+                        Give this follow-up code to the patient
+                      </p>
+                      <p style={{
+                        margin: "6px 0", fontSize: "1.6rem", fontWeight: 700,
+                        letterSpacing: "0.16em", color: "#173c3d", fontFamily: "monospace",
+                      }}>
+                        {followUpCode}
+                      </p>
+                      <p className="muted" style={{ margin: 0, fontSize: "0.76rem" }}>
+                        They enter it at <b>/feedback</b> to tell you how they are doing.
+                        No login needed. One update per visit per 24 hours.
+                      </p>
+                    </div>
+                  )}
 
                   <div style={{ marginTop: "16px", display: "flex", gap: "10px" }}>
                     <button className="dashboard-button primary" type="submit">
