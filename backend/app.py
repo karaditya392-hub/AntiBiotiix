@@ -10,7 +10,7 @@ import json
 import shutil
 import tempfile
 from contextlib import asynccontextmanager
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 
@@ -35,7 +35,7 @@ from backend.models.database import (
     SafetyWarningDB, ClinicianOverrideDB, ClinicalRuleDB, RuleAuthorshipLogDB,
     GuidelineDocumentDB, AMRSurveillanceDB, AlertMetricsDB, AuditLogDB,
     DoctorDB, VisitDB, SymptomDB, DiagnosisDB, PatientRAGDocumentDB, AppointmentDB,
-    NotificationDB
+    NotificationDB, FeedbackResponseDB, FeedbackAcknowledgementDB
 )
 from backend.models.schemas import (
     PatientCreate, PatientResponse, PatientContactUpdate, PrescriptionCreate, PrescriptionItem,
@@ -844,6 +844,7 @@ def create_patient_visit(
         clinical_notes=payload.clinical_notes or payload.symptoms_text,
         prescription_id=presc_id,
         status="COMPLETED",
+        feedback_code=_new_feedback_code(db),
     )
     db.add(visit_obj)
     db.commit()
@@ -2214,6 +2215,302 @@ def list_clinical_rules():
     }
 
 
+# ---------------------------------------------------------------------------
+# Patient feedback (Section 30 - post-prescription follow-up)
+#
+# SCOPE OF THIS SLICE, STATED PLAINLY: a patient opens the page with a per-visit
+# code, sees that visit's medications, answers three questions, and the answers
+# reach the clinician as an in-app notification and a stored record.
+#
+# What it deliberately does NOT do yet:
+#   - ask periodically. There is no scheduling here. The patient answers when they
+#     open the link, once per submission, and nothing prompts them again.
+#   - escalate. An answer of "worse" is stored and notified like any other. It does
+#     not page anyone, and the page tells the patient so in as many words.
+# Both are real work and neither is stubbed out pretending to exist.
+# ---------------------------------------------------------------------------
+
+# Digits and letters that cannot be misread aloud or in handwriting: no O/0, I/1,
+# S/5. The code is read out or written on a discharge slip, so an ambiguous glyph
+# is a support call.
+# How long after the VISIT an answer waits before it interrupts a clinician.
+# See list_unseen_feedback for why this is not zero.
+FEEDBACK_NOTIFICATION_DELAY_HOURS = 24
+
+_FEEDBACK_ALPHABET = "ABCDEFGHJKLMNPQRTUVWXY2346789"
+
+
+def _new_feedback_code(db: Session) -> str:
+    """A short per-visit code, checked for collision against existing visits."""
+    import secrets
+
+    for _ in range(12):
+        code = "".join(secrets.choice(_FEEDBACK_ALPHABET) for _ in range(8))
+        if not db.query(VisitDB).filter(VisitDB.feedback_code == code).first():
+            return code
+    # 29^8 is ~5e11; twelve collisions means something is wrong with the RNG, and
+    # returning a duplicate would let one patient open another's visit.
+    raise HTTPException(status_code=500, detail="Could not allocate a feedback code.")
+
+
+def _visit_for_code(db: Session, code: str) -> VisitDB:
+    """
+    The one visit a code opens, or 404.
+
+    A blank or missing code must never match. Visits recorded before this feature
+    have feedback_code NULL, and a query for "" would otherwise return one of them.
+    """
+    cleaned = (code or "").strip().upper()
+    if len(cleaned) < 6:
+        raise HTTPException(status_code=404, detail="That code was not recognised.")
+    visit = db.query(VisitDB).filter(VisitDB.feedback_code == cleaned).first()
+    if not visit:
+        # Deliberately the same message as a malformed code: distinguishing "no such
+        # code" from "code exists but is not yours" tells a guesser which is which.
+        raise HTTPException(status_code=404, detail="That code was not recognised.")
+    return visit
+
+
+@app.get("/api/feedback/unseen")
+def list_unseen_feedback(
+    db: Session = Depends(get_db),
+    current_clinician: Dict[str, str] = Depends(get_current_clinician),
+):
+    """
+    Answers no clinician has opened yet. Drives the alert shown after login.
+
+    Declared BEFORE /api/feedback/{code}: FastAPI matches in declaration order, and
+    with the parameterised route first "unseen" would be read as a visit code and
+    answer 404.
+    """
+    # Unseen BY THIS CLINICIAN. A shared "seen" flag let whichever clinician logged
+    # in first clear an answer for all five of them -- so a pharmacist dismissing a
+    # popup could hide it from the attending physician who owned the patient.
+    clinician_id = current_clinician.get("clinician_id") or current_clinician.get("doctor_id") or ""
+    acknowledged = (db.query(FeedbackAcknowledgementDB.response_id)
+                    .filter(FeedbackAcknowledgementDB.clinician_id == clinician_id))
+
+    # A 24-HOUR HOLD BEFORE AN ANSWER IS NOTIFIED.
+    #
+    # A patient who opens the link on the way out of the clinic is reporting how
+    # they felt during the consultation, not how the treatment is working. Paging
+    # a clinician minutes after they prescribed tells them nothing they did not
+    # just observe, and it trains them to dismiss the alert -- which is how a
+    # genuinely deteriorating patient gets clicked past three days later.
+    #
+    # So an answer is stored immediately and NOTIFIED only once the visit is at
+    # least FEEDBACK_NOTIFICATION_DELAY_HOURS old. Nothing is discarded: the
+    # response is on the patient's record from the moment it arrives, and the
+    # clinician can read it there. Only the interruption waits.
+    cutoff = datetime.now(timezone.utc) - timedelta(hours=FEEDBACK_NOTIFICATION_DELAY_HOURS)
+    mature_visits = (db.query(VisitDB.visit_id)
+                     .filter(VisitDB.visit_date <= cutoff))
+
+    rows = (db.query(FeedbackResponseDB)
+            .filter(~FeedbackResponseDB.response_id.in_(acknowledged))
+            .filter(FeedbackResponseDB.visit_id.in_(mature_visits))
+            .order_by(FeedbackResponseDB.submitted_at.desc())
+            .limit(25).all())
+    names = {p.patient_id: p.display_name for p in db.query(PatientDB).all()}
+    return {
+        "unseen": len(rows),
+        "notification_delay_hours": FEEDBACK_NOTIFICATION_DELAY_HOURS,
+        "responses": [{
+            "response_id": r.response_id,
+            "visit_id": r.visit_id,
+            "patient_id": r.patient_id,
+            "patient_name": names.get(r.patient_id) or r.patient_id,
+            "feeling": r.feeling,
+            "medicines_helped": r.medicines_helped,
+            "discomfort": r.discomfort,
+            "submitted_at": r.submitted_at.isoformat() if r.submitted_at else None,
+        } for r in rows],
+    }
+
+
+@app.get("/api/feedback/{code}")
+def get_feedback_context(code: str, db: Session = Depends(get_db)):
+    """
+    What the patient is shown before answering: their own medications for THIS visit.
+
+    Scoped hard to the one visit the code opens. No allergies, no renal function, no
+    other visit, no clinical notes -- a patient confirming how their treatment is
+    going does not need their full record, and a public endpoint should hand back
+    the minimum that makes the question answerable.
+    """
+    visit = _visit_for_code(db, code)
+    patient = db.query(PatientDB).filter(PatientDB.patient_id == visit.patient_id).first()
+
+    medications: List[Dict[str, Any]] = []
+    if visit.prescription_id:
+        items = db.query(PrescriptionItemDB).filter(
+            PrescriptionItemDB.prescription_id == visit.prescription_id
+        ).all()
+        medications = [{
+            "medication_name": i.medication_name,
+            "dose": i.dose,
+            "unit": i.unit,
+            "route": i.route,
+            "frequency": i.frequency,
+            "duration_days": i.duration_days,
+        } for i in items]
+
+    already = db.query(FeedbackResponseDB).filter(
+        FeedbackResponseDB.visit_id == visit.visit_id
+    ).count()
+
+    return {
+        "visit_id": visit.visit_id,
+        "patient_name": (patient.display_name if patient else None) or visit.patient_id,
+        "diagnosis": visit.diagnosis,
+        "visit_date": visit.visit_date.isoformat() if visit.visit_date else None,
+        "medications": medications,
+        "previous_responses": already,
+        "not_for_emergencies": (
+            "This form is read by your clinician during working hours. It is not "
+            "monitored continuously. If you feel seriously unwell, contact your "
+            "doctor or emergency services directly."
+        ),
+    }
+
+
+@app.post("/api/feedback/{code}")
+def submit_feedback(code: str, payload: Dict[str, Any], db: Session = Depends(get_db)):
+    """Store the patient's answers and raise an in-app notification for the clinician."""
+    import uuid
+
+    visit = _visit_for_code(db, code)
+    patient = db.query(PatientDB).filter(PatientDB.patient_id == visit.patient_id).first()
+
+    feeling = str(payload.get("feeling") or "").strip().upper()
+    helped = str(payload.get("medicines_helped") or "").strip().upper()
+    discomfort = str(payload.get("discomfort") or "").strip()
+
+    # ADHERENCE. Central to this system's own subject: a course not completed is a
+    # principal driver of resistance, and it is invisible to every other signal the
+    # system holds -- the prescription says what was ordered, never what was taken.
+    # Optional on purpose: a patient who will not answer it must still be able to
+    # report that they feel worse.
+    doses = str(payload.get("doses_taken") or "").strip().upper() or None
+    if doses and doses not in {"ALL", "MOST", "SOME", "STOPPED"}:
+        doses = None
+
+    if feeling not in {"BETTER", "SAME", "WORSE"}:
+        raise HTTPException(status_code=400, detail="Please answer how you are feeling.")
+    if helped not in {"YES", "NO", "UNSURE"}:
+        raise HTTPException(status_code=400, detail="Please answer whether the medicines helped.")
+
+    response = FeedbackResponseDB(
+        response_id=f"FB-{uuid.uuid4().hex[:10].upper()}",
+        visit_id=visit.visit_id,
+        patient_id=visit.patient_id,
+        doctor_id=visit.doctor_id,
+        feeling=feeling,
+        medicines_helped=helped,
+        doses_taken=doses,
+        # Stored exactly as written. A patient's own words about their symptoms are
+        # not something this system should tidy.
+        discomfort=discomfort[:2000] or None,
+    )
+    db.add(response)
+
+    name = (patient.display_name if patient else None) or visit.patient_id
+    headline = {"BETTER": "reports feeling better",
+                "SAME": "reports no change",
+                "WORSE": "REPORTS FEELING WORSE"}[feeling]
+    db.add(NotificationDB(
+        notification_id=f"NOTIF-{uuid.uuid4().hex[:10].upper()}",
+        patient_id=visit.patient_id,
+        doctor_id=visit.doctor_id,
+        kind="PATIENT_FEEDBACK",
+        channel="IN_APP",
+        recipient_type="DOCTOR",
+        title=f"{name} {headline}",
+        message=(
+            f"Visit {visit.visit_id} ({visit.diagnosis or 'no diagnosis recorded'}). "
+            f"Feeling: {feeling}. Medicines helped: {helped}."
+            + (f" Reported: {discomfort[:300]}" if discomfort else " No discomfort described.")
+        ),
+        # IN_APP is the one channel that is real without configuration, and this row
+        # IS the delivery -- it is readable the moment it is written.
+        status="DELIVERED",
+        detail="Patient feedback recorded and queued for clinician review.",
+    ))
+    db.commit()
+
+    return {
+        "recorded": True,
+        "response_id": response.response_id,
+        "message": "Thank you. Your answers have been sent to your clinician.",
+    }
+
+
+@app.post("/api/feedback/{response_id}/seen")
+def mark_feedback_seen(
+    response_id: str,
+    db: Session = Depends(get_db),
+    current_clinician: Dict[str, str] = Depends(get_current_clinician),
+):
+    """
+    Acknowledge one answer so it stops appearing in the post-login alert.
+
+    Marking it seen is NOT marking it handled. The answer stays in the record and
+    in the patient's own history; this only stops it announcing itself.
+    """
+    row = db.query(FeedbackResponseDB).filter(
+        FeedbackResponseDB.response_id == response_id
+    ).first()
+    if not row:
+        raise HTTPException(status_code=404, detail="No such feedback response.")
+
+    clinician_id = current_clinician.get("clinician_id") or current_clinician.get("doctor_id") or ""
+    existing = db.query(FeedbackAcknowledgementDB).filter(
+        FeedbackAcknowledgementDB.response_id == response_id,
+        FeedbackAcknowledgementDB.clinician_id == clinician_id,
+    ).first()
+    if not existing:
+        db.add(FeedbackAcknowledgementDB(response_id=response_id, clinician_id=clinician_id))
+        db.commit()
+    # Acknowledging is per clinician and says nothing about the other four. The
+    # answer itself is untouched: it stays in the record and on the patient's page.
+    return {"response_id": response_id, "seen_by": clinician_id, "seen": True}
+
+
+@app.get("/api/feedback")
+def list_feedback_responses(
+    patient_id: Optional[str] = None,
+    db: Session = Depends(get_db),
+    current_clinician: Dict[str, str] = Depends(get_current_clinician),
+):
+    """
+    Every patient answer, newest first. Clinician-only.
+
+    The submit endpoint is public because the patient has no login; READING the
+    answers is not, because the reader is a clinician looking at other people's
+    records.
+    """
+    query = db.query(FeedbackResponseDB)
+    if patient_id:
+        query = query.filter(FeedbackResponseDB.patient_id == patient_id)
+    rows = query.order_by(FeedbackResponseDB.submitted_at.desc()).limit(200).all()
+
+    names = {p.patient_id: p.display_name for p in db.query(PatientDB).all()}
+    return {
+        "total": len(rows),
+        "responses": [{
+            "response_id": r.response_id,
+            "visit_id": r.visit_id,
+            "patient_id": r.patient_id,
+            "patient_name": names.get(r.patient_id) or r.patient_id,
+            "doctor_id": r.doctor_id,
+            "feeling": r.feeling,
+            "medicines_helped": r.medicines_helped,
+            "discomfort": r.discomfort,
+            "submitted_at": r.submitted_at.isoformat() if r.submitted_at else None,
+        } for r in rows],
+    }
+
+
 @app.get("/api/guidelines/documents")
 def list_ingested_documents(domain: Optional[str] = None):
     """
@@ -2942,7 +3239,7 @@ if os.path.exists(frontend_dir):
     #
     # Keep in step with the <Route> list in frontend-src/src/App.tsx.
     _SPA_ROUTES = (
-        "/landing", "/login", "/patient-type", "/dashboard", "/review",
+        "/landing", "/login", "/patient-type", "/feedback", "/dashboard", "/review",
         "/clinical-tools", "/clinical-tools/{rest:path}",
         "/patients/{rest:path}",
     )

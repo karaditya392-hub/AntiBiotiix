@@ -418,10 +418,15 @@ class FeedbackResponseDB(Base):
     visit_id = Column(String(64), ForeignKey("visits.visit_id"), index=True, nullable=False)
     patient_id = Column(String(64), ForeignKey("patients.patient_id"), index=True, nullable=False)
     doctor_id = Column(String(64), index=True, nullable=True)
-    # The three questions, kept as separate columns rather than a JSON blob so a
+    # The questions, kept as separate columns rather than a JSON blob so a
     # clinician query ("who reported feeling worse") is a plain WHERE clause.
     feeling = Column(String(32), nullable=True)          # BETTER / SAME / WORSE
     medicines_helped = Column(String(32), nullable=True)  # YES / NO / UNSURE
+    # Adherence: ALL / MOST / SOME / STOPPED, or NULL if not answered. Nullable
+    # deliberately -- a patient unwilling to say they stopped must still be able
+    # to report that they feel worse, and forcing the answer would cost the more
+    # important one.
+    doses_taken = Column(String(32), nullable=True)
     discomfort = Column(Text, nullable=True)              # free text, may be empty
     submitted_at = Column(DateTime, default=now_ist)
     # NOTE: acknowledgement is NOT a column here. It was, as a single
@@ -502,6 +507,10 @@ def init_db():
             # endpoint treats a missing code as no access rather than as a match.
             "ALTER TABLE visits ADD COLUMN feedback_code VARCHAR(16)",
             "ALTER TABLE feedback_responses ADD COLUMN seen_by_clinician BOOLEAN DEFAULT 0",
+            # Adherence, added when the follow-up questions were expanded. Existing
+            # rows keep NULL, which reads correctly as "not asked" rather than as
+            # "took none".
+            "ALTER TABLE feedback_responses ADD COLUMN doses_taken VARCHAR(32)",
             "ALTER TABLE feedback_responses ADD COLUMN seen_at DATETIME",
         ]:
             try:

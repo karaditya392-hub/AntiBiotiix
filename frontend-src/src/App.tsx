@@ -7,6 +7,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Login from "@/pages/Login";
 import Landing from "@/pages/Landing";
 import PatientTypeSelection from "@/pages/PatientTypeSelection";
+import PatientFeedback from "@/pages/PatientFeedback";
 import SelectReturningPatient from "@/pages/SelectReturningPatient";
 import RegisterNewPatient from "@/pages/RegisterNewPatient";
 import PatientProfile from "@/pages/PatientProfile";
@@ -23,6 +24,7 @@ import EvidencePage from "@/pages/EvidencePage";
 import SafetyEnginePage from "@/pages/SafetyEnginePage";
 import ReferencePage from "@/pages/ReferencePage";
 import Console from "@/pages/Console";
+import FeedbackAlerts from "@/components/FeedbackAlerts";
 
 /**
  * Multi-Step Doctor Workflow Routing (Hash-Based).
@@ -68,6 +70,9 @@ function Shell() {
           <Route path="/landing" component={Landing} />
           <Route path="/login" component={Login} />
           <Route path="/patient-type" component={PatientTypeSelection} />
+          {/* PUBLIC on purpose: the patient has no login. Access is by the
+              per-visit code, not by name - see PatientFeedback.tsx. */}
+          <Route path="/feedback" component={PatientFeedback} />
           <Route path="/clinical-tools">
             {() => <ProtectedRoute component={ClinicalToolsLanding} path="/clinical-tools" />}
           </Route>
@@ -103,6 +108,11 @@ function Shell() {
           </Route>
         </Switch>
       </div>
+
+      {/* Patient follow-up alerts, mounted once outside the router so they reach
+          the clinician on every page. Renders nothing signed out, and nothing
+          until a response is 24 hours past its visit. */}
+      <FeedbackAlerts />
 
       {consoleMounted && (
         <div hidden={!onConsole} data-console-host="">

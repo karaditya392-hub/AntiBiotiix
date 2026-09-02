@@ -428,6 +428,33 @@ def _patient_row(entry: dict) -> dict:
     }
 
 
+def _seed_feedback_code(visit_id: str) -> str:
+    """
+    A follow-up code for a SEEDED visit, derived from its visit id.
+
+    DERIVED, NOT RANDOM, AND THAT IS THE POINT. seed_database(reset_patients=True)
+    deletes every visit and rebuilds it, and tests/conftest.py calls it that way on
+    every run. With randomly generated codes, VIS-001's code changed each time the
+    suite ran -- so a code written on a patient's visit summary, or shown to someone
+    during a demonstration, stopped working as soon as anyone ran the tests. An
+    access code that rotates behind the holder's back is not an access code.
+
+    Deriving it from the visit id makes it stable across reseeds. It also makes it
+    predictable to anyone who knows the scheme, which is acceptable HERE and only
+    here: these are the synthetic demonstration patients, and the ids they protect
+    are VIS-001 through VIS-020. Visits created through the application get a random
+    code from backend.app._new_feedback_code, and are never deleted, so they are
+    stable without needing to be derivable.
+
+    The alphabet excludes O/0, I/1 and S/5: the code is read aloud or handwritten.
+    """
+    import hashlib
+
+    alphabet = "ABCDEFGHJKLMNPQRTUVWXY2346789"
+    digest = hashlib.sha256(f"antibiotix-seed-feedback:{visit_id}".encode()).digest()
+    return "".join(alphabet[b % len(alphabet)] for b in digest[:8])
+
+
 def seed_roster_ids() -> set:
     return {entry["patient_id"] for entry in SEED_ROSTER}
 
@@ -632,6 +659,9 @@ def seed_database(reset_patients: bool = False):
                 clinical_notes=v_notes,
                 prescription_id=prescription_id,
                 status="COMPLETED",
+                # Seeded visits get a follow-up code too. Without one the patient
+                # feedback page has nothing to open on a fresh database.
+                feedback_code=_seed_feedback_code(visit_id),
             )
             db.add(visit_obj)
             db.flush()
@@ -653,6 +683,20 @@ def seed_database(reset_patients: bool = False):
             index_visit_for_rag(db, visit_id)
 
     # Backfill follow-up codes on visits that predate the column.
+
+    #
+    # The block above only runs when the seed PRESCRIPTION is absent, which is what
+    # makes seeding idempotent -- and it means an existing database never re-enters
+    # it and so never gets a code. Without this pass, the patient feedback page has
+    # nothing to open on any database seeded before the feature existed, which is
+    # every database that already exists. Same spirit as the patient drift repair
+    # above: fix what is already there rather than requiring a wipe.
+    uncoded = db.query(VisitDB).filter(VisitDB.feedback_code.is_(None)).all()
+    if uncoded:
+        for visit in uncoded:
+            visit.feedback_code = _seed_feedback_code(visit.visit_id)
+        db.commit()
+        print(f"  - assigned follow-up codes to {len(uncoded)} existing visit(s)")
 
     # 2. Seed Clinical Rules
     for r in knowledge_base.rules_catalog:

@@ -261,6 +261,11 @@ export default function Landing() {
           <nav aria-label="Primary navigation">
             <a href="#capabilities">Safety signals</a>
             <a href="#workflow">Review path</a>
+            {/* For patients, not clinicians. Public: it asks for the visit code
+                printed on their visit summary and opens only that one visit. */}
+            <Link href="/feedback" className="landing-secondary-cta" style={{ fontSize: "0.82rem", marginRight: "6px" }}>
+              Patient Feedback
+            </Link>
             <Link href="/clinical-tools" className="landing-secondary-cta" style={{ fontSize: "0.82rem", marginRight: "6px" }}>
               Clinical Tools
             </Link>
