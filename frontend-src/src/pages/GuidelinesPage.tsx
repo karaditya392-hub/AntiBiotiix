@@ -1,9 +1,15 @@
 import { useEffect, useState } from "react";
 import { ShieldAlert, CheckCircle2, RotateCcw, FileCheck, X, Layers, ChevronRight } from "lucide-react";
 import ClinicalToolsLayout from "@/components/ClinicalToolsLayout";
+import DocumentUploadPanel from "@/components/DocumentUploadPanel";
+import { useAuth } from "@/context/AuthContext";
 import "@/styles/patient-dashboard.css";
 
 export default function GuidelinesPage() {
+  // The upload's attesting role is resolved server-side from THIS token, which is
+  // why the panel takes the session token rather than logging in on its own: a
+  // rank-1 claim has to be attributable to the clinician actually signed in.
+  const { token } = useAuth();
   const [rules, setRules] = useState<any[]>([]);
   const [governance, setGovernance] = useState<any[]>([]);
   const [query, setQuery] = useState("");
@@ -145,6 +151,8 @@ export default function GuidelinesPage() {
 
   return (
     <ClinicalToolsLayout>
+      <DocumentUploadPanel token={token} />
+
       <section className="info-section" style={{ background: "#ffffff", padding: "24px" }}>
         <div className="section-title-row" style={{ marginBottom: "16px" }}>
           <div>

@@ -2809,7 +2809,11 @@ async def upload_clinical_document(
             title=title.strip(),
             issuing_org=issuing_org.strip(),
             claimed_rank=claimed_rank,
-            attesting_role=current_clinician.get("role"),
+            # "clinician_role", not "role": that is the key the session registry
+            # actually sets, and reading the wrong one silently produced None --
+            # which the rank gate correctly read as "no attesting role" and refused
+            # every rank-1 claim, including an attending physician's.
+            attesting_role=current_clinician.get("clinician_role"),
             uploaded_by=current_clinician.get("clinician_id", "UNKNOWN"),
         )
     finally:

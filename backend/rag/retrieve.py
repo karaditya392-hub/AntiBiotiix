@@ -128,14 +128,44 @@ LEXICAL_OVERLAP_CAVEAT = (
 )
 
 
+# A FLOOR PER EMBEDDING MODEL, because a cosine threshold is a measurement of one
+# model's score distribution and nothing else.
+#
+# THE BUG THIS FIXES, found by cloning the repository and running it as a new user
+# would: RELEVANCE_FLOOR was re-measured for nvidia/nemotron-3-embed-1b and moved
+# to 0.326. A fresh clone defaults to EMBEDDING_BACKEND=local and rebuilds the
+# index with all-MiniLM-L6-v2, whose scores sit higher -- its own calibration put
+# the floor at 0.45. Judging MiniLM scores against the NVIDIA floor let off-domain
+# questions through: "how to train a puppy" scored 0.3414, cleared 0.326, and was
+# answered instead of refused. That is precisely the failure the floor exists to
+# prevent, introduced by carrying one model's number onto another model's index.
+#
+# Each entry is the midpoint of that model's own measured legitimate/off-domain
+# gap. An unknown model falls back to the STRICTER of the known floors rather than
+# the looser one: refusing a legitimate question is recoverable by rephrasing;
+# answering an off-domain one with a clinical passage is not.
+MODEL_RELEVANCE_FLOORS = {
+    "nvidia:nvidia/nemotron-3-embed-1b": 0.326,
+    "sentence-transformers/all-MiniLM-L6-v2": 0.45,
+}
+
+
 def active_floor() -> float:
     """
-    The floor appropriate to the backend actually answering queries here.
+    The floor appropriate to the model that actually built the index in use here.
 
     Passed explicitly rather than read inside retrieve() so a caller can still
     override it, and so the chosen value appears in the response.
     """
-    return RELEVANCE_FLOOR if vector_store.is_semantic else LEXICAL_RELEVANCE_FLOOR
+    if not vector_store.is_semantic:
+        return LEXICAL_RELEVANCE_FLOOR
+    model = vector_store.embedding_model
+    if model in MODEL_RELEVANCE_FLOORS:
+        return MODEL_RELEVANCE_FLOORS[model]
+    # Unrecognised model: no calibration exists for it, so take the strictest
+    # known floor and let scripts/calibrate_relevance_floor.py establish the
+    # right one before it is loosened.
+    return max(MODEL_RELEVANCE_FLOORS.values())
 
 # Query tokens at least this long are treated as specific entity names
 # (drug names, organisms, syndromes) rather than ordinary English.
