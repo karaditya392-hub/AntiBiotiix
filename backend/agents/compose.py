@@ -196,7 +196,7 @@ def compose(context: GroundedContext) -> ComposedAnswer:
         f"CLINICAL QUESTION:\n{context.question}\n\n"
         f"NUMBERED PASSAGES:\n{context.to_prompt_block()}"
     )
-    outcome = llm_client.complete_json(SYSTEM_PROMPT, user_prompt, max_tokens=900)
+    outcome = llm_client.complete_json(SYSTEM_PROMPT, user_prompt)
     if not outcome.ok or not outcome.data:
         return _extractive(context, reason=f"Composition unavailable ({outcome.error}).")
 

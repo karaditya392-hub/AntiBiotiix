@@ -169,6 +169,127 @@ def chunk_page(
     return chunks, current_section
 
 
+_MD_HEADING = re.compile(r"^(#{1,6})\s+(.*)$")
+_MD_PAGE_ANCHOR = re.compile(r"^<!--\s*page\s+(\d+)\s*-->$")
+
+
+def chunk_markdown(
+    document_id: str, version: str, markdown: str,
+) -> List[Chunk]:
+    """
+    Split converted Markdown into chunks that keep their structure.
+
+    THREE RULES, and each exists because breaking it produces a citation that
+    misleads:
+
+      1. A TABLE IS NEVER SPLIT. A pipe table cut in half leaves half its rows
+         with no column headers, and a susceptibility figure without its column
+         header is a figure attached to the wrong organism. An oversized table is
+         emitted whole and over-length rather than divided.
+
+      2. THE HEADING TRAIL TRAVELS WITH THE CHUNK. Each chunk records the nearest
+         enclosing heading, so a retrieved dose carries the section that
+         qualified it. `backend.rag.ingest.chunk_page` inferred this from the
+         first few lines of a page; here it is read from the `#` levels, which is
+         what the Markdown conversion existed to preserve.
+
+      3. THE PAGE ANCHOR SETS THE PAGE. `<!-- page N -->` comments are written by
+         the converter and consumed here, so a chunk cut from Markdown still
+         cites the page of the PDF it came from. Anchors are stripped from the
+         chunk body: they are machinery, and a passage quoted to a clinician must
+         contain only what the document said.
+    """
+    chunks: List[Chunk] = []
+    if not markdown or not markdown.strip():
+        return chunks
+
+    heading_trail: List[str] = []
+    page: Optional[int] = None
+    buffer: List[str] = []
+    buffer_len = 0
+    cursor = 0
+    buffer_start = 0
+    section_at_flush: Optional[str] = None
+
+    def current_section() -> Optional[str]:
+        return " > ".join(heading_trail[-2:]) if heading_trail else None
+
+    def flush() -> None:
+        nonlocal buffer, buffer_len, buffer_start, section_at_flush
+        body = "\n\n".join(buffer).strip()
+        if len(body) >= MIN_CHUNK_CHARS:
+            chunks.append(Chunk(
+                document_id=document_id,
+                version=version,
+                page=page,
+                section=section_at_flush,
+                char_start=buffer_start,
+                char_end=buffer_start + len(body),
+                text=body,
+            ))
+        buffer = []
+        buffer_len = 0
+        section_at_flush = None
+
+    blocks = markdown.split("\n\n")
+    for block in blocks:
+        raw = block.strip()
+        block_span = len(block) + 2
+        start_of_block = cursor
+        cursor += block_span
+        if not raw:
+            continue
+
+        anchor = _MD_PAGE_ANCHOR.match(raw)
+        if anchor:
+            # A page boundary flushes: a chunk spanning two pages can only cite one
+            # of them, and citing the wrong page is worse than a shorter chunk.
+            flush()
+            page = int(anchor.group(1))
+            continue
+
+        heading = _MD_HEADING.match(raw)
+        if heading:
+            flush()
+            level = len(heading.group(1))
+            title = heading.group(2).strip()
+            del heading_trail[level - 1:]
+            heading_trail.append(title)
+            if not buffer:
+                buffer_start = start_of_block
+            section_at_flush = current_section()
+            buffer.append(raw)
+            buffer_len += len(raw)
+            continue
+
+        is_table = raw.startswith("|")
+        if not buffer:
+            buffer_start = start_of_block
+            section_at_flush = current_section()
+
+        # Rule 1: a table that will not fit is emitted on its own, whole.
+        if is_table and buffer_len + len(raw) > CHUNK_TARGET_CHARS and buffer:
+            flush()
+            buffer_start = start_of_block
+            section_at_flush = current_section()
+
+        buffer.append(raw)
+        buffer_len += len(raw)
+
+        if buffer_len >= CHUNK_TARGET_CHARS and not is_table:
+            trail = buffer[-1] if len(buffer) > 1 else ""
+            flush()
+            # Overlap by carrying the last block forward, so a statement split
+            # across a boundary is still retrievable whole from one side of it.
+            if trail and len(trail) <= CHUNK_OVERLAP_CHARS * 2 and not trail.startswith("|"):
+                buffer = [trail]
+                buffer_len = len(trail)
+                buffer_start = start_of_block
+                section_at_flush = current_section()
+    flush()
+    return chunks
+
+
 def ingest_pdf(pdf_path: Path, meta: dict) -> tuple[DocumentMeta, List[Chunk]]:
     pages = extract_pages(pdf_path)
     empty = sum(1 for p in pages if not p.strip())

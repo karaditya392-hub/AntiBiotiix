@@ -21,6 +21,7 @@ import PatientDashboard from "@/pages/PatientDashboard";
 import ClinicalToolsLanding from "@/pages/ClinicalToolsLanding";
 import GuidelinesPage from "@/pages/GuidelinesPage";
 import EvidencePage from "@/pages/EvidencePage";
+import AgentsPage from "@/pages/AgentsPage";
 import SafetyEnginePage from "@/pages/SafetyEnginePage";
 import ReferencePage from "@/pages/ReferencePage";
 import Console from "@/pages/Console";
@@ -43,6 +44,7 @@ import FeedbackAlerts from "@/components/FeedbackAlerts";
  * Additional Views:
  *   /login -> Login (OAuth Doctor Credential Verification)
  *   /clinical-tools and /clinical-tools/* -> Clinical Tools (Protected by OAuth Login)
+ *   /clinical-tools/agents -> Agent Console (ingestion + search pipelines, flow-visualised)
  *   /patients/:patient_id/medications -> PatientMedicationHistory
  *   /patients/:patient_id/history-assistant -> PatientHistoryAssistant
  *   /dashboard -> PatientDashboard
@@ -81,6 +83,9 @@ function Shell() {
           </Route>
           <Route path="/clinical-tools/evidence">
             {() => <ProtectedRoute component={EvidencePage} path="/clinical-tools/evidence" />}
+          </Route>
+          <Route path="/clinical-tools/agents">
+            {() => <ProtectedRoute component={AgentsPage} path="/clinical-tools/agents" />}
           </Route>
           <Route path="/clinical-tools/safety">
             {() => <ProtectedRoute component={SafetyEnginePage} path="/clinical-tools/safety" />}

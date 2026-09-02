@@ -75,13 +75,27 @@ def _extract_json(text: str) -> Optional[Dict[str, Any]]:
     return parsed if isinstance(parsed, dict) else None
 
 
-def complete_json(system_prompt: str, user_prompt: str, max_tokens: int = 700) -> LLMResult:
+TRUNCATED = "answer was cut off before the JSON was written (token budget exhausted)"
+
+
+def complete_json(system_prompt: str, user_prompt: str, max_tokens: int = 0) -> LLMResult:
     """
-    One chat completion, parsed as JSON, with capacity fallback.
+    One chat completion, parsed as JSON, with capacity and truncation fallback.
 
     Temperature defaults to 0. A filtration verdict that changes between two runs
     on the same input is not auditable, and this layer's whole claim is that its
     decisions can be reviewed afterwards.
+
+    THE MODELS BEHIND THIS ENDPOINT REASON BEFORE THEY ANSWER, and the reasoning
+    is charged against the SAME completion budget as the answer. A budget that
+    fits the JSON but not the thinking that precedes it returns
+    finish_reason="length" with the reasoning trace in `content` and no JSON at
+    all -- which is indistinguishable, from the outside, from a model that simply
+    answered in prose. It is not the same thing, and treating it as the same thing
+    is what made the composing agent fall back to extractive mode on every single
+    query while reporting only "no parseable JSON". So truncation is detected
+    explicitly and retried with a larger budget; asking a truncated answer to
+    "return only JSON" does nothing, because it never got far enough to disobey.
 
     On 429 or 503 the next configured model is tried. Those two codes only: a 400
     is a bad request and a 401 is a bad key, and retrying either against a second
@@ -91,11 +105,19 @@ def complete_json(system_prompt: str, user_prompt: str, max_tokens: int = 700) -
     if not available():
         return LLMResult(False, None, config.AGENT_LLM_MODEL, "NVIDIA_API_KEY is not configured")
 
+    budget = max_tokens or config.AGENT_LLM_MAX_TOKENS
+
     last = None
     for model in [config.AGENT_LLM_MODEL, *config.AGENT_LLM_FALLBACK_MODELS]:
-        last = _complete_one(model, system_prompt, user_prompt, max_tokens)
+        last = _complete_one(model, system_prompt, user_prompt, budget)
 
-        # ONE RETRY WHEN THE ANSWER WAS NOT JSON, and only then.
+        # RETRY 1: the answer was cut off. More budget is the only thing that helps.
+        if not last.ok and (last.error or "") == TRUNCATED:
+            retry_budget = min(int(budget * 2.5), config.AGENT_LLM_MAX_TOKENS_CEILING)
+            if retry_budget > budget:
+                last = _complete_one(model, system_prompt, user_prompt, retry_budget)
+
+        # RETRY 2: the model finished but formatted its object wrongly.
         #
         # This endpoint does not support response_format={"type":"json_object"} --
         # it answers 503 to any request carrying it, on both models -- so JSON has
@@ -114,7 +136,7 @@ def complete_json(system_prompt: str, user_prompt: str, max_tokens: int = 700) -
                 + "\n\nReturn ONLY the JSON object. No prose before or after it, "
                   "no markdown fences, no explanation.",
                 user_prompt,
-                max_tokens,
+                budget,
             )
 
         if last.ok or not (last.error or "").startswith(("HTTP 429", "HTTP 503")):
@@ -155,11 +177,17 @@ def _complete_one(model: str, system_prompt: str, user_prompt: str, max_tokens: 
         return LLMResult(False, None, model, f"HTTP {response.status_code}")
 
     try:
-        content = response.json()["choices"][0]["message"]["content"]
+        choice = response.json()["choices"][0]
+        content = choice["message"]["content"]
     except (KeyError, IndexError, ValueError, TypeError):
         return LLMResult(False, None, model, "unexpected response shape")
 
     parsed = _extract_json(content)
-    if parsed is None:
-        return LLMResult(False, None, model, "response contained no parseable JSON")
-    return LLMResult(True, parsed, model)
+    if parsed is not None:
+        return LLMResult(True, parsed, model)
+
+    # No JSON. WHICH failure it was decides what the caller should do about it, so
+    # the two are reported separately rather than collapsed into one message.
+    if choice.get("finish_reason") == "length":
+        return LLMResult(False, None, model, TRUNCATED)
+    return LLMResult(False, None, model, "response contained no parseable JSON")

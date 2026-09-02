@@ -3101,6 +3101,22 @@ def agent_layer_status():
     return _status()
 
 
+@app.get("/api/agents/graph")
+def agent_pipeline_graphs():
+    """
+    The declared nodes and edges of both pipelines.
+
+    Served from the backend rather than drawn in the frontend so the diagram
+    cannot drift from the code. A flow chart maintained separately keeps showing a
+    step after it is removed, and a reader trusts a picture more than prose -- so a
+    stale one misleads harder than no picture at all. Every run returns a trace
+    keyed by these same node ids.
+    """
+    from backend.agents.trace import graphs
+
+    return graphs()
+
+
 @app.post("/api/agents/ask")
 def ask_through_agents(payload: Dict[str, Any]):
     """
@@ -3169,8 +3185,85 @@ async def upload_clinical_document(
         shutil.rmtree(tmp_dir, ignore_errors=True)
 
     if not outcome.accepted:
-        raise HTTPException(status_code=422, detail=outcome.reason)
+        # 422 with the WHOLE outcome, not just the message. A refusal here is the
+        # safety behaviour working, and the caller needs the trace and the failed
+        # checks to see which rule stopped it -- a bare string turns a reviewable
+        # refusal into an unexplained error.
+        return JSONResponse(status_code=422, content=outcome.to_dict())
     return outcome.to_dict()
+
+
+@app.get("/api/agents/documents/{document_id}/markdown")
+def download_document_markdown(document_id: str, download: bool = False):
+    """
+    The Markdown a document was converted to before it was indexed.
+
+    THIS IS THE VERIFICATION PATH, not a convenience. Everything downstream --
+    the chunks, the embeddings, the citations a clinician is shown -- is derived
+    from this file. Without it, "the system indexed my antibiogram correctly" is
+    something a user can only take on trust. With it, they can read exactly what
+    was indexed and compare it against the PDF on their desk.
+    """
+    from backend.agents.ingestion import markdown_path_for
+
+    # Path traversal: the id becomes a filename, so anything that is not the id
+    # format is refused before it reaches the filesystem.
+    if not re.fullmatch(r"[A-Z0-9][A-Z0-9\-]{2,63}", document_id or ""):
+        raise HTTPException(status_code=400, detail="Not a valid document id.")
+
+    path = markdown_path_for(document_id)
+    if not path.exists():
+        raise HTTPException(
+            status_code=404,
+            detail=f"No converted Markdown is held for {document_id}. Documents ingested "
+                   f"before the Markdown pipeline, and those ingested by the corpus scripts, "
+                   f"have none.",
+        )
+    return FileResponse(
+        path,
+        media_type="text/markdown; charset=utf-8",
+        filename=f"{document_id}.md" if download else None,
+    )
+
+
+@app.get("/api/agents/documents")
+def list_ingested_documents():
+    """
+    Documents that went through the ingestion agent, newest first.
+
+    Reported from the Markdown directory rather than from the corpus index,
+    because that is the set this endpoint can actually serve. Listing every held
+    document would offer a download for the 90-odd corpus documents that were
+    ingested before this pipeline existed and have no Markdown at all.
+    """
+    from backend.agents.ingestion import markdown_dir
+    from backend.rag.store import vector_store
+
+    directory = markdown_dir()
+    if not directory.exists():
+        return {"documents": [], "count": 0}
+
+    vector_store._load_chunks()
+    rows = []
+    for path in directory.glob("*.md"):
+        doc = vector_store.docs.get(path.stem) or {}
+        stat = path.stat()
+        rows.append({
+            "document_id": path.stem,
+            "title": doc.get("title"),
+            "issuing_org": doc.get("issuing_org"),
+            "precedence_rank": doc.get("precedence_rank"),
+            "clinical_domain": doc.get("clinical_domain"),
+            # A Markdown file with no matching corpus entry means the document was
+            # removed from the index; the conversion is still readable and says so.
+            "still_indexed": bool(doc),
+            "markdown_bytes": stat.st_size,
+            "converted_at": datetime.fromtimestamp(stat.st_mtime, tz=timezone.utc)
+                                    .isoformat(timespec="seconds"),
+            "markdown_url": f"/api/agents/documents/{path.stem}/markdown",
+        })
+    rows.sort(key=lambda r: r["converted_at"], reverse=True)
+    return {"documents": rows, "count": len(rows)}
 
 
 # ---------------------------------------------------------------------------

@@ -58,6 +58,13 @@ def _env_float(name: str, default: float) -> float:
         return default
 
 
+def _env_int(name: str, default: int) -> int:
+    try:
+        return int(_env(name, str(default)))
+    except ValueError:
+        return default
+
+
 # --- Agent LLM (NVIDIA NIM, OpenAI-compatible surface) ----------------------
 NVIDIA_API_KEY = _env("NVIDIA_API_KEY")
 NVIDIA_BASE_URL = _env("NVIDIA_BASE_URL", "https://integrate.api.nvidia.com/v1")
@@ -78,23 +85,82 @@ AGENT_LLM_FALLBACK_MODELS = [
 AGENT_LLM_TIMEOUT_S = _env_float("AGENT_LLM_TIMEOUT_S", 45.0)
 AGENT_LLM_TEMPERATURE = _env_float("AGENT_LLM_TEMPERATURE", 0.0)
 
+# Completion budget per call. THIS COVERS THE MODEL'S REASONING AS WELL AS ITS
+# ANSWER: the Nemotron models behind this endpoint think before they answer, and
+# both are charged here. A budget sized for the JSON alone returns a truncated
+# reasoning trace and no JSON, which the client reports as a truncation rather
+# than as a formatting failure -- they need different fixes. 2400 fits the
+# composing prompt, which is the largest of them, with room to spare.
+AGENT_LLM_MAX_TOKENS = _env_int("AGENT_LLM_MAX_TOKENS", 2400)
+
+# The ceiling a truncation retry may raise the budget to. Bounded so a model that
+# will not stop cannot bill indefinitely against one request.
+AGENT_LLM_MAX_TOKENS_CEILING = _env_int("AGENT_LLM_MAX_TOKENS_CEILING", 6000)
+
 # --- Retrieval embeddings --------------------------------------------------
 # "local" = sentence-transformers all-MiniLM-L6-v2 (offline, the built index).
 # "nvidia" = hosted embeddings through the NVIDIA endpoint above.
 EMBEDDING_BACKEND = _env("EMBEDDING_BACKEND", "local").lower()
 NVIDIA_EMBEDDING_MODEL = _env("NVIDIA_EMBEDDING_MODEL", "nvidia/nv-embedqa-e5-v5")
 
+# Which sentence-transformers model the local backend loads. Read here rather
+# than in backend.rag.embeddings so every model id in the system is declared in
+# one file. S11_EMBEDDING_MODEL is the historical name, still honoured so an
+# existing deployment does not change under anyone.
+EMBEDDING_MODEL = _env("EMBEDDING_MODEL") or _env("S11_EMBEDDING_MODEL") or "all-MiniLM-L6-v2"
+
+# --- Persistence -----------------------------------------------------------
+# Empty means the SQLite file beside the repository. Declared here so the
+# database URL is configured from the same file as everything else, rather than
+# being the one endpoint that is invisible until something fails to connect.
+DATABASE_URL = _env("DATABASE_URL")
+
 # --- Web evidence path -----------------------------------------------------
 WEB_SEARCH_ENABLED = _env_bool("WEB_SEARCH_ENABLED", False)
 WEB_SEARCH_PROVIDER = _env("WEB_SEARCH_PROVIDER", "tavily").lower()
 WEB_SEARCH_API_KEY = _env("WEB_SEARCH_API_KEY")
 WEB_SEARCH_BASE_URL = _env("WEB_SEARCH_BASE_URL", "https://api.tavily.com/search")
-WEB_SEARCH_MAX_RESULTS = int(_env("WEB_SEARCH_MAX_RESULTS", "5") or 5)
+WEB_SEARCH_MAX_RESULTS = _env_int("WEB_SEARCH_MAX_RESULTS", 5)
 
 # Filtration agent: a result scoring below this is rejected outright rather than
 # passed forward with a low score. Same principle as the retrieval relevance
 # floor -- a weak source shown to a clinician as evidence is worse than nothing.
 WEB_FILTER_ACCEPT_THRESHOLD = _env_float("WEB_FILTER_ACCEPT_THRESHOLD", 0.6)
+
+# --- Search pipeline -------------------------------------------------------
+# The vector search and the web search are dispatched together. This is the wall
+# clock the SLOWER branch is allowed before the pipeline proceeds without it: a
+# search that hangs on a vendor endpoint must degrade to corpus-only evidence,
+# never to a spinner in front of a clinician.
+SEARCH_PARALLEL_TIMEOUT_S = _env_float("SEARCH_PARALLEL_TIMEOUT_S", 40.0)
+SEARCH_MAX_PASSAGES = _env_int("SEARCH_MAX_PASSAGES", 8)
+
+# --- Document ingestion pipeline -------------------------------------------
+# Where the converted Markdown is written. Kept beside the RAG corpus so a
+# document's indexed chunks and the Markdown they were cut from live together.
+MARKDOWN_OUTPUT_DIR = _env("MARKDOWN_OUTPUT_DIR") or str(
+    REPO_ROOT / "backend" / "guidelines" / "data" / "markdown"
+)
+
+# Page cap for conversion. A 900-page compendium converts in minutes and blocks a
+# request that long; 0 means no cap for an operator who wants the whole thing.
+MARKDOWN_MAX_PAGES = _env_int("MARKDOWN_MAX_PAGES", 400)
+
+# How much converted Markdown the validating model is shown. The whole document
+# would not fit a context window, and a validator that silently truncates without
+# saying so is a validator whose verdict covers less than it appears to.
+INGEST_VALIDATION_SAMPLE_CHARS = _env_int("INGEST_VALIDATION_SAMPLE_CHARS", 12000)
+
+# Below this the model's own confidence in its review is reported as a warning on
+# the document. It never blocks: low confidence is a reason to tell the reader,
+# not a finding about the document.
+INGEST_VALIDATION_MIN_CONFIDENCE = _env_float("INGEST_VALIDATION_MIN_CONFIDENCE", 0.5)
+
+# STRICT MODE. With this on, a document is refused unless a model actually
+# reviewed its content -- no key, no endpoint, no ingestion. Off by default so the
+# system still runs fully offline, in which case the structural rules run alone
+# and every result says so rather than implying a review happened.
+INGEST_VALIDATION_REQUIRE_MODEL = _env_bool("INGEST_VALIDATION_REQUIRE_MODEL", False)
 
 SYSTEM_VERSION = "1.4.0-clinical-safety"
 ENGINE_BUILD = "2026.08.22-release"

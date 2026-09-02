@@ -85,12 +85,113 @@ An explainable, evidence-grounded Clinical Decision-Support System (CDSS) for an
 
 ---
 
+## 🤖 The Two Agent Pipelines
+
+Both are visualised node by node at **Clinical Tools → Agent Console**
+(`/#/clinical-tools/agents`). The diagram is not drawn in the frontend — it is
+served from `/api/agents/graph`, declared beside the code that executes it in
+`backend/agents/trace.py`, so it cannot drift from the pipeline it describes.
+Every run returns a trace keyed by the same node ids, and a node that did not run
+shows as **skipped with its reason**.
+
+### Ingestion — `backend/agents/ingestion.py`
+
+```
+receive → convert to Markdown → extract → validate (guardrails) → LLM review
+        → classify & rank → chunk → embed & index → Markdown returned
+```
+
+- **Markdown first, and it is not cosmetic.** Flat text extraction destroys the
+  structure that gives a clinical statement its meaning: a dose detached from its
+  table column is a dose attached to the wrong patient. `markdown_convert.py`
+  recovers headings by font size and tables as pipe tables; `chunk_markdown` then
+  cuts on that structure, never splits a table, and carries the enclosing heading
+  and PDF page on every chunk.
+- **Validation is a gate, not an annotation** (`backend/agents/validation.py`).
+  Seven deterministic rules — content volume, injection, patient identifiers,
+  encoding, structure, issuer, blank-form — run with no network and no key. A
+  blocking failure ends the run before any model is consulted. The LLM review that
+  follows **may only reject**: it can never clear a document a rule blocked and
+  never raises a document's standing. The input is an arbitrary uploaded file, so a
+  model whose approval carried weight would be a model the file could argue with.
+- **The Markdown comes back** at `/api/agents/documents/{id}/markdown`, with
+  provenance front matter. Everything downstream is derived from it, so it is the
+  only way anyone can check that what was indexed is what the document said.
+- **Rank is still granted, never claimed.** Rank 1 (local antibiogram) outranks
+  the national guidelines, so it needs an attesting clinician role *and* the
+  agent's own reading to agree. Disagreement falls to rank 4 and is recorded.
+
+### Search — `backend/agents/pipeline.py`
+
+```
+question → refusal guards → PARALLEL FAN-OUT ─┬─ vector DB search ──────────┐
+                                              └─ web search → LLM filter ───┤
+                                                                            ▼
+                            JSON render contract ← structured output ← couple & ground
+```
+
+- **The fan-out is genuinely parallel.** Both branches are I/O-bound and
+  independent, so they run on separate threads; the wall clock is the slower
+  branch, not the sum. A branch that fails or exceeds `SEARCH_PARALLEL_TIMEOUT_S`
+  is reported as degraded and the pipeline proceeds without it — losing web
+  evidence degrades an answer, losing corpus evidence would be a fault.
+- **Parallelism changed when work happens, not what may be said.** Web results
+  still pass the authenticity filter, still enter at precedence rank 5, and still
+  cannot ground an antimicrobial recommendation alone.
+- **The filter's refusals are rendered, not logged.** Every verdict — accepted and
+  rejected, with its reason and score — reaches the client. A filter whose
+  refusals are invisible cannot be reviewed.
+- **The response is a render contract** (`backend/agents/render.py`,
+  `schema: antibiotix.search.render/1`): sections, citations grouped by authority
+  tier, per-source counts, filtration verdicts and the trace. Assembled
+  deterministically, with each passage's origin label and reading caveat already
+  attached — a client renders what it is given rather than deriving what to show,
+  because the origin label is the first thing dropped when a layout is tight.
+
+The same vector database serves both: a document ingested by the first pipeline is
+retrievable by the second, by `/api/evidence/ask` citation search, and by the RAG
+chat, from the moment it is indexed.
+
+**The boundary neither pipeline crosses:** `backend/rules/engine.py` imports
+nothing from `backend/agents`. Every deterministic safety warning fires with this
+entire layer absent, the network down and no API key configured.
+
+---
+
 ## 🚀 Quick Start & Running Locally
 
 ### 1. Requirements
 - Python 3.10+
-- Dependencies: `fastapi`, `uvicorn`, `sqlalchemy`, `pydantic`, `pytest`, `httpx` (no opaque ML dependencies)
+- Dependencies: `fastapi`, `uvicorn`, `sqlalchemy`, `pydantic`, `pytest`, `httpx`, `pymupdf`
 - Modern Web Browser (Chrome, Edge, Firefox, Safari)
+
+### 1a. Configure — one file, `.env` at the repository root
+
+Copy `.env.example` to `.env`. **Every endpoint, key, model id and threshold the
+system uses is read from that one file**, through `backend/config.py`, which is
+the only module that reads the environment. Nothing calls `os.getenv()` at its own
+call site — a key read where it is used is a key nobody can find later, and an
+endpoint that differs between two modules is an outage that only appears in
+production. A real environment variable always wins over the file, so container
+and CI secrets are never overridden by a checked-out `.env`.
+
+| Setting | What it governs |
+| --- | --- |
+| `NVIDIA_API_KEY`, `NVIDIA_BASE_URL`, `AGENT_LLM_MODEL` | Every LLM call: validation, classification, web filtration, structured output |
+| `AGENT_LLM_FALLBACK_MODELS`, `AGENT_LLM_TIMEOUT_S`, `AGENT_LLM_TEMPERATURE` | Capacity fallback, timeout, determinism |
+| `AGENT_LLM_MAX_TOKENS`, `AGENT_LLM_MAX_TOKENS_CEILING` | Completion budget — **covers the model's reasoning as well as its answer** |
+| `EMBEDDING_BACKEND`, `EMBEDDING_MODEL`, `NVIDIA_EMBEDDING_MODEL` | Retrieval embeddings (changing these requires a migration) |
+| `DATABASE_URL` | Persistence; empty = the SQLite file beside the repository |
+| `WEB_SEARCH_*`, `WEB_FILTER_ACCEPT_THRESHOLD` | The web evidence path and its acceptance floor |
+| `SEARCH_PARALLEL_TIMEOUT_S`, `SEARCH_MAX_PASSAGES` | The parallel fan-out |
+| `MARKDOWN_OUTPUT_DIR`, `MARKDOWN_MAX_PAGES` | Where converted Markdown is written, and the page cap |
+| `INGEST_VALIDATION_*` | Validation sample size, confidence floor, and strict mode |
+
+**The system runs with this file absent.** No key means: web evidence off, the
+filtration agent refuses every result rather than admitting unassessed sources,
+ingestion runs its seven structural rules alone and says so, and search returns
+retrieved passages verbatim instead of a composed answer. All clinical safety
+rules fire exactly as they do today — they never read anything in this file.
 
 ### 2. Seed Database
 ```bash
@@ -119,6 +220,8 @@ Open your browser at `http://127.0.0.1:8000/` to access the clinical decision-su
 - `tests/test_extraction_accuracy.py`: 21-case labeled benchmark suite measuring per-field precision and recall.
 - `tests/test_prompt_injection.py`: Adversarial prompt injection and instruction hijacking resistance tests.
 - `tests/test_api_workflow.py`: End-to-end API lifecycle from text extraction to cryptographic audit chain verification.
+- `tests/test_markdown_pipeline.py`: Markdown conversion (headings, tables that are never split, page anchors that never reach a reader) and the ingestion guardrails — including that a model may reject a document but never approve one.
+- `tests/test_search_pipeline.py`: The parallel fan-out (asserted by wall clock), branch failure and timeout degradation, the refusals that parallelism must not have removed, and the render contract's authority tiers.
 
 ---
 

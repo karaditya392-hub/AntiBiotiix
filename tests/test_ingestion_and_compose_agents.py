@@ -156,22 +156,64 @@ def test_dry_ingest_reports_the_rank_without_writing(tmp_path, monkeypatch):
 
 
 def test_upload_provenance_is_never_hash_verified(tmp_path, monkeypatch):
-    """A clinician upload must not wear the basis a verified national PDF wears."""
+    """
+    A clinician upload must not wear the basis a verified national PDF wears.
+
+    Asserted on the DocumentMeta the pipeline builds, rather than by spying on the
+    call that used to build it: the property is what the document records about
+    itself, and a test tied to the shape of one internal call stops testing that
+    property the moment the pipeline is rearranged.
+    """
     monkeypatch.setattr(llm_client, "available", lambda: False)
-    captured = {}
-    real = ingestion.ingest_text
-
-    def spy(path, meta):
-        captured.update(meta)
-        return real(path, meta)
-
-    monkeypatch.setattr(ingestion, "ingest_text", spy)
     f = tmp_path / "a.txt"
     f.write_text(ANTIBIOGRAM_TEXT, encoding="utf-8")
-    ingestion.ingest_upload(f, document_id="LOCAL-PROV-2026", title="x",
-                            issuing_org="y", persist=False)
-    assert captured["provenance_basis"] == "CLINICIAN_UPLOAD_UNVERIFIED"
-    assert captured["precedence_rank"] == DEFAULT_RANK
+    meta = ingestion._document_meta(
+        f, "LOCAL-PROV-2026", "x", "y", "v", "d", None, "sha",
+    )
+    assert meta.provenance_basis == "CLINICIAN_UPLOAD_UNVERIFIED"
+    assert meta.precedence_rank == DEFAULT_RANK
+    assert meta.source_type == "CLINICIAN_UPLOADED_TEXT"
+
+
+def test_a_patient_record_is_refused_before_any_model_sees_it(tmp_path, monkeypatch):
+    """
+    The guideline corpus is retrieved by every clinician, so a patient record
+    loaded into it is disclosed to all of them. Deterministic and blocking.
+    """
+    monkeypatch.setattr(
+        llm_client, "complete_json",
+        lambda *a, **k: pytest.fail("a blocked document must never reach a model"),
+    )
+    f = tmp_path / "record.txt"
+    f.write_text(
+        "DISCHARGE SUMMARY. Patient ID: 88213. UHID: 4471902. Date of birth: 12/03/1961. "
+        "Contact rakesh.n@example.com for queries. The patient was admitted with fever and "
+        "treated with ceftriaxone for five days before discharge in a stable condition with "
+        "advice to review in the outpatient department after one week of oral therapy.",
+        encoding="utf-8",
+    )
+    out = ingestion.ingest_upload(f, document_id="LOCAL-REC-2026", title="x",
+                                  issuing_org="y", persist=False)
+    assert out.accepted is False
+    assert "R3" in out.validation.failed_rule_ids
+
+
+def test_an_ingested_document_reports_every_node_it_ran(tmp_path, monkeypatch):
+    """The trace is the evidence the pipeline did what it claims, so it is asserted."""
+    monkeypatch.setattr(llm_client, "available", lambda: False)
+    f = tmp_path / "antibiogram.txt"
+    f.write_text(ANTIBIOGRAM_TEXT, encoding="utf-8")
+    out = ingestion.ingest_upload(f, document_id="LOCAL-TRACE-2026", title="x",
+                                  issuing_org="y", persist=False)
+    assert out.accepted is True
+    ran = {n["node_id"]: n["status"] for n in out.trace.to_dict()["nodes"]}
+    for node in ("INGEST_RECEIVE", "INGEST_CONVERT", "INGEST_EXTRACT",
+                 "INGEST_VALIDATE", "INGEST_CLASSIFY", "INGEST_CHUNK"):
+        assert node in ran, f"{node} is missing from the trace"
+    # No key configured, so the review did not happen -- and the trace says so
+    # rather than leaving a reader to assume it did.
+    assert ran["INGEST_REVIEW"] == "SKIPPED"
+    assert out.markdown, "the converted Markdown must come back with the outcome"
 
 
 # ---------------------------------------------------------------------------

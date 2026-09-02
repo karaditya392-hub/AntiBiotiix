@@ -23,6 +23,15 @@ import { useAuth } from "@/context/AuthContext";
  *   the page: the clinician may be in the middle of a prescription review, and
  *   this is follow-up, not an emergency channel. The patient page says as much.
  *
+ *   IT GETS OUT OF THE WAY OF A FORM. The stack is fixed to the bottom-right at
+ *   z-index 9999, which is over the submit button of every form on the right-hand
+ *   side of a page -- and it polls every twenty seconds, so a card can appear
+ *   under the cursor between a clinician reading a field and clicking Save. A
+ *   follow-up answer is not worth intercepting a click meant for a prescription.
+ *   So while a form is being filled the stack is HELD, not dropped: nothing is
+ *   marked seen, nothing is lost, and everything held reappears once the form is
+ *   submitted or abandoned. See `useFormEngagement` below.
+ *
  *   Clicking it navigates to that patient and marks the answer seen. Dismissing
  *   with the cross also marks it seen -- the alert has done its job either way,
  *   and an alert that reappears after being dismissed trains people to ignore it.
@@ -39,14 +48,101 @@ type Feedback = {
 
 const POLL_MS = 20000;
 
+/**
+ * Routes where these alerts stay silent entirely.
+ *
+ * The Agent Console is a run-and-read screen: the clinician fills a form, waits
+ * for a pipeline, and reads what came back. A patient follow-up card arriving
+ * over that result competes with the only thing the page exists to show, and the
+ * cards sit exactly where the run's own output does. So on this route the ONLY
+ * thing that surfaces is the result of the run the clinician just started.
+ *
+ * Silenced, not discarded — nothing is marked seen here, so every held answer is
+ * waiting on the dashboard and on every other page the moment they navigate away.
+ */
+const QUIET_ROUTES = ["/clinical-tools/agents"];
+
+// How long after the clinician stops touching a form before the held alerts are
+// allowed back. Long enough to cover reading a field, checking a value or picking
+// a file; short enough that a form abandoned mid-way does not silence follow-up
+// answers for the rest of the session.
+const RELEASE_AFTER_MS = 12000;
+
+/**
+ * Whether the clinician is currently filling in a form.
+ *
+ * Watched on the document rather than wired through every page: this component
+ * is mounted once, globally, and it has no idea which form it is about to cover.
+ * A page-by-page opt-out would have to be remembered on every form added later,
+ * and the one that got forgotten would be the one where a click went to a
+ * follow-up alert instead of a prescription.
+ *
+ * Engagement starts on focus or typing in any field, and ends on submit, on
+ * reset, or after RELEASE_AFTER_MS of no interaction. Submit ends it immediately
+ * because that is exactly the moment the clinician is done and the answers become
+ * worth showing again.
+ */
+function useFormEngagement(): boolean {
+  const [engaged, setEngaged] = useState(false);
+  const timer = useRef<number | undefined>(undefined);
+
+  useEffect(() => {
+    function isField(target: EventTarget | null): boolean {
+      const el = target as HTMLElement | null;
+      if (!el || !el.tagName) return false;
+      return (
+        ["INPUT", "TEXTAREA", "SELECT"].includes(el.tagName) ||
+        el.isContentEditable === true
+      );
+    }
+
+    function hold() {
+      setEngaged(true);
+      window.clearTimeout(timer.current);
+      timer.current = window.setTimeout(() => setEngaged(false), RELEASE_AFTER_MS);
+    }
+
+    function release() {
+      window.clearTimeout(timer.current);
+      setEngaged(false);
+    }
+
+    function onFocusIn(e: FocusEvent) {
+      if (isField(e.target)) hold();
+    }
+    function onInput(e: Event) {
+      if (isField(e.target)) hold();
+    }
+
+    document.addEventListener("focusin", onFocusIn, true);
+    document.addEventListener("input", onInput, true);
+    // Capture phase: the form's own handler may preventDefault and re-render, and
+    // a bubbling listener on a re-rendered tree can miss the event entirely.
+    document.addEventListener("submit", release, true);
+    document.addEventListener("reset", release, true);
+
+    return () => {
+      document.removeEventListener("focusin", onFocusIn, true);
+      document.removeEventListener("input", onInput, true);
+      document.removeEventListener("submit", release, true);
+      document.removeEventListener("reset", release, true);
+      window.clearTimeout(timer.current);
+    };
+  }, []);
+
+  return engaged;
+}
+
 export default function FeedbackAlerts() {
   // This app authenticates with a Bearer token held in AuthContext, not with
   // cookies. These calls originally sent credentials:"include" and no header,
   // so every one of them answered 401 and the alert silently never appeared.
   const { isAuthenticated, token } = useAuth();
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const [items, setItems] = useState<Feedback[]>([]);
   const dismissed = useRef<Set<string>>(new Set());
+  const fillingAForm = useFormEngagement();
+  const onAQuietRoute = QUIET_ROUTES.some((r) => location.startsWith(r));
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -113,7 +209,12 @@ export default function FeedbackAlerts() {
     setLocation(`/patients/${encodeURIComponent(item.patient_id)}?feedback=${encodeURIComponent(item.response_id)}`);
   }
 
-  if (!isAuthenticated || items.length === 0) return null;
+  // HELD, NOT DROPPED. Rendering nothing while a form is being filled — or while
+  // the clinician is on a route that has asked for quiet — leaves the answers
+  // unseen on the server, so they come back the moment they are done. Marking
+  // them seen here instead would lose a patient's answer to nothing more than the
+  // clinician having typed in a box.
+  if (!isAuthenticated || items.length === 0 || fillingAForm || onAQuietRoute) return null;
 
   return (
     <div

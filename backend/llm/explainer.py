@@ -20,7 +20,11 @@ class ClinicalExplainer:
         
         # Injection detection patterns (Spec §10A)
         self.injection_patterns = [
-            re.compile(r'(?:ignore\s+previous\s+instructions|system\s*:\s*override|disregard\s+prior|mark\s+as\s+safe|do\s+not\s+warn|safe\s+to\s+prescribe)', re.IGNORECASE),
+            # `ignore ... instructions` allows the qualifier that almost every real
+            # attempt puts in the middle -- "ignore ALL previous instructions",
+            # "ignore the above instructions". The original pattern required the
+            # three words adjacent and so missed the single most common phrasing.
+            re.compile(r'(?:(?:ignore|disregard|forget)\s+(?:\w+\s+){0,3}(?:instructions?|prompts?|rules?|context)|system\s*:\s*override|disregard\s+prior|mark\s+as\s+safe|do\s+not\s+warn|safe\s+to\s+prescribe)', re.IGNORECASE),
             re.compile(r'(?:</context>|<system>|\[INST\]|###\s*instruction|```system)', re.IGNORECASE),
             re.compile(r'(?:you\s+are\s+now|bypass\s+safety|override\s+alert)', re.IGNORECASE)
         ]

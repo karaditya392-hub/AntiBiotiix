@@ -1,4 +1,4 @@
-import { BookOpenCheck, ShieldCheck, Search, FileText, ArrowRight } from "lucide-react";
+import { BookOpenCheck, Bot, ShieldCheck, Search, FileText, ArrowRight } from "lucide-react";
 import { Link } from "wouter";
 import ClinicalToolsLayout from "@/components/ClinicalToolsLayout";
 import "@/styles/patient-dashboard.css";
@@ -20,6 +20,14 @@ export default function ClinicalToolsLanding() {
       icon: Search,
       color: "#2d7064",
       description: "Natural language extractive search over the ICMR and NCDC national antimicrobial guidelines, WHO AWaRe, the national programme guidelines, and FDA drug labels.",
+    },
+    {
+      id: "agents",
+      title: "Agent Console",
+      path: "/clinical-tools/agents",
+      icon: Bot,
+      color: "#2d7064",
+      description: "Run the two agent pipelines and watch them node by node: a document converted to Markdown, validated against guardrails and embedded; a query answered from the vector DB and the filtered web at once.",
     },
     {
       id: "safety",

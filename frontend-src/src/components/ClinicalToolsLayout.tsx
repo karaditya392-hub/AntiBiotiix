@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { Link, useLocation } from "wouter";
-import { BookOpenCheck, ShieldCheck, Search, FileText } from "lucide-react";
+import { BookOpenCheck, Bot, ShieldCheck, Search, FileText } from "lucide-react";
 import UnifiedHeader from "@/components/UnifiedHeader";
 import "@/styles/patient-dashboard.css";
 
@@ -13,6 +13,7 @@ export default function ClinicalToolsLayout({ children }: Props) {
 
   const isGuidelines = location === "/clinical-tools/guidelines";
   const isEvidence = location === "/clinical-tools/evidence";
+  const isAgents = location === "/clinical-tools/agents";
   const isSafety = location === "/clinical-tools/safety" || location === "/review/safety";
   const isReference = location === "/clinical-tools/reference";
 
@@ -49,6 +50,14 @@ export default function ClinicalToolsLayout({ children }: Props) {
             style={{ justifyContent: "center", padding: "10px 12px" }}
           >
             <Search size={16} /> Ask the Evidence
+          </Link>
+
+          <Link
+            href="/clinical-tools/agents"
+            className={`dashboard-button ${isAgents ? "primary" : "secondary"}`}
+            style={{ justifyContent: "center", padding: "10px 12px" }}
+          >
+            <Bot size={16} /> Agent Console
           </Link>
 
           <Link

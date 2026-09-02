@@ -18,16 +18,20 @@ from sqlalchemy import (
     Text, DateTime, ForeignKey, UniqueConstraint
 )
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship
+from backend import config
 from backend.config import SYSTEM_VERSION, PROMPT_TEMPLATE_ID
 
 Base = declarative_base()
 
-# Database URL configuration (PostgreSQL production / SQLite fallback)
+# Database URL configuration (PostgreSQL production / SQLite fallback).
+# Read through backend.config so the connection string is declared in the same
+# single .env as every other endpoint, rather than being the one setting that is
+# invisible until a connection fails.
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 DEFAULT_SQLITE_PATH = PROJECT_ROOT / "prescriptions_safety.db"
 DB_PATH = DEFAULT_SQLITE_PATH
 
-DATABASE_URL = os.getenv("DATABASE_URL")
+DATABASE_URL = config.DATABASE_URL
 if not DATABASE_URL:
     DATABASE_URL = f"sqlite:///{DEFAULT_SQLITE_PATH.as_posix()}"
 

@@ -15,19 +15,17 @@ dimension are recorded on every chunk and checked at query time.
 """
 from __future__ import annotations
 
-import os
 import threading
 from typing import List, Optional, Sequence
 
 import numpy as np
 
-# Read from .env via backend.config (EMBEDDING_MODEL), with the historical
-# S11_EMBEDDING_MODEL still honoured so existing setups do not change under anyone.
-DEFAULT_MODEL = (
-    os.getenv("EMBEDDING_MODEL")
-    or os.getenv("S11_EMBEDDING_MODEL")
-    or "all-MiniLM-L6-v2"
-)
+from backend import config
+
+# Read through backend.config, which loads the single .env at the repository
+# root. Not os.getenv() here: a model id read at its own call site is a model id
+# nobody can find when they need to know what the index was built with.
+DEFAULT_MODEL = config.EMBEDDING_MODEL
 
 
 class EmbeddingBackend:

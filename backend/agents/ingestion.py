@@ -5,8 +5,28 @@ A clinician uploads a trusted file - a hospital antibiogram, a local formulary,
 a departmental protocol - and it becomes retrievable evidence alongside the
 national corpus.
 
-THE DANGEROUS PART OF THIS AGENT IS NOT THE PARSING. It is the precedence rank.
-Rank 1 is the local hospital antibiogram, and rank 1 OUTRANKS the national
+THE PIPELINE, and each node exists because the one before it cannot be trusted
+to have produced something safe:
+
+    receive -> CONVERT TO MARKDOWN -> extract -> VALIDATE -> classify & rank
+            -> chunk -> embed -> index -> return the Markdown
+
+CONVERSION TO MARKDOWN IS FIRST, AND IT IS NOT COSMETIC. Flat text extraction
+destroys the structure that gives a clinical statement its meaning: a dose
+detached from its table column is a dose attached to the wrong patient, and a
+regimen detached from its heading is a regimen for the wrong condition. The
+Markdown keeps headings and tables, the chunker cuts on them, and the file is
+handed back to the clinician so they can check what was indexed against the PDF
+in front of them. Evidence nobody can verify is evidence nobody should cite.
+
+VALIDATION IS A GATE, NOT AN ANNOTATION. Seven deterministic rules run first and
+a blocking failure ends the ingestion - a patient record, an injected document or
+an unreadable extraction never reaches classification. The model review that
+follows may only REJECT. See backend.agents.validation for why the asymmetry is
+the entire point.
+
+THE DANGEROUS PART OF THIS AGENT IS STILL NOT THE PARSING. It is the precedence
+rank. Rank 1 is the local hospital antibiogram, and rank 1 OUTRANKS the national
 guidelines, by design, because resistance is local. So an upload path that lets a
 file assert its own rank is an upload path that lets any PDF overrule ICMR. Three
 things prevent that:
@@ -22,17 +42,13 @@ things prevent that:
   3. RANK 1 ADDITIONALLY REQUIRES AN ATTESTING ROLE. Institutional data outranks
      national guidance, so claiming it requires a clinician role that can be held
      responsible for the claim - the same roles that authorise a warning override.
-
-Everything else is the ingest pipeline that already exists: the file is hashed,
-the text is extracted by PyMuPDF, and a file with no extractable text is REFUSED
-rather than ingested empty - the same refusal that kept three scanned PDFs out of
-the national corpus.
 """
 from __future__ import annotations
 
+import datetime as _datetime
 import json
 import re
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -40,9 +56,13 @@ from typing import Any, Dict, List, Optional
 import numpy as np
 
 from backend import config
-from backend.agents import llm_client
+from backend.agents import llm_client, markdown_convert
+from backend.agents.trace import (
+    INGESTION_PIPELINE_ID, PipelineTrace, STATUS_DEGRADED, STATUS_OK, STATUS_REFUSED,
+)
+from backend.agents.validation import ValidationReport, validate
 from backend.rag.embeddings import get_backend
-from backend.rag.ingest import ingest_pdf, ingest_text
+from backend.rag.ingest import DocumentMeta, chunk_markdown, ingest_pdf, ingest_text, sha256_file
 from backend.rag.store import (
     DOMAIN_ANTIMICROBIAL, DOMAIN_CLINICAL_OTHER, DOMAIN_PROGRAMME_POLICY,
     DOMAIN_PUBLIC_INFORMATION, NOT_A_CLINICAL_GUIDELINE_RANK, vector_store,
@@ -57,6 +77,8 @@ ATTESTING_ROLES = frozenset({
 
 LOCAL_INSTITUTIONAL_RANK = 1
 DEFAULT_RANK = NOT_A_CLINICAL_GUIDELINE_RANK  # 4 - what an unclassifiable upload gets
+
+SUPPORTED_SUFFIXES = (".pdf", ".txt", ".md", ".markdown")
 
 # Signals in the text itself for the deterministic classifier. Present so the
 # agent has an opinion even with no model configured, and so the model's answer
@@ -104,6 +126,19 @@ class IngestionOutcome:
     rank_downgraded: bool = False
     notes: List[str] = field(default_factory=list)
 
+    # --- the Markdown pipeline ------------------------------------------------
+    markdown: str = ""
+    markdown_path: Optional[str] = None
+    markdown_url: Optional[str] = None
+    conversion: Dict[str, Any] = field(default_factory=dict)
+    validation: Optional[ValidationReport] = None
+    file_sha256: Optional[str] = None
+    trace: Optional[PipelineTrace] = None
+
+    @property
+    def markdown_preview(self) -> str:
+        return self.markdown[:4000]
+
     def to_dict(self) -> Dict[str, Any]:
         return {
             "accepted": self.accepted,
@@ -119,6 +154,18 @@ class IngestionOutcome:
             "classified_by_model": self.classified_by_model,
             "notes": self.notes,
             "ingested_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            # --- Markdown pipeline ------------------------------------------
+            "file_sha256": self.file_sha256,
+            "conversion": self.conversion,
+            "validation": self.validation.to_dict() if self.validation else None,
+            "markdown_characters": len(self.markdown),
+            # The preview is bounded so a 900-page conversion does not arrive as a
+            # 4 MB JSON body. The whole file is at markdown_url.
+            "markdown_preview": self.markdown_preview,
+            "markdown_truncated": len(self.markdown) > len(self.markdown_preview),
+            "markdown_path": self.markdown_path,
+            "markdown_url": self.markdown_url,
+            "trace": self.trace.to_dict() if self.trace else None,
         }
 
 
@@ -292,6 +339,83 @@ def _append_vectors(document_id: str) -> int:
     return len(positions)
 
 
+def markdown_dir() -> Path:
+    return Path(config.MARKDOWN_OUTPUT_DIR)
+
+
+def markdown_path_for(document_id: str) -> Path:
+    return markdown_dir() / f"{document_id}.md"
+
+
+def _front_matter(document_id: str, title: str, issuing_org: str, uploaded_by: str,
+                  sha: str, granted_rank: int, conversion: Dict[str, Any]) -> str:
+    """
+    The header written above the Markdown.
+
+    It exists so the file is self-describing once it leaves this system. A
+    Markdown file mailed to a colleague with no provenance is a document that
+    looks like a guideline and is not one, and the rank line is the sentence that
+    stops it being read as one.
+    """
+    return "\n".join([
+        "---",
+        f"document_id: {document_id}",
+        f"title: {title}",
+        f"issuing_org: {issuing_org or 'Not stated; supplied by the uploading clinician'}",
+        f"uploaded_by: {uploaded_by}",
+        f"source_sha256: {sha}",
+        f"precedence_rank_granted: {granted_rank}",
+        f"converted_by: {conversion.get('converter', 'unknown')}",
+        f"converted_at: {datetime.now(timezone.utc).isoformat(timespec='seconds')}",
+        "provenance_basis: CLINICIAN_UPLOAD_UNVERIFIED",
+        "note: >-",
+        "  Converted from the uploaded file by AntiBioTix. Text is verbatim; only structure",
+        "  markers and extraction repair were added. NOT verified against any published copy.",
+        "---",
+        "",
+    ])
+
+
+def _document_meta(
+    path: Path, document_id: str, title: str, issuing_org: str, version: str,
+    publication_date: str, page_count: Optional[int], sha: str,
+) -> DocumentMeta:
+    """
+    Provenance for an uploaded document.
+
+    Note what is NOT claimed. `provenance_basis` is CLINICIAN_UPLOAD_UNVERIFIED,
+    never the HASH_VERIFIED_PDF a national document carries: that basis means an
+    operator checked the file against a published edition, and nobody did that
+    here. The hash is still recorded -- it proves which bytes were read, which is
+    a different and smaller claim, and the difference is the whole point.
+    """
+    is_pdf = path.suffix.lower() == ".pdf"
+    return DocumentMeta(
+        document_id=document_id,
+        title=title,
+        issuing_org=issuing_org or "Not stated; supplied by the uploading clinician",
+        geographic_scope="Local / institutional unless the document states otherwise",
+        version=version,
+        publication_date=publication_date,
+        source_url="",
+        source_file=path.name,
+        file_sha256=sha,
+        page_count=page_count,
+        precedence_rank=DEFAULT_RANK,
+        ingested_at=_datetime.datetime.now(_datetime.timezone.utc).isoformat(),
+        notes="",
+        source_type="CLINICIAN_UPLOADED_PDF" if is_pdf else "CLINICIAN_UPLOADED_TEXT",
+        page_reference_kind="OFFICIAL_DOCUMENT_PAGE" if is_pdf else "NO_PAGINATION",
+        provenance_basis="CLINICIAN_UPLOAD_UNVERIFIED",
+        clinical_domain=DOMAIN_PUBLIC_INFORMATION,
+    )
+
+
+def _refused(trace: PipelineTrace, node: str, reason: str, **extra: Any) -> IngestionOutcome:
+    trace.mark(node, STATUS_REFUSED, reason)
+    return IngestionOutcome(False, reason=reason, trace=trace, **extra)
+
+
 def ingest_upload(
     file_path: Path,
     *,
@@ -306,58 +430,148 @@ def ingest_upload(
     persist: bool = True,
 ) -> IngestionOutcome:
     """
-    Agent 1 end to end: read, classify, rank, chunk, embed, store.
+    Agent 1 end to end: convert, extract, validate, classify, rank, chunk, embed,
+    store, and hand the Markdown back.
 
-    Refuses rather than degrades. A scanned PDF with no extractable text, an empty
-    file, or a document id that already exists comes back accepted=False with the
-    reason, and nothing is written.
+    Refuses rather than degrades at every node. A scanned PDF with no extractable
+    text, a patient record, an injected document, or a document id that already
+    exists comes back accepted=False with the reason and the trace, and nothing is
+    written.
     """
+    trace = PipelineTrace(INGESTION_PIPELINE_ID)
     path = Path(file_path)
-    if not path.exists():
-        return IngestionOutcome(False, reason=f"{path.name}: file not found.")
 
-    if not re.fullmatch(r"[A-Z0-9][A-Z0-9\-]{2,63}", document_id):
-        return IngestionOutcome(False, reason="Document id must be uppercase alphanumeric with hyphens.")
+    # --- node 1: receive ------------------------------------------------------
+    with trace.node("INGEST_RECEIVE") as node:
+        if not path.exists():
+            return _refused(trace, "INGEST_RECEIVE", f"{path.name}: file not found.")
+        if path.suffix.lower() not in SUPPORTED_SUFFIXES:
+            return _refused(trace, "INGEST_RECEIVE",
+                            f"{path.suffix or 'this file type'} cannot be ingested. "
+                            f"Supported: {', '.join(SUPPORTED_SUFFIXES)}.")
+        if not re.fullmatch(r"[A-Z0-9][A-Z0-9\-]{2,63}", document_id):
+            return _refused(trace, "INGEST_RECEIVE",
+                            "Document id must be uppercase alphanumeric with hyphens.")
 
-    vector_store._load_chunks()
-    if document_id in vector_store.docs:
-        return IngestionOutcome(False, reason=f"{document_id} is already held. Choose a new id.")
+        vector_store._load_chunks()
+        if document_id in vector_store.docs:
+            return _refused(trace, "INGEST_RECEIVE",
+                            f"{document_id} is already held. Choose a new id.")
 
-    meta = {
-        "document_id": document_id,
-        "title": title,
-        "issuing_org": issuing_org or "Not stated; supplied by the uploading clinician",
-        "geographic_scope": "Local / institutional unless the document states otherwise",
-        "version": version,
-        "publication_date": publication_date,
-        "source_url": "",
-        # Never HASH_VERIFIED_PDF: that basis means the operator verified this file
-        # against a published document. Nobody did that here.
-        "provenance_basis": "CLINICIAN_UPLOAD_UNVERIFIED",
-        "source_type": "CLINICIAN_UPLOADED_PDF" if path.suffix.lower() == ".pdf" else "CLINICIAN_UPLOADED_TEXT",
-        "precedence_rank": DEFAULT_RANK,
-        "clinical_domain": DOMAIN_PUBLIC_INFORMATION,
-    }
+        sha = sha256_file(path)
+        size = path.stat().st_size
+        node.detail = f"{path.name} · {size:,} bytes · sha256 {sha[:12]}…"
+        node.metrics = {"filename": path.name, "bytes": size, "sha256": sha,
+                        "suffix": path.suffix.lower()}
 
+    # --- node 2: convert to Markdown -----------------------------------------
     try:
-        if path.suffix.lower() == ".pdf":
-            doc, chunks = ingest_pdf(path, meta)
-        else:
-            doc, chunks = ingest_text(path, meta)
+        with trace.node("INGEST_CONVERT") as node:
+            converted = markdown_convert.convert(path)
+            node.detail = (f"{converted.converter}: {converted.char_count:,} characters, "
+                           f"{converted.heading_count} heading(s), {converted.table_count} table(s)")
+            node.metrics = converted.to_dict()
     except Exception as exc:
-        return IngestionOutcome(False, reason=str(exc))
+        return IngestionOutcome(False, reason=str(exc), file_sha256=sha, trace=trace)
 
-    if not chunks:
-        return IngestionOutcome(False, reason=f"{path.name}: nothing extractable to index.")
+    markdown = converted.markdown
+    conversion = converted.to_dict()
 
-    sample = "\n".join(c.text for c in chunks[:40])
-    verdict = classify(sample)
-    granted, notes = _grant_rank(claimed_rank, verdict, attesting_role)
-    domain = _KIND_TO_DOMAIN.get(verdict.get("kind", ""), DOMAIN_PUBLIC_INFORMATION)
-    if granted == DEFAULT_RANK:
-        # Rank 4 and a clinical domain would contradict each other on the same
-        # passage, and the reader would have to decide which to believe.
-        domain = DOMAIN_PUBLIC_INFORMATION if domain == DOMAIN_ANTIMICROBIAL else domain
+    # --- node 3: extract ------------------------------------------------------
+    with trace.node("INGEST_EXTRACT") as node:
+        plain = "\n".join(p.plain for p in converted.pages if p.plain).strip()
+        headings = [h for p in converted.pages for h in p.headings]
+        node.detail = (f"{len(plain):,} characters of text across "
+                       f"{converted.page_count or 1} page(s)")
+        node.metrics = {"characters": len(plain), "headings": len(headings),
+                        "tables": converted.table_count, "pages": converted.page_count}
+
+    # --- node 4 + 5: validate (guardrails, then the bounded model review) -----
+    with trace.node("INGEST_VALIDATE") as node:
+        report = validate(markdown, plain)
+        deterministic = [c for c in report.checks if c.rule_id != "R8"]
+        failed = [c for c in deterministic if not c.passed]
+        node.detail = (f"{len(deterministic) - len(failed)}/{len(deterministic)} structural "
+                       f"rules passed")
+        node.metrics = {"checks": [c.to_dict() for c in deterministic],
+                        "warnings": len(report.warnings)}
+        if any(not c.passed and c.severity == "BLOCKING" for c in deterministic):
+            node.status = STATUS_REFUSED
+
+    model_check = next((c for c in report.checks if c.rule_id == "R8"), None)
+    if model_check is None:
+        trace.skip("INGEST_REVIEW",
+                   "No validating model configured; structural rules ran alone and the "
+                   "document's clinical content has not been assessed."
+                   if not llm_client.available() else
+                   "Not reached: a structural rule blocked the document first.")
+    else:
+        trace.mark("INGEST_REVIEW",
+                   STATUS_OK if model_check.passed else STATUS_REFUSED,
+                   model_check.detail, model=report.model,
+                   confidence=round(report.model_confidence, 3))
+
+    if not report.passed:
+        outcome = IngestionOutcome(
+            False,
+            reason="Refused by content validation. " + " ".join(report.blocking),
+            markdown=markdown, conversion=conversion, validation=report,
+            file_sha256=sha, trace=trace,
+        )
+        return outcome
+
+    # --- node 6: classify & rank ---------------------------------------------
+    with trace.node("INGEST_CLASSIFY") as node:
+        # Classified from the MARKDOWN, not the raw text: the headings are the
+        # strongest signal of what a document is, and flat extraction had removed
+        # exactly that signal before the classifier ever saw it.
+        verdict = classify(markdown[:12000])
+        granted, notes = _grant_rank(claimed_rank, verdict, attesting_role)
+        domain = _KIND_TO_DOMAIN.get(verdict.get("kind", ""), DOMAIN_PUBLIC_INFORMATION)
+        if granted == DEFAULT_RANK:
+            # Rank 4 and a clinical domain would contradict each other on the same
+            # passage, and the reader would have to decide which to believe.
+            domain = DOMAIN_PUBLIC_INFORMATION if domain == DOMAIN_ANTIMICROBIAL else domain
+        node.detail = (f"Read as {verdict.get('kind')}; entering at rank {granted}"
+                       + (f" (rank {claimed_rank} was claimed)"
+                          if claimed_rank is not None and granted != claimed_rank else ""))
+        node.metrics = {"kind": verdict.get("kind"), "granted_rank": granted,
+                        "claimed_rank": claimed_rank, "by_model": verdict.get("by_model"),
+                        "clinical_domain": domain}
+        if not verdict.get("by_model"):
+            node.status = STATUS_DEGRADED
+
+    # --- node 7: chunk --------------------------------------------------------
+    with trace.node("INGEST_CHUNK") as node:
+        doc = _document_meta(path, document_id, title, issuing_org, version,
+                             publication_date, converted.page_count, sha)
+        chunks = chunk_markdown(document_id, doc.version, markdown)
+        if not chunks:
+            node.status = STATUS_REFUSED
+            node.detail = "Nothing indexable after chunking."
+            return IngestionOutcome(
+                False, reason=f"{path.name}: nothing extractable to index.",
+                markdown=markdown, conversion=conversion, validation=report,
+                file_sha256=sha, trace=trace,
+            )
+        with_section = sum(1 for c in chunks if c.section)
+        node.detail = (f"{len(chunks)} chunk(s); {with_section} carry a section heading")
+        node.metrics = {"chunks": len(chunks), "with_section": with_section,
+                        "with_page": sum(1 for c in chunks if c.page)}
+
+    doc.precedence_rank = granted
+    doc.clinical_domain = domain
+    doc.notes = " ".join([
+        f"CLINICIAN UPLOAD. Supplied by {uploaded_by}; not verified against any published copy.",
+        f"Converted to Markdown by {conversion.get('converter')}; "
+        f"{conversion.get('headings_detected', 0)} heading(s) and "
+        f"{conversion.get('tables_detected', 0)} table(s) preserved.",
+        f"Content validation: {len(report.checks)} check(s), "
+        f"reviewed by model: {'yes' if report.reviewed_by_model else 'no'}.",
+        f"Agent classification: {verdict.get('kind')} ({verdict.get('reason', '')}).",
+        *notes,
+        *report.warnings,
+    ]).strip()
 
     outcome = IngestionOutcome(
         accepted=True,
@@ -370,33 +584,64 @@ def ingest_upload(
         agent_reason=verdict.get("reason"),
         classified_by_model=bool(verdict.get("by_model")),
         rank_downgraded=claimed_rank is not None and granted > claimed_rank,
-        notes=notes,
+        notes=notes + report.warnings,
         reason="Ingested.",
+        markdown=markdown,
+        conversion=conversion,
+        validation=report,
+        file_sha256=sha,
+        trace=trace,
     )
 
     if not persist:
+        trace.skip("INGEST_EMBED", "Dry run: nothing was embedded or written.")
+        trace.skip("INGEST_RETURN", "Dry run: no Markdown file was saved.")
         return outcome
 
-    doc.precedence_rank = granted
-    doc.clinical_domain = domain
-    doc.notes = " ".join([
-        f"CLINICIAN UPLOAD. Supplied by {uploaded_by}; not verified against any published copy.",
-        f"Agent classification: {verdict.get('kind')} ({verdict.get('reason', '')}).",
-        *notes,
-    ]).strip()
-
-    payload = {
-        "document": doc.__dict__ if hasattr(doc, "__dict__") else dict(doc),
-        "chunks": [c.__dict__ if hasattr(c, "__dict__") else dict(c) for c in chunks],
-    }
+    # --- node 8: embed & index -----------------------------------------------
+    payload = {"document": asdict(doc), "chunks": [asdict(c) for c in chunks]}
     target = vector_store.dir / f"{document_id}.json"
     target.write_text(json.dumps(payload, indent=1, ensure_ascii=False), encoding="utf-8")
 
     try:
-        outcome.chunks_added = _append_vectors(document_id)
+        with trace.node("INGEST_EMBED") as node:
+            outcome.chunks_added = _append_vectors(document_id)
+            node.detail = (f"{outcome.chunks_added} chunk(s) embedded with "
+                           f"{vector_store.embedding_model} and spliced into the index")
+            node.metrics = {"chunks_indexed": outcome.chunks_added,
+                            "embedding_model": vector_store.embedding_model,
+                            "semantic": vector_store.is_semantic,
+                            "corpus_chunks": len(vector_store.chunks)}
     except Exception as exc:
         target.unlink(missing_ok=True)
         vector_store._load_chunks()
-        return IngestionOutcome(False, reason=f"Indexing failed, upload discarded: {exc}")
+        return IngestionOutcome(
+            False, reason=f"Indexing failed, upload discarded: {exc}",
+            markdown=markdown, conversion=conversion, validation=report,
+            file_sha256=sha, trace=trace,
+        )
+
+    # --- node 9: return the Markdown -----------------------------------------
+    with trace.node("INGEST_RETURN") as node:
+        out_dir = markdown_dir()
+        out_dir.mkdir(parents=True, exist_ok=True)
+        md_path = markdown_path_for(document_id)
+        md_path.write_text(
+            _front_matter(document_id, title, issuing_org, uploaded_by, sha, granted, conversion)
+            + markdown,
+            encoding="utf-8",
+        )
+        outcome.markdown_path = str(md_path)
+        outcome.markdown_url = f"/api/agents/documents/{document_id}/markdown"
+        node.detail = f"Markdown saved and retrievable at {outcome.markdown_url}"
+        node.metrics = {"path": str(md_path), "bytes": md_path.stat().st_size,
+                        "download_url": outcome.markdown_url}
 
     return outcome
+
+
+# Re-exported so callers and tests that patched these on this module keep working.
+__all__ = [
+    "ATTESTING_ROLES", "DEFAULT_RANK", "LOCAL_INSTITUTIONAL_RANK", "IngestionOutcome",
+    "classify", "ingest_upload", "ingest_pdf", "ingest_text", "markdown_path_for",
+]

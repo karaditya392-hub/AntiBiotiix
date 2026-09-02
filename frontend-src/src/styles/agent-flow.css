@@ -1,0 +1,393 @@
+/*
+ * Agent pipeline flow visualisation.
+ *
+ * The graph is drawn from the backend's own node/edge declaration
+ * (/api/agents/graph) and coloured by the trace of the run that just happened.
+ * A node that did not run shows as SKIPPED with its reason — the state a normal
+ * flow diagram cannot express and the one that matters most, because "the web
+ * path was off" and "the web path found nothing" look identical otherwise.
+ */
+
+.flow-shell {
+  background: #fbfcf9;
+  border: 1px solid #d8e2dd;
+  border-radius: 7px;
+  overflow: hidden;
+}
+
+.flow-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 18px 22px;
+  background: #173c3d;
+  color: #eef6f0;
+}
+.flow-head h3 {
+  font-family: 'Space Grotesk', sans-serif;
+  margin: 4px 0 3px;
+  font-size: 1.18rem;
+  color: #eef6f0;
+}
+.flow-head p { margin: 0; color: #a9c7bd; font-size: 0.78rem; line-height: 1.5; max-width: 62ch; }
+.flow-head .flow-kicker { color: #e2a878; font-size: .66rem; font-weight: 700; letter-spacing: .14em; margin: 0; }
+
+.flow-clock {
+  border: 1px solid #4d7d72;
+  border-radius: 4px;
+  padding: 7px 11px;
+  font-size: .7rem;
+  color: #cae6d3;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.flow-clock strong { color: #fff; font-size: .95rem; display: block; }
+
+/* --- the canvas ---------------------------------------------------------- */
+
+.flow-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 26px 22px 20px;
+  scrollbar-width: thin;
+  scrollbar-color: #9bb8aa transparent;
+}
+
+.flow-canvas {
+  position: relative;
+  display: grid;
+  gap: 16px 30px;
+  align-items: center;
+  justify-items: stretch;
+  min-width: max-content;
+}
+
+.flow-edges {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+}
+.flow-edge { fill: none; stroke: #c2d3cc; stroke-width: 1.6; }
+.flow-edge.is-parallel { stroke-dasharray: 5 4; stroke: #4e8a7a; }
+.flow-edge.is-live { stroke: #2d7064; stroke-width: 2.2; }
+.flow-edge.is-dead { stroke: #dde5e1; }
+
+/* --- one node ------------------------------------------------------------ */
+
+.flow-node {
+  position: relative;
+  width: 178px;
+  min-height: 92px;
+  box-sizing: border-box;
+  border: 1.5px solid #cbd9d4;
+  border-left-width: 4px;
+  border-radius: 6px;
+  background: #fff;
+  padding: 11px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  text-align: left;
+  font: inherit;
+  color: #203236;
+  cursor: pointer;
+  transition: box-shadow .15s ease, transform .15s ease, border-color .15s ease;
+}
+.flow-node:hover { box-shadow: 0 3px 10px rgba(23, 60, 61, .12); transform: translateY(-1px); }
+.flow-node.is-selected { box-shadow: 0 0 0 2px #2d7064; }
+
+.flow-node-kind {
+  font-size: .58rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  color: #8a9996;
+  text-transform: uppercase;
+}
+.flow-node-label {
+  font-size: .82rem;
+  font-weight: 700;
+  line-height: 1.25;
+  color: #173c3d;
+}
+.flow-node-foot {
+  margin-top: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+  font-size: .64rem;
+  font-variant-numeric: tabular-nums;
+}
+.flow-node-status { font-weight: 700; letter-spacing: .04em; }
+.flow-node-ms { color: #8a9996; }
+
+/* Status colouring. The left border carries it, so it reads down a column. */
+.flow-node[data-status="PENDING"]  { border-left-color: #d3ded9; background: #f7faf8; }
+.flow-node[data-status="PENDING"]  .flow-node-label { color: #7f918e; }
+.flow-node[data-status="PENDING"]  .flow-node-status { color: #a0b0ac; }
+
+.flow-node[data-status="RUNNING"]  { border-left-color: #2d7064; }
+.flow-node[data-status="RUNNING"]  .flow-node-status { color: #2d7064; }
+
+.flow-node[data-status="OK"]       { border-left-color: #2d7064; background: #f3f9f5; }
+.flow-node[data-status="OK"]       .flow-node-status { color: #2d7064; }
+
+.flow-node[data-status="DEGRADED"] { border-left-color: #a65e38; background: #fdf6ef; }
+.flow-node[data-status="DEGRADED"] .flow-node-status { color: #a65e38; }
+
+.flow-node[data-status="SKIPPED"]  { border-left-color: #b9c6c2; background: #f4f7f5; border-style: dashed; border-left-style: solid; }
+.flow-node[data-status="SKIPPED"]  .flow-node-label { color: #6e807d; }
+.flow-node[data-status="SKIPPED"]  .flow-node-status { color: #8a9996; }
+
+.flow-node[data-status="REFUSED"]  { border-left-color: #a33d31; background: #fbf1ef; }
+.flow-node[data-status="REFUSED"]  .flow-node-status { color: #a33d31; }
+
+.flow-node[data-status="FAILED"]   { border-left-color: #a33d31; background: #fbe9e5; }
+.flow-node[data-status="FAILED"]   .flow-node-status { color: #a33d31; }
+
+/* The running pulse. Reduced-motion users get a static border instead. */
+.flow-node[data-status="RUNNING"]::after {
+  content: "";
+  position: absolute;
+  inset: -1.5px -1.5px -1.5px -4px;
+  border-radius: 6px;
+  border: 1.5px solid #2d7064;
+  animation: flow-pulse 1.25s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes flow-pulse {
+  0%, 100% { opacity: .25; }
+  50%      { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .flow-node[data-status="RUNNING"]::after { animation: none; opacity: .8; }
+}
+
+/* --- the detail strip under the graph ------------------------------------ */
+
+.flow-detail {
+  border-top: 1px solid #d8e2dd;
+  padding: 15px 22px 18px;
+  background: #f4f8f6;
+}
+.flow-detail-head {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-wrap: wrap;
+  margin-bottom: 7px;
+}
+.flow-detail-head strong { font-size: .9rem; color: #173c3d; }
+.flow-detail-desc { margin: 0 0 9px; font-size: .8rem; line-height: 1.55; color: #526968; max-width: 90ch; }
+.flow-detail-run {
+  margin: 0;
+  font-size: .8rem;
+  line-height: 1.55;
+  color: #203236;
+  background: #fff;
+  border: 1px solid #d8e2dd;
+  border-left: 3px solid #4e8a7a;
+  border-radius: 4px;
+  padding: 9px 12px;
+}
+.flow-detail-run.is-refused { border-left-color: #a33d31; }
+.flow-detail-run.is-degraded { border-left-color: #a65e38; }
+
+.flow-metrics {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.flow-metrics li {
+  font-size: .68rem;
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  background: #fff;
+  border: 1px solid #d8e2dd;
+  border-radius: 3px;
+  padding: 4px 8px;
+  color: #526968;
+}
+.flow-metrics li b { color: #173c3d; font-weight: 600; }
+
+.flow-badge {
+  font-size: .62rem;
+  font-weight: 700;
+  letter-spacing: .07em;
+  border-radius: 3px;
+  padding: 3px 7px;
+  white-space: nowrap;
+}
+.flow-badge.ok       { background: #e0efe6; color: #2d7064; }
+.flow-badge.degraded { background: #f7e7d8; color: #8a4b1f; }
+.flow-badge.skipped  { background: #e7edea; color: #6e807d; }
+.flow-badge.refused,
+.flow-badge.failed   { background: #f7ddd7; color: #a33d31; }
+.flow-badge.pending  { background: #eef2f0; color: #8a9996; }
+.flow-badge.running  { background: #dff0e7; color: #2d7064; }
+
+.flow-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 11px 22px;
+  border-top: 1px solid #d8e2dd;
+  background: #fbfcf9;
+  font-size: .68rem;
+  color: #718281;
+}
+.flow-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.flow-legend i { width: 11px; height: 11px; border-radius: 2px; display: inline-block; }
+
+/* --- agent console page -------------------------------------------------- */
+
+.agent-tabs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 10px;
+  margin-bottom: 18px;
+}
+.agent-tab {
+  border: 1.5px solid #cbd9d4;
+  background: #fbfcf9;
+  border-radius: 6px;
+  padding: 14px 16px;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: #203236;
+  display: flex;
+  gap: 11px;
+  align-items: flex-start;
+  transition: border-color .15s ease, background .15s ease;
+}
+.agent-tab:hover { border-color: #4e8a7a; }
+.agent-tab.is-active { border-color: #2d7064; background: #eaf3ee; box-shadow: inset 0 0 0 1px #2d7064; }
+.agent-tab h4 { margin: 0 0 3px; font-size: .92rem; font-family: 'Space Grotesk', sans-serif; color: #173c3d; }
+.agent-tab p { margin: 0; font-size: .74rem; line-height: 1.45; color: #667978; }
+
+.agent-status-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.agent-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid #d8e2dd;
+  background: #fbfcf9;
+  border-radius: 20px;
+  padding: 6px 13px;
+  font-size: .71rem;
+  color: #526968;
+}
+.agent-status-pill b { color: #173c3d; font-weight: 700; }
+.agent-status-pill.is-on  i { width: 8px; height: 8px; border-radius: 50%; background: #2d7064; }
+.agent-status-pill.is-off i { width: 8px; height: 8px; border-radius: 50%; background: #b9c6c2; }
+
+/* --- results ------------------------------------------------------------- */
+
+.evidence-card {
+  border: 1px solid #d8e2dd;
+  border-left: 4px solid #4e8a7a;
+  border-radius: 6px;
+  background: #fff;
+  padding: 14px 16px;
+}
+.evidence-card[data-tier="WEB_UNVERIFIED"]        { border-left-color: #a65e38; background: #fdf9f5; }
+.evidence-card[data-tier="REFERENCE_ONLY"]        { border-left-color: #b9a06e; background: #fdfbf4; }
+.evidence-card[data-tier="LOCAL_AUTHORITY"]       { border-left-color: #2d7064; background: #f2f9f5; }
+.evidence-card[data-tier="INTERNATIONAL_AUTHORITY"] { border-left-color: #4a7fa6; background: #f4f8fb; }
+
+.evidence-card-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: baseline;
+  margin-bottom: 7px;
+}
+.evidence-index {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-weight: 700;
+  color: #2d7064;
+  font-size: .8rem;
+}
+.evidence-source { font-size: .8rem; font-weight: 700; color: #173c3d; }
+.evidence-passage { font-size: .84rem; line-height: 1.6; color: #203236; margin: 8px 0; }
+.evidence-meta { display: flex; flex-wrap: wrap; gap: 12px; font-size: .7rem; color: #718281; }
+.evidence-caveat {
+  font-size: .73rem;
+  color: #8a4b1f;
+  background: #fdf3e3;
+  border: 1px solid #e0c9a0;
+  border-radius: 4px;
+  padding: 6px 9px;
+  margin: 0 0 8px;
+  line-height: 1.5;
+}
+
+.verdict-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 9px 11px;
+  border: 1px solid #d8e2dd;
+  border-radius: 4px;
+  background: #fff;
+  font-size: .76rem;
+}
+.verdict-row.is-rejected { background: #fbf5f4; border-color: #e6cdc8; }
+.verdict-row code { font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: .7rem; color: #526968; }
+.verdict-score { font-variant-numeric: tabular-nums; font-weight: 700; white-space: nowrap; }
+
+.markdown-preview {
+  background: #ffffff;
+  border: 1px solid #d8e2dd;
+  border-radius: 4px;
+  padding: 14px 16px;
+  max-height: 420px;
+  overflow: auto;
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: .74rem;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: #2a3d40;
+  scrollbar-width: thin;
+  scrollbar-color: #9bb8aa transparent;
+}
+
+.check-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 8px 10px;
+  border-radius: 4px;
+  font-size: .76rem;
+  line-height: 1.5;
+  background: #f3f9f5;
+  border: 1px solid #d5e6dc;
+}
+.check-row.is-failed { background: #fbf1ef; border-color: #e6cdc8; }
+.check-row.is-warning { background: #fdf6ef; border-color: #e6d5bd; }
+.check-row code {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-weight: 700;
+  color: #526968;
+  flex-shrink: 0;
+}
+
+@media (max-width: 720px) {
+  .flow-scroll { padding: 20px 14px 16px; }
+  .flow-node { width: 156px; }
+}
