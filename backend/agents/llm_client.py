@@ -94,6 +94,29 @@ def complete_json(system_prompt: str, user_prompt: str, max_tokens: int = 700) -
     last = None
     for model in [config.AGENT_LLM_MODEL, *config.AGENT_LLM_FALLBACK_MODELS]:
         last = _complete_one(model, system_prompt, user_prompt, max_tokens)
+
+        # ONE RETRY WHEN THE ANSWER WAS NOT JSON, and only then.
+        #
+        # This endpoint does not support response_format={"type":"json_object"} --
+        # it answers 503 to any request carrying it, on both models -- so JSON has
+        # to be obtained by asking. A model that wrapped its object in prose or a
+        # markdown fence has done the work and formatted it wrongly; re-asking once
+        # with an explicit instruction recovers it, and costs one call only in the
+        # case that would otherwise have been discarded entirely.
+        #
+        # Deliberately NOT retried for anything else: an HTTP error is a transport
+        # problem the fallback model handles, and retrying a refusal would be
+        # asking a model to change its mind.
+        if not last.ok and (last.error or "") == "response contained no parseable JSON":
+            last = _complete_one(
+                model,
+                system_prompt
+                + "\n\nReturn ONLY the JSON object. No prose before or after it, "
+                  "no markdown fences, no explanation.",
+                user_prompt,
+                max_tokens,
+            )
+
         if last.ok or not (last.error or "").startswith(("HTTP 429", "HTTP 503")):
             return last
     return last

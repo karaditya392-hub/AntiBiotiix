@@ -242,8 +242,43 @@ def filter_web_results(results: List[Dict[str, Any]], question: str) -> Filtrati
     agent deliberately knows nothing about the held corpus.
     """
     out = FiltrationResult(degraded=not llm_client.available())
-    for result in results or []:
-        verdict = judge_one(result, question)
+    items = list(results or [])
+    if not items:
+        return out
+
+    # JUDGED CONCURRENTLY. Each verdict is one hosted model call of roughly ten
+    # seconds, and they are independent -- judging five results in sequence took
+    # 71 seconds for a single drug, which is a frozen screen in front of a
+    # clinician. The calls are I/O-bound, so threads are the right tool and the
+    # GIL is not in the way.
+    #
+    # ORDER IS PRESERVED regardless of completion order: verdicts are written
+    # back by index. A filtration log whose order changes between runs on the
+    # same input is not an audit trail.
+    verdicts: List[Optional[FilterVerdict]] = [None] * len(items)
+    try:
+        from concurrent.futures import ThreadPoolExecutor
+
+        with ThreadPoolExecutor(max_workers=min(len(items), 6)) as pool:
+            futures = {pool.submit(judge_one, item, question): i for i, item in enumerate(items)}
+            for future, index in futures.items():
+                try:
+                    verdicts[index] = future.result()
+                except Exception:
+                    verdicts[index] = None
+    except Exception:
+        # Threading unavailable for any reason: fall back to sequential rather
+        # than losing the filter altogether.
+        verdicts = [judge_one(item, question) for item in items]
+
+    for index, verdict in enumerate(verdicts):
+        if verdict is None:
+            # A judgement that could not be produced is not an acceptance.
+            verdict = FilterVerdict(
+                items[index].get("url", "(no url)"), False, 0.0,
+                "Assessment did not complete; source not admitted.",
+                config.AGENT_LLM_MODEL, site_of(items[index].get("url", "")), False,
+            )
         out.verdicts.append(verdict)
         if verdict.accepted and verdict.citation:
             out.accepted.append(verdict.citation)

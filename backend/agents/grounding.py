@@ -180,6 +180,7 @@ def ground(
     retrieval_result: Any = None,
     web_citations: Optional[List[Dict[str, Any]]] = None,
     max_passages: int = 8,
+    held_citations: Optional[List[Dict[str, Any]]] = None,
 ) -> GroundedContext:
     """
     Fuse held-corpus retrieval with filtered web evidence.
@@ -187,12 +188,19 @@ def ground(
     `retrieval_result` is a backend.rag.retrieve.RetrievalResult, or None when
     retrieval refused. `web_citations` are the citations Agent 2 ACCEPTED - this
     agent never sees a rejected result, and has no route to admit one.
+
+    `held_citations` is for callers that already retrieved and marked their
+    held-corpus passages, so they are not made to rebuild a RetrievalResult just
+    to hand them over. Same shape, same origin stamping, same ordering.
     """
     held: List[Dict[str, Any]] = []
     caveats: List[str] = []
 
+    if held_citations:
+        held = [c if c.get("origin") else mark_held(c) for c in held_citations]
+
     if retrieval_result is not None and not getattr(retrieval_result, "refused", False):
-        held = [mark_held(c.to_citation()) for c in getattr(retrieval_result, "chunks", [])]
+        held.extend(mark_held(c.to_citation()) for c in getattr(retrieval_result, "chunks", []))
         # Carried through rather than recomputed: the evidence and the warning about
         # the evidence must not be able to drift apart.
         caveats.extend(retrieval_result.caveats())

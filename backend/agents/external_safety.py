@@ -128,8 +128,15 @@ class CoverageResolution:
     label_found: bool = False
     label_source: Optional[str] = None
     web_verdicts: List[Dict[str, Any]] = field(default_factory=list)
+    # The citation objects Agent 2 admitted, in the shape Agent 3 orders and
+    # Agent 4 quotes. Distinct from `findings`, which are the reader-facing
+    # wrappers: passing those to grounding would hand it passages with no
+    # precedence rank and no verbatim text.
+    web_citations: List[Dict[str, Any]] = field(default_factory=list)
     note: str = ""
     resolved_name: Dict[str, str] = field(default_factory=dict)
+    grounded: Dict[str, Any] = field(default_factory=dict)
+    composed: Dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -140,11 +147,18 @@ class CoverageResolution:
             "regulatory_label_found": self.label_found,
             "regulatory_label_source": self.label_source,
             "web_filter_verdicts": self.web_verdicts,
+            # Consumed by the grounding agent and removed before the response is
+            # returned; a citation shape must not reach a client twice.
+            "_web_citations": list(self.web_citations),
             "note": self.note,
             # Never omitted when a name was resolved: an unshown resolution is an
             # unchecked one, and a wrong brand mapping would otherwise show a
             # clinician a different drug's contraindications without saying so.
             "resolved_name": self.resolved_name,
+            # Agents 3 and 4 over the same evidence: how it was ordered, and
+            # the composed reading of it. Empty when the chain did not run.
+            "grounded": self.grounded,
+            "composed": self.composed,
             "affects_stewardship_priority": False,
         }
 
@@ -498,6 +512,7 @@ def resolve_coverage_gap(patient, item, diagnosis: Optional[str] = None,
                          f"{diagnosis or ''}").strip()
                 filtered = filter_web_results(web_search.search(query), query)
                 result.web_verdicts = filtered.to_dict()["verdicts"]
+                result.web_citations = list(filtered.accepted)
                 stamp = datetime.now(timezone.utc).isoformat(timespec="seconds")
                 for citation in filtered.accepted:
                     result.findings.append(ExternalFinding(
@@ -683,6 +698,60 @@ def evidence_for_items(patient, items, warnings, diagnosis: Optional[str] = None
             "NOT assessed by any deterministic rule - this drug is outside the validated "
             "knowledge base, and the coverage warning stands."
         )
+
+        # ---- Agent 3, then Agent 4, over what Agent 2 admitted -----------------
+        #
+        # SCOPED TO THE DRUGS THAT NEED IT. Composition is a hosted model call of
+        # roughly fifteen seconds, and running it for a drug the national
+        # guidelines already answer buys nothing a clinician cannot read directly
+        # from the passage above. So the chain runs only where the rules could not
+        # assess the drug -- which is exactly where the clinician has nothing else.
+        #
+        # It cannot change any warning, severity or the priority tier. Agent 4's
+        # own checks still apply: an answer naming a drug no passage names, or
+        # citing a passage that does not exist, is discarded rather than shown.
+        if not answered_nationally and (resolution["findings"] or national):
+            try:
+                from backend.agents.compose import compose
+                from backend.agents.grounding import ground
+
+                question = (
+                    f"What are the safety considerations for {drug} in this patient"
+                    + (f" with {diagnosis}?" if diagnosis else "?")
+                )
+                web_citations = [
+                    f for f in (resolution.get("_web_citations") or [])
+                ]
+                context = ground(
+                    question,
+                    held_citations=national,
+                    web_citations=web_citations,
+                )
+                resolution["grounded"] = {
+                    "passage_count": len(context.passages),
+                    "held": context.held_count,
+                    "web": context.web_count,
+                    "sufficient_to_ground": context.sufficient_to_ground,
+                    "insufficiency_reason": context.insufficiency_reason,
+                    "divergences": context.divergences,
+                    "fusion_method": "DETERMINISTIC_PRECEDENCE_ORDER_NO_MODEL",
+                }
+                answer = compose(context)
+                d = answer.to_dict()
+                resolution["composed"] = {
+                    "answered": d["answered"],
+                    "answer_mode": d["answer_mode"],
+                    "summary": d["summary"],
+                    "points": d["points"],
+                    "model": d["model"],
+                    "rejected_because": d["composition_rejected_because"],
+                    "disclaimer": d["disclaimer"],
+                }
+            except Exception:
+                resolution["grounded"] = {}
+                resolution["composed"] = {}
+
+        resolution.pop("_web_citations", None)
         out.append(resolution)
     return out
 
