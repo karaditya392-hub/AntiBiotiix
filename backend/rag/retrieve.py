@@ -58,7 +58,36 @@ NO_EVIDENCE = "No sufficiently relevant evidence was retrieved."
 # a nonsense name in a well-formed dosing question matches on sentence FORM, not
 # content, and no threshold separates those. They are caught before scoring by
 # unknown_entities() below. Neither check alone is sufficient.
-RELEVANCE_FLOOR = 0.45
+#
+# ---------------------------------------------------------------------------
+# RE-MEASURED 02-09-2026 for nvidia/nemotron-3-embed-1b (2048 dim), which
+# replaced all-MiniLM-L6-v2 as the retrieval model. Same method, same corpus,
+# scripts/calibrate_relevance_floor.py:
+#
+#   lowest legitimate  0.3906  ("nitrofurantoin renal impairment")
+#   highest off-domain 0.2608  ("how to train a puppy")
+#   MARGIN             0.1298
+#
+# THE MARGIN PROBLEM ABOVE IS THE ONE THIS ADDRESSES, and a stronger retrieval
+# model is what the note above said was needed instead of a higher threshold.
+# 0.041 -> 0.1298 is a 3.2x recovery, back between the 0.181 measured at 39
+# documents and the 0.219 at 11, on a corpus more than twice the size of either.
+#
+# THE FLOOR HAD TO MOVE, and leaving it would have been the failure. A cosine
+# floor is a property of the model's score distribution, not a constant: 0.45 on
+# THIS index refuses "nitrofurantoin renal impairment" at 0.3906, a question the
+# corpus plainly answers. 0.326 is the midpoint of the measured gap, chosen the
+# same way 0.45 was for MiniLM -- it rejects no legitimate query in the set and
+# admits no off-domain one.
+#
+# Three off-domain queries never reach the floor at all now ("best pizza recipe
+# in Naples" among them) because unknown_entities() rejects them first. That is
+# the second signal doing its job, not the threshold.
+#
+# ANY FUTURE EMBEDDING CHANGE MUST RE-RUN THE CALIBRATION. A floor carried across
+# a model swap is a number that no longer means what this comment says.
+# ---------------------------------------------------------------------------
+RELEVANCE_FLOOR = 0.326
 
 # Floor for the LEXICAL fallback, used when this machine could not load the
 # semantic model and the corpus was re-embedded with TF-IDF.

@@ -631,7 +631,7 @@ def seed_database(reset_patients: bool = False):
                 diagnosis=v_diag,
                 clinical_notes=v_notes,
                 prescription_id=prescription_id,
-                status="COMPLETED"
+                status="COMPLETED",
             )
             db.add(visit_obj)
             db.flush()
@@ -651,6 +651,8 @@ def seed_database(reset_patients: bool = False):
             ))
             db.commit()
             index_visit_for_rag(db, visit_id)
+
+    # Backfill follow-up codes on visits that predate the column.
 
     # 2. Seed Clinical Rules
     for r in knowledge_base.rules_catalog:

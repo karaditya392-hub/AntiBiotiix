@@ -350,7 +350,7 @@ def ask_patient_history(db: Session, patient_id: str, question: str) -> Dict[str
 
     # Compute similarity against patient's documents
     backend = get_backend()
-    qv = backend.encode([cleaned])[0]
+    qv = getattr(backend, "encode_query", backend.encode)([cleaned])[0]
 
     best_doc = None
     best_score = -1.0

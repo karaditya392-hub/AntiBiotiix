@@ -14,8 +14,8 @@ def now_ist() -> datetime:
     return datetime.now(IST)
 
 from sqlalchemy import (
-    create_engine, Column, Integer, String, Float, Boolean, 
-    Text, DateTime, ForeignKey
+    create_engine, Column, Integer, String, Float, Boolean,
+    Text, DateTime, ForeignKey, UniqueConstraint
 )
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 from backend.config import SYSTEM_VERSION, PROMPT_TEMPLATE_ID
@@ -119,6 +119,9 @@ class VisitDB(Base):
     prescription_id = Column(String(64), nullable=True)
     status = Column(String(32), default="COMPLETED")
     created_at = Column(DateTime, default=now_ist)
+    # Short code the patient is given to open the feedback page for THIS visit.
+    # See FeedbackResponseDB for why access is by code rather than by name.
+    feedback_code = Column(String(16), index=True, nullable=True)
 
     patient = relationship("PatientDB", back_populates="visits")
     symptoms = relationship("SymptomDB", back_populates="visit", cascade="all, delete-orphan")
@@ -393,6 +396,73 @@ class NotificationDB(Base):
     created_at = Column(DateTime, default=now_ist)
 
 
+class FeedbackResponseDB(Base):
+    """
+    One patient's answers about how a course of treatment is going.
+
+    ACCESS IS BY CODE, NOT BY NAME. The feedback page is public -- a patient has no
+    login in this system -- so the obvious design, "type your name and we'll show
+    your prescription", would hand anyone who guesses a name that patient's
+    medications, allergies and diagnosis. The code is per VISIT, is shown to the
+    clinician on the visit summary, and is what the patient is given. It grants
+    sight of exactly one visit and nothing else.
+
+    Answers are stored verbatim as the patient gave them. Nothing here is graded,
+    scored, or turned into a clinical finding: this table records what a patient
+    said, and a clinician reads it.
+    """
+    __tablename__ = "feedback_responses"
+
+    id = Column(Integer, primary_key=True, index=True)
+    response_id = Column(String(64), unique=True, index=True, nullable=False)
+    visit_id = Column(String(64), ForeignKey("visits.visit_id"), index=True, nullable=False)
+    patient_id = Column(String(64), ForeignKey("patients.patient_id"), index=True, nullable=False)
+    doctor_id = Column(String(64), index=True, nullable=True)
+    # The three questions, kept as separate columns rather than a JSON blob so a
+    # clinician query ("who reported feeling worse") is a plain WHERE clause.
+    feeling = Column(String(32), nullable=True)          # BETTER / SAME / WORSE
+    medicines_helped = Column(String(32), nullable=True)  # YES / NO / UNSURE
+    discomfort = Column(Text, nullable=True)              # free text, may be empty
+    submitted_at = Column(DateTime, default=now_ist)
+    # NOTE: acknowledgement is NOT a column here. It was, as a single
+    # seen_by_clinician boolean, and that was wrong: five clinicians share this
+    # system, and one of them dismissing an alert marked the answer seen for all of
+    # them. A pharmacist clearing a popup would have hidden it from the attending
+    # physician who owned the patient. See FeedbackAcknowledgementDB.
+    #
+    # The old columns remain in existing SQLite files because SQLite cannot drop a
+    # column in place. They are unmapped and unread; nothing writes them.
+
+
+class FeedbackAcknowledgementDB(Base):
+    """
+    One row per (patient answer, clinician who has seen it).
+
+    Acknowledgement is PER CLINICIAN. The alert queue asks "has THIS clinician seen
+    this answer", not "has anyone". A shared flag meant whichever clinician happened
+    to log in first could clear an answer for everyone else, which is exactly the
+    failure mode a follow-up alert exists to prevent: the person who needed to read
+    it never learns it arrived.
+
+    Acknowledging is not resolving. It stops the answer announcing itself to that
+    one clinician; the answer stays in the record and on the patient's page for all
+    of them.
+    """
+    __tablename__ = "feedback_acknowledgements"
+    __table_args__ = (
+        # One acknowledgement per clinician per answer. Without this a repeated
+        # dismissal (a double click, a retried request) writes duplicate rows and
+        # the unseen query starts doing more work for no reason.
+        UniqueConstraint("response_id", "clinician_id", name="uq_feedback_ack"),
+    )
+
+    id = Column(Integer, primary_key=True, index=True)
+    response_id = Column(String(64), ForeignKey("feedback_responses.response_id"),
+                         index=True, nullable=False)
+    clinician_id = Column(String(64), index=True, nullable=False)
+    seen_at = Column(DateTime, default=now_ist)
+
+
 class AlertMetricsDB(Base):
     __tablename__ = "alert_metrics"
 
@@ -427,6 +497,12 @@ def init_db():
             "ALTER TABLE patients ADD COLUMN contact_email VARCHAR(128)",
             "ALTER TABLE patients ADD COLUMN contact_phone VARCHAR(32)",
             "ALTER TABLE doctors ADD COLUMN email VARCHAR(128)",
+            # Per-visit code the patient uses to reach the feedback page. Nullable:
+            # visits recorded before this existed have none, and the feedback
+            # endpoint treats a missing code as no access rather than as a match.
+            "ALTER TABLE visits ADD COLUMN feedback_code VARCHAR(16)",
+            "ALTER TABLE feedback_responses ADD COLUMN seen_by_clinician BOOLEAN DEFAULT 0",
+            "ALTER TABLE feedback_responses ADD COLUMN seen_at DATETIME",
         ]:
             try:
                 conn.execute(text(stmt))

@@ -27,7 +27,7 @@ export default function ClinicalToolsLanding() {
       path: "/clinical-tools/safety",
       icon: ShieldCheck,
       color: "#a65e38",
-      description: "Execute the 24 deterministic clinical safety rules for allergy cross-reactivity, renal/hepatic dosing, DDIs, and stewardship.",
+      description: "Execute the 30 deterministic clinical safety rules for allergy cross-reactivity, renal/hepatic dosing, DDIs, vulnerable populations, and stewardship.",
     },
     {
       id: "reference",

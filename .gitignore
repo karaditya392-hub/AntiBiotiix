@@ -38,3 +38,12 @@ frontend-src/*.tsbuildinfo
 # must work straight after clone without an npm install + build step.
 # Source lives in frontend-src/. The pre-migration vanilla UI is kept in
 # frontend-legacy/ as the reference the console markup is generated from.
+
+# Retrieval index. A BUILD ARTIFACT, not source: it is regenerated from the
+# ingested guideline JSON by scripts/migrate_embeddings.py, and its size depends
+# on the embedding model in use -- 22 MB on all-MiniLM-L6-v2 (384 dim), 116 MB on
+# nvidia/nemotron-3-embed-1b (2048 dim). The second exceeds GitHub's 100 MB file
+# limit, so the index is rebuilt after cloning rather than carried in the repo:
+#     python -m scripts.migrate_embeddings --to local    # or --to nvidia
+backend/guidelines/data/rag/_vectors.npz
+backend/guidelines/data/rag/_vectors.npz.pre-migration

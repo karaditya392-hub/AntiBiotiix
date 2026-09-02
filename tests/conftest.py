@@ -23,6 +23,34 @@ import pytest
 # enough regardless of import order.
 os.environ.setdefault("S11_NOTIFICATION_SCHEDULER", "0")
 
+# The AGENT layer must be off for the whole suite, whatever is in .env, because a
+# test that reaches a hosted model is not deterministic: the agent tests stub
+# llm_client explicitly, and anything that does not stub it must take the no-model
+# path, which is the behaviour those tests assert.
+#
+# THE RETRIEVAL LAYER IS A DIFFERENT MATTER, and conflating the two cost an hour.
+# Since the index moved to a hosted embedding model, the suite can no longer be
+# run with no network at all -- query embedding is an API call. That is a real
+# consequence of EMBEDDING_BACKEND=nvidia and it is stated here rather than
+# discovered on a machine with no connectivity. Set EMBEDDING_BACKEND=local and
+# migrate back if an offline suite matters more than retrieval quality.
+#
+# The web path stays off for every test: a suite whose results depend on what a
+# search engine returned this morning is not a suite.
+os.environ["WEB_SEARCH_ENABLED"] = "false"
+os.environ["WEB_SEARCH_API_KEY"] = ""
+
+# NVIDIA_API_KEY is deliberately NOT blanked, and that is a change from the first
+# version of this file. Blanking it stopped the agent tests reaching a hosted
+# model, which was the intent -- but it also stopped the EMBEDDING backend from
+# starting, and the guideline index is now built with nvidia/nemotron-3-embed-1b.
+# The store then found a backend mismatch and re-embedded all 15,894 chunks in
+# memory on every run: the suite went from four minutes to over ten, and it was
+# silently testing MiniLM retrieval against an index the application does not use.
+#
+# So the agent LLM is disabled directly instead, by the fixture below. Embeddings
+# keep their key; the agents get none.
+
 from backend.models.database import PatientDB, SessionLocal, init_db
 
 # The fixtures the suites actually depend on, and why.
@@ -69,3 +97,18 @@ def verify_seeded_database():
     # Clean up any non-seed test patients created during test execution
     from backend.seed_data import seed_database
     seed_database(reset_patients=True)
+
+
+@pytest.fixture(autouse=True)
+def _no_hosted_agent_llm(monkeypatch):
+    """
+    No test reaches a hosted model unless it says so.
+
+    Autouse, so a test that forgets cannot accidentally depend on a vendor being
+    up, on a key being present, or on what a 120B model felt like answering. Tests
+    that exercise the model path stub llm_client themselves; a test-level
+    monkeypatch is applied after this one and therefore wins.
+    """
+    from backend.agents import llm_client
+
+    monkeypatch.setattr(llm_client, "available", lambda: False)

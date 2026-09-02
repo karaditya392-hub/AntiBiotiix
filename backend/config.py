@@ -3,7 +3,98 @@ System Configuration, Version Pinning & Precedence Rules for S11 Assistant
 """
 import hashlib
 import os
+from pathlib import Path
 from typing import Dict, List, Any
+
+
+# ---------------------------------------------------------------------------
+# Single-file environment configuration
+#
+# Every endpoint, key and model id this system talks to is read from ONE .env at
+# the repository root, and read HERE rather than at each call site. A key read
+# with os.getenv() inside the module that uses it is a key nobody can find later,
+# and an endpoint that differs between two modules is an outage that only appears
+# in production.
+#
+# Deliberately a local reader rather than python-dotenv: this is fifteen lines,
+# and a clinical system should not add a dependency to parse KEY=VALUE.
+# A real environment variable always wins over the file, so a container or CI
+# secret is never silently overridden by a checked-out .env.
+# ---------------------------------------------------------------------------
+
+REPO_ROOT = Path(__file__).resolve().parent.parent
+ENV_FILE = REPO_ROOT / ".env"
+
+
+def _load_dotenv(path: Path = ENV_FILE) -> None:
+    if not path.exists():
+        return
+    for raw in path.read_text(encoding="utf-8").splitlines():
+        line = raw.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, _, value = line.partition("=")
+        key = key.strip()
+        value = value.strip().strip('"').strip("'")
+        if key and key not in os.environ:
+            os.environ[key] = value
+
+
+_load_dotenv()
+
+
+def _env(name: str, default: str = "") -> str:
+    return os.getenv(name, default).strip()
+
+
+def _env_bool(name: str, default: bool = False) -> bool:
+    return _env(name, "true" if default else "false").lower() in ("1", "true", "yes", "on")
+
+
+def _env_float(name: str, default: float) -> float:
+    try:
+        return float(_env(name, str(default)))
+    except ValueError:
+        return default
+
+
+# --- Agent LLM (NVIDIA NIM, OpenAI-compatible surface) ----------------------
+NVIDIA_API_KEY = _env("NVIDIA_API_KEY")
+NVIDIA_BASE_URL = _env("NVIDIA_BASE_URL", "https://integrate.api.nvidia.com/v1")
+AGENT_LLM_MODEL = _env("AGENT_LLM_MODEL", "nvidia/nemotron-3-super-120b-a12b")
+
+# Models to try, in order, when the primary answers 429/503.
+#
+# Hosted inference is shared capacity: "Service temporarily overloaded" is a
+# normal answer, not a misconfiguration, and it arrives without warning. A
+# clinical demo that dies on someone else's traffic spike is a demo that dies for
+# no reason. The model that actually answered is recorded on every result, so a
+# fallback never hides which model produced a verdict.
+AGENT_LLM_FALLBACK_MODELS = [
+    m.strip() for m in _env(
+        "AGENT_LLM_FALLBACK_MODELS", "nvidia/nemotron-3-ultra-550b-a55b"
+    ).split(",") if m.strip()
+]
+AGENT_LLM_TIMEOUT_S = _env_float("AGENT_LLM_TIMEOUT_S", 45.0)
+AGENT_LLM_TEMPERATURE = _env_float("AGENT_LLM_TEMPERATURE", 0.0)
+
+# --- Retrieval embeddings --------------------------------------------------
+# "local" = sentence-transformers all-MiniLM-L6-v2 (offline, the built index).
+# "nvidia" = hosted embeddings through the NVIDIA endpoint above.
+EMBEDDING_BACKEND = _env("EMBEDDING_BACKEND", "local").lower()
+NVIDIA_EMBEDDING_MODEL = _env("NVIDIA_EMBEDDING_MODEL", "nvidia/nv-embedqa-e5-v5")
+
+# --- Web evidence path -----------------------------------------------------
+WEB_SEARCH_ENABLED = _env_bool("WEB_SEARCH_ENABLED", False)
+WEB_SEARCH_PROVIDER = _env("WEB_SEARCH_PROVIDER", "tavily").lower()
+WEB_SEARCH_API_KEY = _env("WEB_SEARCH_API_KEY")
+WEB_SEARCH_BASE_URL = _env("WEB_SEARCH_BASE_URL", "https://api.tavily.com/search")
+WEB_SEARCH_MAX_RESULTS = int(_env("WEB_SEARCH_MAX_RESULTS", "5") or 5)
+
+# Filtration agent: a result scoring below this is rejected outright rather than
+# passed forward with a low score. Same principle as the retrieval relevance
+# floor -- a weak source shown to a clinician as evidence is worse than nothing.
+WEB_FILTER_ACCEPT_THRESHOLD = _env_float("WEB_FILTER_ACCEPT_THRESHOLD", 0.6)
 
 SYSTEM_VERSION = "1.4.0-clinical-safety"
 ENGINE_BUILD = "2026.08.22-release"
@@ -102,8 +193,45 @@ GUIDELINE_PRECEDENCE_HIERARCHY = [
         ),
         "issuing_org": "Various; see each document's provenance notes",
         "version": "n/a"
+    },
+    {
+        # RANK 5 -- WEB EVIDENCE RETRIEVED AT QUERY TIME.
+        #
+        # Added for the agentic evidence layer. A web passage is not a held document:
+        # nobody hash-verified it, its issuing body is whatever the page claims, and it
+        # can change or disappear between one query and the next. It is admitted anyway,
+        # because refusing all web evidence means the system can only answer what the
+        # corpus already holds -- but it is admitted BELOW rank 4, and that ordering is
+        # the whole point.
+        #
+        # Rank 4 holds documents that are not clinical guidance. Rank 5 holds text whose
+        # provenance itself is unverified, which is a different and worse deficiency: a
+        # rank 4 document at least is what it says it is. So web evidence sorts last,
+        # can never outrank a national guideline, and is never sufficient on its own.
+        #
+        # A rank 5 passage reaches a reader ONLY with its origin printed next to it
+        # (see backend.agents.provenance.source_label). It never reaches the clinical
+        # rule engine at all -- backend.rules.engine does not import the agent layer,
+        # in the same way and for the same reason it does not import retrieval.
+        "rank": 5,
+        "category": "WEB_UNVERIFIED_PROVENANCE",
+        "description": (
+            "Retrieved from the public web at query time and passed by the filtration "
+            "agent. Carries a citation to its source page but no verified provenance: "
+            "not hash-verified, not held, and not attributable to a named authority "
+            "beyond the page's own claim. May add context to an answer and must always "
+            "be labelled as web-sourced. Never sufficient alone to ground a clinical "
+            "recommendation, never an input to a deterministic safety rule, and never "
+            "capable of outranking ranks 1-3."
+        ),
+        "issuing_org": "Per result; whatever the retrieved page states about itself",
+        "version": "n/a - retrieved live, cite the retrieval timestamp"
     }
 ]
+
+# The rank at which web-retrieved evidence enters. Named rather than written as the
+# literal 5 at each call site, so the ordering above stays the single definition.
+WEB_EVIDENCE_PRECEDENCE_RANK = 5
 
 # The documents that carry national antimicrobial authority, by corpus id.
 #

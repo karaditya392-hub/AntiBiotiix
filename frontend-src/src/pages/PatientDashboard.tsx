@@ -181,6 +181,7 @@ export default function PatientDashboard() {
     }
   }
 
+
   async function loadPresets() {
     try {
       const res = await fetch("/api/scenario-presets");
@@ -507,7 +508,7 @@ export default function PatientDashboard() {
           <p className="dashboard-kicker">ANTIBIOTIX CLINICAL DECISION SUPPORT SYSTEM</p>
           <h1>Doctor Patient Record & Prescription Memory</h1>
           <p className="dashboard-subtitle">
-            Longitudinal Patient History · 24 Deterministic Rules · Grounded RAG History Assistant
+            Longitudinal Patient History · 30 Deterministic Rules · Grounded RAG History Assistant
           </p>
         </div>
         <Link href="/" className="dashboard-exit">
@@ -886,7 +887,7 @@ export default function PatientDashboard() {
 
                                   {visit.findings.length > 0 && (
                                     <p className="finding-note">
-                                      <FileWarning size={14} /> {visit.findings.length} safety finding(s) surfaced by 24-rule engine
+                                      <FileWarning size={14} /> {visit.findings.length} safety finding(s) surfaced by 30-rule engine
                                     </p>
                                   )}
 

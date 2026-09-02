@@ -294,7 +294,7 @@ export default function RegisterNewPatient() {
                   onChange={(e) => setForm({ ...form, allergies: e.target.value })}
                 />
                 <p className="muted" style={{ marginTop: "4px", fontSize: "0.76rem" }}>
-                  Allergies trigger the 24-rule safety engine checks. Clinician-entered allergies carry verified provenance.
+                  Allergies trigger the 30-rule safety engine checks. Clinician-entered allergies carry verified provenance.
                 </p>
               </div>
 

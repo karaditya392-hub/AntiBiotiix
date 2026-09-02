@@ -4,6 +4,7 @@ import ClinicalToolsLayout from "@/components/ClinicalToolsLayout";
 import "@/styles/patient-dashboard.css";
 import { useRuleCount } from "@/hooks/useRuleCount";
 import { patientName } from "@/lib/patient";
+import DrugEvidencePanel from "@/components/DrugEvidencePanel";
 
 export default function SafetyEnginePage() {
   // Read from the engine rather than restated from memory; see useRuleCount.
@@ -220,7 +221,7 @@ export default function SafetyEnginePage() {
       if (!prescRes.ok) throw new Error("Could not submit prescription for analysis.");
       const prescData = await prescRes.json();
 
-      // Execute 24-rule analysis
+      // Execute 30-rule analysis
       const analyzeRes = await fetch(`/api/prescriptions/${prescData.prescription_id}/analyze`, {
         method: "POST",
       });
@@ -284,13 +285,16 @@ export default function SafetyEnginePage() {
   }
 
   const warnings = analysis?.warnings || [];
+  // Where each drug's guidance came from. Same endpoint as the patient flow,
+  // so this screen shows the same evidence chain rather than only the warning.
+  const coverageFindings = analysis?.external_coverage_findings || [];
 
   return (
     <ClinicalToolsLayout>
       <section className="info-section" style={{ background: "#ffffff", padding: "24px" }}>
         <div className="section-title-row" style={{ marginBottom: "14px" }}>
           <div>
-            <p className="dashboard-kicker">24 DETERMINISTIC CLINICAL RULES</p>
+            <p className="dashboard-kicker">30 DETERMINISTIC CLINICAL RULES</p>
             <h2>Prescription Safety Engine</h2>
           </div>
           <ShieldCheck size={24} color="#a65e38" />
@@ -470,7 +474,7 @@ export default function SafetyEnginePage() {
               <div style={{ background: "#eef8f3", border: "1px solid #c2dbcd", padding: "16px", borderRadius: "6px" }}>
                 <strong style={{ color: "#173c3d" }}>✓ No Safety Warnings Fired</strong>
                 <p style={{ margin: "4px 0 0", color: "#526968", fontSize: "0.82rem" }}>
-                  The prescription passed all 24 deterministic checks (allergy, renal/hepatic dosing, drug interactions, stewardship).
+                  The prescription passed all 30 deterministic checks (allergy, renal/hepatic dosing, drug interactions, stewardship).
                 </p>
               </div>
             ) : (
@@ -539,6 +543,10 @@ export default function SafetyEnginePage() {
                 })}
               </div>
             )}
+
+            <div style={{ marginTop: "18px" }}>
+              <DrugEvidencePanel findings={coverageFindings} />
+            </div>
           </div>
         )}
       </section>

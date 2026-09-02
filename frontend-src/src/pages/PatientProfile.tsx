@@ -259,7 +259,7 @@ export default function PatientProfile() {
 
                   {v.findings.length > 0 && (
                     <p className="finding-note">
-                      <FileWarning size={14} /> {v.findings.length} safety warning(s) evaluated by 24-rule engine
+                      <FileWarning size={14} /> {v.findings.length} safety warning(s) evaluated by 30-rule engine
                     </p>
                   )}
 

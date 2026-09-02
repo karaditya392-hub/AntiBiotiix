@@ -4,6 +4,7 @@ import { Link, useLocation, useParams } from "wouter";
 import UnifiedHeader from "@/components/UnifiedHeader";
 import { patientName } from "@/lib/patient";
 import "@/styles/patient-dashboard.css";
+import DrugEvidencePanel from "@/components/DrugEvidencePanel";
 
 export default function ClinicalSafetyAnalysis() {
   const { patient_id, visit_id } = useParams<{ patient_id: string; visit_id: string }>();
@@ -55,7 +56,7 @@ export default function ClinicalSafetyAnalysis() {
         if (!prescRes.ok) throw new Error("Prescription submission failed.");
         const prescData = await prescRes.json();
 
-        // Run 24 deterministic rules
+        // Run 30 deterministic rules
         const analyzeRes = await fetch(`/api/prescriptions/${prescData.prescription_id}/analyze`, {
           method: "POST",
         });
@@ -169,7 +170,7 @@ export default function ClinicalSafetyAnalysis() {
       <main className="dashboard-page">
         <div className="dashboard-empty">
           <ShieldCheck size={28} />
-          <h2>Evaluating 24 Deterministic Rules...</h2>
+          <h2>Evaluating 30 Deterministic Rules...</h2>
           <p>Analyzing prescription against patient allergies, renal function, drug interactions, and antimicrobial guidelines.</p>
         </div>
       </main>
@@ -192,6 +193,9 @@ export default function ClinicalSafetyAnalysis() {
   }
 
   const warnings = analysis?.warnings || [];
+  // Coverage-gap resolution: what external sources say about drugs no rule could
+  // assess. Rendered separately from the warnings above, never merged into them.
+  const coverageFindings = analysis?.external_coverage_findings || [];
   const priorityTier = analysis?.stewardship_summary?.stewardship_priority?.tier || "ROUTINE";
 
   return (
@@ -203,7 +207,7 @@ export default function ClinicalSafetyAnalysis() {
           <p className="dashboard-kicker">PATIENT WORKFLOW STEP 6</p>
           <h1>Clinical Decision Support Analysis</h1>
           <p className="dashboard-subtitle">
-            {patientName(patient?.display_name, patient_id)} · Evaluated by 24 Deterministic Safety Rules · Priority Level: <strong>{priorityTier}</strong>
+            {patientName(patient?.display_name, patient_id)} · Evaluated by 30 Deterministic Safety Rules · Priority Level: <strong>{priorityTier}</strong>
           </p>
         </div>
         <Link href={`/patients/${patient_id}/visits/${visit_id}/prescription`} className="dashboard-button secondary">
@@ -247,6 +251,8 @@ export default function ClinicalSafetyAnalysis() {
         </div>
       </section>
 
+      <DrugEvidencePanel findings={coverageFindings} />
+
       {/* WARNINGS LIST */}
       <section className="info-section" style={{ maxWidth: "1000px", margin: "0 auto 20px" }}>
         <div className="section-title-row">
@@ -260,7 +266,7 @@ export default function ClinicalSafetyAnalysis() {
           <div style={{ background: "#eef8f3", border: "1px solid #c2dbcd", padding: "16px", borderRadius: "6px", margin: "14px 0" }}>
             <strong style={{ color: "#173c3d", fontSize: "0.95rem" }}>No Safety Warnings Fired</strong>
             <p style={{ margin: "4px 0 0", color: "#526968", fontSize: "0.82rem" }}>
-              The prescription passed all 24 deterministic safety rules (allergy, renal/hepatic dosing, drug interactions, antimicrobial stewardship).
+              The prescription passed all 30 deterministic safety rules (allergy, renal/hepatic dosing, drug interactions, antimicrobial stewardship).
             </p>
           </div>
         ) : (

@@ -130,11 +130,22 @@ def test_ask_carries_no_reference_caveat_for_a_guideline_answer():
 
 def test_the_semantic_floor_still_clears_the_measured_off_domain_ceiling():
     """
-    The floor was raised from 0.35 to 0.45 because the expanded corpus pushed
-    off-domain scores up to 0.341 -- a food composition table in the burns document
-    and rehabilitation language in the leprosy guideline both match ordinary English.
+    The floor must sit above what off-domain questions actually score, and below
+    what clinical ones do.
+
+    This asserted RELEVANCE_FLOOR >= 0.45 until 02-09-2026. That was pinning the
+    NUMBER rather than the property the test is named for, and it broke the moment
+    the embedding model changed: 0.45 belonged to all-MiniLM-L6-v2, and on
+    nvidia/nemotron-3-embed-1b it refuses "nitrofurantoin renal impairment" -- a
+    question the corpus plainly answers. A threshold copied across a model swap is
+    a threshold that no longer means anything.
+
+    So the invariant is asserted directly instead: whatever the floor is, every
+    off-domain question is refused. The measured margin for the current model is
+    recorded beside the constant in backend/rag/retrieve.py, and
+    scripts/calibrate_relevance_floor.py reproduces it.
     """
-    assert RELEVANCE_FLOOR >= 0.45
+    assert 0 < RELEVANCE_FLOOR < 1
     for query in ("how to train a puppy", "best pizza recipe in Naples",
                   "how to fix a leaking kitchen tap", "how do I change a bicycle tyre"):
         assert retrieve(query, k=3).refused is True, query

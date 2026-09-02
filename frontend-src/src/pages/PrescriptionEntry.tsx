@@ -178,7 +178,7 @@ export default function PrescriptionEntry() {
               </button>
             </div>
             <p className="muted" style={{ margin: "6px 0 0", fontSize: "0.72rem" }}>
-              Extraction parses per-field confidence. Clinician confirmation gate validates parsed items before 24-rule safety analysis.
+              Extraction parses per-field confidence. Clinician confirmation gate validates parsed items before 30-rule safety analysis.
             </p>
           </div>
 

@@ -77,7 +77,7 @@ const workflow = [
   {
     number: "03",
     title: "Evidence",
-    text: "Evaluate against 24 deterministic safety rules, ICMR guidelines, and WHO AWaRe classifications.",
+    text: "Evaluate against 30 deterministic safety rules, ICMR guidelines, and WHO AWaRe classifications.",
     icon: BookOpenCheck,
   },
   {
@@ -426,7 +426,7 @@ export default function Landing() {
         <m.section className="landing-intro-strip" variants={fadeIn} {...reveal}>
           <span>CLINICAL DECISION SUPPORT</span>
           <p>
-            Patient context, prescription details, 24 deterministic safety rules, ICMR/WHO evidence sources, and clinician override rationale in one unified flow.
+            Patient context, prescription details, 30 deterministic safety rules, ICMR/WHO evidence sources, and clinician override rationale in one unified flow.
           </p>
           <span>IST TIMEZONE INTEGRATED</span>
         </m.section>
@@ -442,7 +442,7 @@ export default function Landing() {
               </h2>
             </div>
             <p>
-              Patient context, prescription text, 24 deterministic rules, and guideline evidence remain visible before a clinician takes action.
+              Patient context, prescription text, 30 deterministic rules, and guideline evidence remain visible before a clinician takes action.
             </p>
           </m.div>
 

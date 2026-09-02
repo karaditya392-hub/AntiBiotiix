@@ -2,15 +2,21 @@
 FastAPI Main Application for S11 Explainable Antimicrobial Stewardship & Safety Assistant
 """
 import os
+import re
 import threading
 import time
 import uuid
 import json
+import shutil
+import tempfile
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import List, Dict, Any, Optional
 
-from fastapi import FastAPI, Depends, HTTPException, Query, Request, status
+from fastapi import (
+    FastAPI, Depends, File, Form, HTTPException, Query, Request, UploadFile, status,
+)
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
@@ -837,7 +843,7 @@ def create_patient_visit(
         diagnosis=payload.diagnosis,
         clinical_notes=payload.clinical_notes or payload.symptoms_text,
         prescription_id=presc_id,
-        status="COMPLETED"
+        status="COMPLETED",
     )
     db.add(visit_obj)
     db.commit()
@@ -1441,14 +1447,21 @@ def register_patient(
         )
 
     patient_id = _next_patient_id(db)
+    # The NAME, stored as the name. This used to write "PATIENT-021 (Meera
+    # Krishnan)" -- the record key glued onto the front of the person -- so every
+    # newly registered patient re-created the format the seeded roster was cleaned
+    # of. The id is already on the row; repeating it inside the name field means
+    # every reader has to strip it back off, and one that forgets prints it twice.
     raw_name = (payload.display_name or "").strip()
-    if raw_name:
-        if raw_name.startswith("PATIENT-"):
-            disp_name = raw_name
-        else:
-            disp_name = f"{patient_id} ({raw_name})"
+    # A name that already carries the old wrapper is unwrapped rather than nested.
+    wrapped = re.match(r"^\s*PATIENT-\d+\s*\((.+)\)\s*$", raw_name)
+    if wrapped:
+        raw_name = wrapped.group(1).strip()
+    # A "name" that is just an id is not a name, and neither is an empty box.
+    if not raw_name or re.fullmatch(r"PATIENT-\d+", raw_name):
+        disp_name = None
     else:
-        disp_name = f"{patient_id} (Patient Record)"
+        disp_name = raw_name
 
     p = PatientDB(
         patient_id=patient_id,
@@ -1894,6 +1907,31 @@ def analyze_prescription(prescription_id: str, db: Session = Depends(get_db)):
         items=items_schema
     )
 
+    # 5A. Per-drug external evidence, beside the national guidance (Spec §17, §23).
+    #
+    # For EVERY prescribed drug, not only the ones COVERAGE-001 flagged: the
+    # regulatory label -- and the web where a provider is configured -- read
+    # against THIS patient's recorded allergies, renal and hepatic status,
+    # pregnancy and home medications, returned alongside the held-corpus passages
+    # about the same drug so a clinician can compare the two directly.
+    #
+    # For an unassessed drug this fills a gap the engine reported. For an assessed
+    # one it is corroboration, or a visible difference between two sources.
+    #
+    # DELIBERATELY AFTER THE ROLLUP ABOVE, and reading the warnings rather than
+    # the knowledge base: it cannot alter which rules fired or what tier they
+    # produced. Wrapped, because an external endpoint being slow or down must
+    # degrade this feature and nothing else -- the prescription analysis still
+    # returns, with the coverage warning standing exactly as it did before.
+    try:
+        from backend.agents.external_safety import evidence_for_items
+
+        coverage_findings = evidence_for_items(
+            patient_schema, items_schema, warnings, presc_db.diagnosis
+        )
+    except Exception:
+        coverage_findings = []
+
     # 6. Immutable Audit Log (Section 19)
     audit_logger.log_event(
         db=db,
@@ -1949,6 +1987,15 @@ def analyze_prescription(prescription_id: str, db: Session = Depends(get_db)):
         "stw_workflow_condition": stw_condition,
         "stg_2022_23_condition": stg_condition,
         "retrieved_guideline_evidence": retrieved_evidence,
+        # Coverage-gap resolution for drugs no clinical rule could assess.
+        #
+        # Computed AFTER the warnings and the stewardship rollup, from the warnings
+        # themselves, and returned in its own field. Three consequences, all
+        # deliberate: it cannot change which rules fired, it cannot change the
+        # priority tier, and a client that does not know about this field behaves
+        # exactly as it did before. The findings are external evidence attached to
+        # a gap the engine already reported -- never a rule finding.
+        "external_coverage_findings": coverage_findings,
         "local_amr_context": local_amr,
         "explanation": explainer_res["explanation"],
         "model_version_info": explainer_res["metadata"],
@@ -2688,6 +2735,92 @@ def ask_the_evidence(payload: Dict[str, Any]):
 
 
 # ---------------------------------------------------------------------------
+# Agentic evidence layer (Spec §20, §23)
+#
+# Separate endpoints from /api/evidence/ask on purpose. That endpoint's guarantee
+# is that no model is involved, and it must keep that guarantee exactly - a caller
+# relying on it should never receive a composed answer because a flag was set
+# somewhere. Two endpoints, two contracts, no flag that quietly changes which one
+# you are talking to.
+# ---------------------------------------------------------------------------
+
+@app.get("/api/agents/status")
+def agent_layer_status():
+    """What is actually configured, so the UI states it rather than assuming it."""
+    from backend.agents.pipeline import status as _status
+
+    return _status()
+
+
+@app.post("/api/agents/ask")
+def ask_through_agents(payload: Dict[str, Any]):
+    """
+    The four-agent path: held corpus + filtered web evidence, grounded by
+    precedence and composed with citations.
+
+    Returns the answer AND the working - what the filtration agent accepted and
+    rejected, and how the evidence was ordered. The rejections are part of the
+    response because a filter whose refusals are invisible cannot be reviewed.
+    """
+    from backend.agents.pipeline import run as _run
+
+    return _run(
+        payload.get("question", ""),
+        k=int(payload.get("k", 4) or 4),
+        include_web=bool(payload.get("include_web", True)),
+    )
+
+
+@app.post("/api/agents/upload")
+async def upload_clinical_document(
+    file: UploadFile = File(...),
+    document_id: str = Form(...),
+    title: str = Form(...),
+    issuing_org: str = Form(""),
+    claimed_rank: Optional[int] = Form(None),
+    current_clinician: Dict[str, str] = Depends(get_current_clinician),
+):
+    """
+    Agent 1: a clinician uploads a trusted document into the retrieval corpus.
+
+    THE ATTESTING ROLE COMES FROM THE TOKEN, never from the request body - the
+    same rule the override endpoint follows (Spec §18A). A body that claims
+    ATTENDING_PHYSICIAN gets whatever role the session actually holds, because
+    rank 1 outranks the national guidelines and a self-declared role would make
+    that a claim anyone could make.
+    """
+    from backend.agents.ingestion import ingest_upload
+
+    suffix = Path(file.filename or "upload").suffix.lower()
+    if suffix not in (".pdf", ".txt", ".md"):
+        raise HTTPException(status_code=400, detail="Only .pdf, .txt and .md files can be ingested.")
+
+    contents = await file.read()
+    if len(contents) > 40 * 1024 * 1024:
+        raise HTTPException(status_code=413, detail="File exceeds the 40 MB ingestion limit.")
+
+    tmp_dir = Path(tempfile.mkdtemp(prefix="antibiotix-upload-"))
+    tmp_path = tmp_dir / (file.filename or f"upload{suffix}")
+    try:
+        tmp_path.write_bytes(contents)
+        outcome = ingest_upload(
+            tmp_path,
+            document_id=document_id.strip().upper(),
+            title=title.strip(),
+            issuing_org=issuing_org.strip(),
+            claimed_rank=claimed_rank,
+            attesting_role=current_clinician.get("role"),
+            uploaded_by=current_clinician.get("clinician_id", "UNKNOWN"),
+        )
+    finally:
+        shutil.rmtree(tmp_dir, ignore_errors=True)
+
+    if not outcome.accepted:
+        raise HTTPException(status_code=422, detail=outcome.reason)
+    return outcome.to_dict()
+
+
+# ---------------------------------------------------------------------------
 # Live Test Suite Execution (Spec §16, §23)
 # ---------------------------------------------------------------------------
 
@@ -2711,13 +2844,17 @@ def run_test_suite():
             cwd=project_root,
             capture_output=True,
             text=True,
-            timeout=180,
+            # 600s, raised from 180s. The suite runs ~275s: 532 tests, several of
+            # which load the embedding model and the 15,894-chunk corpus. At 180s
+            # this endpoint reported TIMEOUT on a suite that was passing, which is
+            # a worse answer than a slow one -- it reads as a broken system.
+            timeout=600,
         )
     except subprocess.TimeoutExpired:
         return {
             "executed": False,
             "status": "TIMEOUT",
-            "detail": "Test suite exceeded the 180s limit; no result can be reported.",
+            "detail": "Test suite exceeded the 600s limit; no result can be reported.",
         }
     except Exception as exc:  # pragma: no cover - environment dependent
         return {"executed": False, "status": "ERROR", "detail": str(exc)}
@@ -2783,3 +2920,33 @@ if os.path.exists(frontend_dir):
         return FileResponse(
             os.path.join(frontend_dir, "index.html"), headers=_NO_STORE
         )
+
+    # SPA deep-link fallback.
+    #
+    # The frontend routes client-side, so /clinical-tools/pipeline exists only
+    # once the app has booted. Without this, opening or REFRESHING any route
+    # other than "/" returns {"detail":"Not Found"} - the application replaced by
+    # raw JSON, which is what a reader sees if they reload the page they are
+    # looking at.
+    #
+    # AN EXPLICIT LIST OF THE FRONTEND'S OWN ROUTES, not a "/{path:path}"
+    # catch-all. A catch-all matches every unrouted URL in the application, which
+    # means it silently takes over two things that must not change: the clean JSON
+    # 404 an API client depends on, and the trailing-slash redirect that resolves
+    # an authenticated route to its 401 rather than a 404. Listing the routes
+    # keeps the fallback incapable of shadowing anything under /api.
+    #
+    # Keep in step with the <Route> list in frontend-src/src/App.tsx.
+    _SPA_ROUTES = (
+        "/landing", "/login", "/patient-type", "/dashboard", "/review",
+        "/clinical-tools", "/clinical-tools/{rest:path}",
+        "/patients/{rest:path}",
+    )
+
+    def _serve_spa_shell(rest: str = ""):
+        return FileResponse(
+            os.path.join(frontend_dir, "index.html"), headers=_NO_STORE
+        )
+
+    for _route in _SPA_ROUTES:
+        app.get(_route, include_in_schema=False)(_serve_spa_shell)

@@ -71,3 +71,43 @@ def test_seeded_patients_carry_a_bare_name_not_an_id_prefixed_one():
     assert names, "expected seeded patients to carry display names"
     for name in names:
         assert not re.match(r"^PATIENT-\d+", name), f"display_name still prefixed: {name!r}"
+
+
+def test_registration_stores_the_name_not_the_id_and_the_name():
+    """
+    Registration used to write "PATIENT-021 (Meera Krishnan)" -- the record key glued
+    onto the front of the person -- so every newly registered patient re-created the
+    format the seeded roster had just been cleaned of. The id is already on the row.
+    """
+    from fastapi.testclient import TestClient
+    from backend.app import app
+
+    client = TestClient(app)
+    login = client.post("/api/auth/login", json={
+        "username": "DOC-DEMO-01", "role": "ATTENDING_PHYSICIAN"})
+    headers = {"Authorization": f"Bearer {login.json()['access_token']}"}
+
+    res = client.post("/api/patients", headers=headers, json={
+        "display_name": "Meera Krishnan", "age": 31, "sex": "FEMALE"})
+    assert res.status_code in (200, 201), res.text
+    patient_id = res.json()["patient_id"]
+
+    stored = client.get(f"/api/patients/{patient_id}/history").json()["patient"]
+    assert stored["display_name"] == "Meera Krishnan", stored["display_name"]
+    assert patient_id not in (stored["display_name"] or "")
+
+
+def test_a_name_already_carrying_the_old_wrapper_is_unwrapped_not_nested():
+    from fastapi.testclient import TestClient
+    from backend.app import app
+
+    client = TestClient(app)
+    login = client.post("/api/auth/login", json={
+        "username": "DOC-DEMO-01", "role": "ATTENDING_PHYSICIAN"})
+    headers = {"Authorization": f"Bearer {login.json()['access_token']}"}
+
+    res = client.post("/api/patients", headers=headers, json={
+        "display_name": "PATIENT-001 (Anjali Rao)", "age": 40, "sex": "FEMALE"})
+    patient_id = res.json()["patient_id"]
+    stored = client.get(f"/api/patients/{patient_id}/history").json()["patient"]
+    assert stored["display_name"] == "Anjali Rao", stored["display_name"]

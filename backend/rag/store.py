@@ -84,6 +84,12 @@ DOMAIN_LABORATORY = "LABORATORY_PROCEDURE_BIOSAFETY"
 DOMAIN_PROGRAMME_POLICY = "PROGRAMME_AND_INSTITUTIONAL_POLICY"
 DOMAIN_RESEARCH_REPORT = "RESEARCH_ACTIVITY_REPORT"
 DOMAIN_PUBLIC_INFORMATION = "PUBLIC_INFORMATION_OR_UNATTRIBUTED"
+# Web text retrieved at query time and passed by the filtration agent. Not a held
+# document: it has a URL rather than a provenance basis, and it can change between
+# one query and the next. Its own domain rather than reuse of
+# DOMAIN_PUBLIC_INFORMATION, because that domain describes held files whose issuer
+# could not be established -- a different deficiency from text nobody verified at all.
+DOMAIN_WEB_UNVERIFIED = "WEB_RETRIEVED_UNVERIFIED"
 
 # Domains that describe patient care at all. Outside these, a passage is not
 # clinical guidance in any form, however authoritative its issuer.
@@ -123,6 +129,14 @@ DOMAIN_READING_CONTRACT = {
         "PUBLIC INFORMATION MATERIAL, A COMMUNITY PROGRAMME LEAFLET, OR A DOCUMENT WHOSE "
         "ISSUING BODY COULD NOT BE ESTABLISHED. It carries no clinical authority and is "
         "never a basis for a prescribing or antimicrobial decision."
+    ),
+    DOMAIN_WEB_UNVERIFIED: (
+        "RETRIEVED FROM THE PUBLIC WEB, PROVENANCE UNVERIFIED. This passage was fetched "
+        "live from the page cited beside it and passed by the filtration agent. It was "
+        "not hash-verified, is not held by this system, and its issuing body is only "
+        "what the page claims. Read it as context alongside the national guidelines, "
+        "never as a substitute for them, and never as the sole basis for a prescribing "
+        "or antimicrobial decision."
     ),
 }
 
@@ -402,7 +416,13 @@ class GuidelineVectorStore:
                     f"The guideline index was built with {self.embedding_model!r} but this "
                     f"machine loaded {be.name!r}, and it could not be re-embedded."
                 )
-        qv = be.encode([query])[0]
+        # getattr rather than a bare call: encode_query is part of the backend
+        # contract, but a caller may pass any object with encode() -- test doubles
+        # do, and so would a backend written before the contract gained the method.
+        # Falling back to encode() is correct for symmetric models and is what the
+        # base class does anyway.
+        encode_q = getattr(be, "encode_query", be.encode)
+        qv = encode_q([query])[0]
         sims = self.matrix @ qv
 
         # Order by score, breaking NEAR-TIES in favour of clinical standing.
