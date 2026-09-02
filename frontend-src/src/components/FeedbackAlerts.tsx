@@ -6,11 +6,15 @@ import { useAuth } from "@/context/AuthContext";
 /**
  * Patient follow-up answers, announced to the clinician after they log in.
  *
- * Mounted in UnifiedHeader, so it is present on every signed-in page rather than
- * only on the dashboard: an answer that arrives while the clinician is mid-review
- * should still reach them.
+ * IT ANNOUNCES ONE PATIENT: THE ONE ON SCREEN. Mounted globally, but it renders
+ * only on a `/patients/:id` route and only about that patient, as a single card.
+ * It used to announce every unacknowledged answer in the system on every page,
+ * which with one long-running record meant 151 cards from the same person
+ * stacked over whatever the clinician was doing -- a wall, and a wall is what
+ * people learn to close without reading. Every answer it no longer shouts about
+ * is still on the dashboard and on its own patient's record.
  *
- * Three things this deliberately does:
+ * Four things this deliberately does:
  *
  *   It shows what THIS clinician has not opened. Acknowledgement is recorded per
  *   clinician on the server, not in this component and not as a shared flag on the
@@ -61,6 +65,50 @@ const POLL_MS = 20000;
  * waiting on the dashboard and on every other page the moment they navigate away.
  */
 const QUIET_ROUTES = ["/clinical-tools/agents"];
+
+/**
+ * The patient the clinician is currently working on, taken from the route.
+ *
+ * Every patient screen is `/patients/:id/...`, so the id in the URL is what the
+ * clinician has in front of them right now.
+ */
+function patientInContext(location: string): string | null {
+  const match = /^\/patients\/([^/?#]+)/.exec(location);
+  if (!match) return null;
+  const id = decodeURIComponent(match[1]);
+  // These are list screens, not a patient.
+  return id === "new" || id === "returning" ? null : id;
+}
+
+/**
+ * One card per patient, newest first, worst first within a patient.
+ *
+ * WITHOUT THIS, ONE PATIENT IS THE WHOLE STACK. A patient answers a follow-up
+ * after every visit, so a long-running record accumulates dozens of unseen
+ * answers -- this system had 151 of them from a single patient, which rendered as
+ * four identical cards and "and 147 more awaiting review". That is not a
+ * notification; it is a wall, and a wall is what people learn to close without
+ * reading.
+ *
+ * The one kept is the one that most needs reading: a patient reporting they feel
+ * WORSE outranks any other answer they have given, and among equals the most
+ * recent wins. The rest stay unacknowledged on the server and are all listed on
+ * the patient's own record.
+ */
+function onePerPatient(rows: Feedback[]): Feedback[] {
+  const best = new Map<string, Feedback>();
+  for (const row of rows) {
+    const held = best.get(row.patient_id);
+    if (!held) {
+      best.set(row.patient_id, row);
+      continue;
+    }
+    const rowIsWorse = row.feeling === "WORSE";
+    const heldIsWorse = held.feeling === "WORSE";
+    if (rowIsWorse && !heldIsWorse) best.set(row.patient_id, row);
+  }
+  return [...best.values()];
+}
 
 // How long after the clinician stops touching a form before the held alerts are
 // allowed back. Long enough to cover reading a field, checking a value or picking
@@ -209,12 +257,36 @@ export default function FeedbackAlerts() {
     setLocation(`/patients/${encodeURIComponent(item.patient_id)}?feedback=${encodeURIComponent(item.response_id)}`);
   }
 
+  // SCOPED TO THE PATIENT IN FRONT OF THE CLINICIAN, then one card for them.
+  //
+  // This used to announce every unacknowledged answer in the system, from every
+  // patient, on every page. With one long-running record that meant 151 cards
+  // from the same person stacked over whatever the clinician was doing.
+  //
+  // The rule now is: an answer interrupts you only about the patient you are
+  // working on. Everywhere else the stack is silent. NOTHING IS LOST BY THIS --
+  // no answer is marked seen here, every one is listed on its patient's own
+  // record (/api/feedback?patient_id=...) and all of them on the dashboard
+  // (/api/feedback). The alert stopped being a channel and went back to being a
+  // prompt about the person on screen.
+  const contextPatient = patientInContext(location);
+  const visible = contextPatient
+    ? onePerPatient(items.filter((r) => r.patient_id === contextPatient))
+    : [];
+
   // HELD, NOT DROPPED. Rendering nothing while a form is being filled — or while
   // the clinician is on a route that has asked for quiet — leaves the answers
   // unseen on the server, so they come back the moment they are done. Marking
   // them seen here instead would lose a patient's answer to nothing more than the
   // clinician having typed in a box.
-  if (!isAuthenticated || items.length === 0 || fillingAForm || onAQuietRoute) return null;
+  if (!isAuthenticated || visible.length === 0 || fillingAForm || onAQuietRoute) return null;
+
+  // Whether this patient has other answers waiting, so the single card does not
+  // imply it is the only one. Deliberately NOT a count: /api/feedback/unseen
+  // pages at 25, so a number here would read as "24 more" for a patient with a
+  // hundred and fifty, which is a smaller lie than no number but still a lie.
+  const moreFromThisPatient =
+    items.filter((r) => r.patient_id === contextPatient).length > visible.length;
 
   return (
     <div
@@ -225,7 +297,7 @@ export default function FeedbackAlerts() {
       role="status"
       aria-live="polite"
     >
-      {items.slice(0, 4).map((item) => {
+      {visible.map((item) => {
         const worse = item.feeling === "WORSE";
         return (
           <div
@@ -277,9 +349,9 @@ export default function FeedbackAlerts() {
           </div>
         );
       })}
-      {items.length > 4 && (
+      {moreFromThisPatient && (
         <div className="muted" style={{ fontSize: "0.72rem", textAlign: "right" }}>
-          and {items.length - 4} more awaiting review
+          Earlier answers from this patient are on their record
         </div>
       )}
     </div>
